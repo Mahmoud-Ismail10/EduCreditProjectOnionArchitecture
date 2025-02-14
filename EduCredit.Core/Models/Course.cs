@@ -1,0 +1,32 @@
+﻿using EduCredit.Core.Relations;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace EduCredit.Core.Models
+{
+    public class Course
+    {
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public string Name { get; set; }
+        public float CreditHours { get; set; }
+        public float MinimumDegree { get; set; }
+        public DateTime ExamDate { get; set; }
+
+        /// Self-reference to represent the previous course
+        public Guid? PreviousCourseId { get; set; } // Foreign Key allow null
+        public Course PreviousCourse { get; set; }
+
+        /// One-to-many: Between Course and Department
+        public Guid DepartmentId { get; set; } // Foreign Key
+        public Department Department { get; set; }
+
+        /// Many-to-many: Between Course and Teacher (JoinTable)
+        public ICollection<Schedule> Schedules { get; set; } = new HashSet<Schedule>();
+
+        /// Many-to-many: Between Course and Student (JoinTable)
+        public ICollection<Enrollment> Enrollments { get; set; } = new HashSet<Enrollment>();
+    }
+}
