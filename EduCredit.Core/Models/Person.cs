@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EduCredit.Core.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,6 @@ namespace EduCredit.Core.Models
         public string PhoneNumber { get; set; }
         public string Email { get; set; }
         public DateOnly BirthDate { get; set; }
-        public string Gender {  get; set; }
+        public Gender Gender {  get; set; } // enum
     }
 }

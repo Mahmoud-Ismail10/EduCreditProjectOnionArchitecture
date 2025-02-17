@@ -1,4 +1,5 @@
-﻿using EduCredit.Core.Relations;
+﻿using EduCredit.Core.Enums;
+using EduCredit.Core.Relations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -15,8 +16,11 @@ namespace EduCredit.Repository.Data.Configurations
         {
             builder.HasKey(s => new {s.TeacherId, s.CourseId});
 
-            builder.Property(s => s.Day)
-                .HasConversion<int>(); /// Store as integer
+            /// Store day in database as string and fetch it from DB as Day(Enum)
+            builder.Property(t => t.Day)
+                .HasConversion(
+                Dy => Dy.ToString(),
+                Dy => (Day)Enum.Parse(typeof(Day), Dy));
 
             builder.Property(s => s.Time)
                 .HasColumnType("time");

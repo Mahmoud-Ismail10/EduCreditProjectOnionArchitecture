@@ -1,4 +1,5 @@
-﻿using EduCredit.Core.Models;
+﻿using EduCredit.Core.Enums;
+using EduCredit.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -36,8 +37,11 @@ namespace EduCredit.Repository.Data.Configurations
             builder.Property(t => t.BirthDate)
                 .HasColumnType("date");
 
+            /// Store gender in database as string and fetch it from DB as Gender
             builder.Property(t => t.Gender)
-                .HasMaxLength(20);
+                .HasConversion(
+                Gndr => Gndr.ToString(),
+                Gndr => (Gender)Enum.Parse(typeof(Gender), Gndr));
 
             builder.Property(t => t.AppointmentDate)
                 .HasColumnType("date");
