@@ -14,6 +14,7 @@ namespace EduCredit.Core.Models
         public string Address { get; set; }
         public string NationalId { get; set; }
         public DateOnly BirthDate { get; set; }
-        public Gender Gender {  get; set; } // enum
+        public Gender Gender { get; set; } // enum
+       // public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();//Navigation Prop
     }
 }

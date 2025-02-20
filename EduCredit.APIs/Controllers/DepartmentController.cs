@@ -4,8 +4,10 @@ using EduCredit.APIs.Errors;
 using EduCredit.APIs.Helper;
 using EduCredit.Core.Models;
 using EduCredit.Core.Repositories.Contract;
+using EduCredit.Core.Security;
 using EduCredit.Core.Specifications.DepartmentSpecifications;
 using EduCredit.Repository.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -47,6 +49,7 @@ namespace EduCredit.APIs.Controllers
 
         /// api/Department
         [HttpGet("GetDepartments")]
+        [Authorize(Roles = AuthorizationConstants.SuperAdminRole)]
         public ActionResult<IReadOnlyList<ReadDepartmentDto>> GetDepartments([FromQuery] DepartmentSpecificationParams specParams) // Create class contains all of params (refactor)
         {
             int count;

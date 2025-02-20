@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using EduCredit.APIs.DTOs.AuthDTOs;
 using EduCredit.APIs.DTOs.DepartmentDTOs;
 using EduCredit.Core.Models;
 

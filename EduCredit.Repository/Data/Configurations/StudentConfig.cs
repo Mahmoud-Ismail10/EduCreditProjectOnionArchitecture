@@ -14,7 +14,9 @@ namespace EduCredit.Repository.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Student> builder)
         {
-            builder.ToTable("Students");
+            builder
+              .ToTable("Students")
+              .HasBaseType<Person>();
 
             builder.Property(s => s.FullName)
                 .IsRequired()
@@ -60,12 +62,12 @@ namespace EduCredit.Repository.Data.Configurations
             builder.HasOne(s => s.Department)
                 .WithMany(s => s.Students)
                 .HasForeignKey(s => s.DepartmentId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.ClientSetNull);
 
             builder.HasOne(s => s.Teacher)
                 .WithMany(s => s.Students)
                 .HasForeignKey(s => s.TeacherId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.ClientSetNull);
         }
     }
 }
