@@ -14,6 +14,10 @@ namespace EduCredit.Repository.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Student> builder)
         {
+            builder
+              .ToTable("Students")
+              .HasBaseType<Person>();
+
             builder.Property(s => s.FullName)
                 .IsRequired()
                 .HasMaxLength(100);

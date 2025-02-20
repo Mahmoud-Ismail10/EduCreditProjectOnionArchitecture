@@ -18,6 +18,8 @@ namespace EduCredit.APIs
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.AddSwaggerServices(); // Extension Method
             builder.Services.AddApplicationServices(); // Extension Method
+            builder.Services.AddJwtAuthentication(builder.Configuration); // Extension Method
+            builder.Services.AddCustomAuthorizationPolicies(); // Extension Method
             /// Connection String
             builder.Services.AddDbContext<EduCreditContext>(Options =>
             Options.UseSqlServer(builder.Configuration.GetConnectionString("CS")));
