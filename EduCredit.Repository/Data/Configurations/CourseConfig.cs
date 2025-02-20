@@ -36,7 +36,7 @@ namespace EduCredit.Repository.Data.Configurations
             builder.HasOne(c => c.Department)
                 .WithMany(c => c.Courses)
                 .HasForeignKey(c => c.DepartmentId)
-                .OnDelete(DeleteBehavior.ClientSetNull);
+                .OnDelete(DeleteBehavior.Restrict);
 
         }
     }

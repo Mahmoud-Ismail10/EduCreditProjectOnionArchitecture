@@ -1,6 +1,8 @@
 ﻿using EduCredit.Core.Models;
 using EduCredit.Core.Relations;
 using EduCredit.Repository.Data.Configurations;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -11,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace EduCredit.Repository.Data
 {
-    public class EduCreditContext : DbContext
+    public class EduCreditContext : IdentityDbContext<Person, IdentityRole<Guid>, Guid>
     {
         /// Using Dependancy Injection, and add service of dbcontext in program.cs
         public EduCreditContext(DbContextOptions<EduCreditContext> options) : base(options) { }
