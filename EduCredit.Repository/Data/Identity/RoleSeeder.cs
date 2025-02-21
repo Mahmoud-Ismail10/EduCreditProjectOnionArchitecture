@@ -1,4 +1,5 @@
-﻿using EduCredit.Core.Security;
+﻿using EduCredit.Core.Models;
+using EduCredit.Core.Security;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using System;
@@ -9,38 +10,26 @@ using System.Threading.Tasks;
 
 namespace EduCredit.Repository.Data.Identity
 {
-    public class RoleSeeder
+    public static class RoleSeeder
     {
-        private readonly RoleManager<IdentityRole<Guid>> _roleManager;
-        private readonly ILogger<RoleSeeder> _logger;
-
-
-        public RoleSeeder(RoleManager<IdentityRole<Guid>> roleManager, ILogger<RoleSeeder> logger)
+        public static async Task AddRolesAsync(RoleManager<IdentityRole<Guid>> _roleManager)
         {
-            _roleManager = roleManager;
-            _logger = logger;
-        }
-
-        public async Task AddRolesAsync()
-        {
-            string[] roles =
+            if (_roleManager.Roles.Count() == 0)
             {
-                AuthorizationConstants.AdminRole,
-                AuthorizationConstants.SuperAdminRole,
-                AuthorizationConstants.StudentRole,
-                AuthorizationConstants.TeacherRole
-            };
+                string[] roles =
+                {
+                    AuthorizationConstants.AdminRole,
+                    AuthorizationConstants.SuperAdminRole,
+                    AuthorizationConstants.StudentRole,
+                    AuthorizationConstants.TeacherRole
+                };
 
-            foreach (var role in roles)
-            {
-                if (!await _roleManager.RoleExistsAsync(role))
+                foreach (var role in roles)
                 {
                     var result = await _roleManager.CreateAsync(new IdentityRole<Guid> { Name = role });
 
-                    if (result.Succeeded)
-                        _logger.LogInformation($"Role '{role}' has been added successfully.");
-                    else
-                        _logger.LogError($"Failed to add role '{role}': {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                    if (!result.Succeeded)
+                        throw new Exception($"Failed to add role '{role}': {string.Join(", ", result.Errors.Select(e => e.Description))}");
                 }
             }
         }

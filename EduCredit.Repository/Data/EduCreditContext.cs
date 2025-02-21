@@ -36,7 +36,7 @@ namespace EduCredit.Repository.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             /// Using it when inherate from identity dbcontext no dbcontext
-            //base.OnModelCreating(modelBuilder);
+            base.OnModelCreating(modelBuilder);
 
             /// Apply FluentAPI
             //modelBuilder.ApplyConfiguration(new CourseConfig());

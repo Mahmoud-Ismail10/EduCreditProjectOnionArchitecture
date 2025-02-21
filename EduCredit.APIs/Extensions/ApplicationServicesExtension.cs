@@ -29,12 +29,16 @@ namespace EduCredit.APIs.Extensions
             #region Dependancy Injection
             // Add services to the container.
             services.AddControllers();
-            services.AddIdentity<Person, IdentityRole<Guid>>()
-             .AddEntityFrameworkStores<EduCreditContext>()
-             .AddDefaultTokenProviders();
+            services.AddIdentity<Person, IdentityRole<Guid>>(options =>
+            {
+                /// Configurations of Password
+                options.Password.RequireUppercase = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+            }).AddEntityFrameworkStores<EduCreditContext>().AddDefaultTokenProviders();
 
-            services.AddScoped<RoleSeeder>();
-            services.AddScoped<UserSeeder>();
+            //services.AddScoped<RoleSeeder>();
+            //services.AddScoped<UserSeeder>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IAuthService, AuthService>();
@@ -43,7 +47,7 @@ namespace EduCredit.APIs.Extensions
             #region New Services
             /// Auto Mapper use parameter less ctor of MappingProfiles
             services.AddAutoMapper(typeof(MappingProfiles));
-            
+
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             /// Custom Validation Errors
             services.Configure<ApiBehaviorOptions>(options =>
@@ -65,7 +69,6 @@ namespace EduCredit.APIs.Extensions
             #endregion
             return services;
         }
-
         public static IServiceCollection AddSwaggerServices(this IServiceCollection services)
         {
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -177,18 +180,18 @@ namespace EduCredit.APIs.Extensions
             {
                 var services = scope.ServiceProvider;
                 var _dbcontext = services.GetRequiredService<EduCreditContext>();
-                var loggerfactory = services.GetRequiredService<ILoggerFactory>(); // Custom Exceptions
+                var _roleManager = services.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+                var _userManager = services.GetRequiredService<UserManager<Person>>();
+                var loggerFactory = services.GetRequiredService<ILoggerFactory>(); // Custom Exceptions
                 try
                 {
                     await _dbcontext.Database.MigrateAsync(); // Update Database
-                    var roleSeeder = services.GetRequiredService<RoleSeeder>();
-                    await roleSeeder.AddRolesAsync();
-                    var UserSeeder = services.GetRequiredService<UserSeeder>();
-                    await UserSeeder.AddSuperAdminAsync();
+                    await RoleSeeder.AddRolesAsync(_roleManager);
+                    await UserSeeder.AddSuperAdminAsync(_userManager);
                 }
                 catch (Exception ex)
                 {
-                    var logger = loggerfactory.CreateLogger<Program>();
+                    var logger = loggerFactory.CreateLogger<Program>();
                     logger.LogError(ex, "An error occurred during migration!");
                 }
             }

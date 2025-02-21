@@ -48,8 +48,8 @@ namespace EduCredit.APIs.Controllers
         //}
 
         /// api/Department
-        [HttpGet("GetDepartments")]
-        [Authorize(Roles = AuthorizationConstants.SuperAdminRole)]
+        [HttpGet]
+        //[Authorize(Roles = AuthorizationConstants.SuperAdminRole)]
         public ActionResult<IReadOnlyList<ReadDepartmentDto>> GetDepartments([FromQuery] DepartmentSpecificationParams specParams) // Create class contains all of params (refactor)
         {
             int count;
@@ -63,12 +63,11 @@ namespace EduCredit.APIs.Controllers
             return Ok(new Pagination<ReadDepartmentDto>(specParams.PageSize, specParams.PageIndex, count, data)); // Status code = 200
         }
 
-        /// api/Department/1
+        /// api/Department/{id}
         /// Handle not found error in swagger
-        [HttpGet("GetDepartment/{id}")]
-        [ProducesResponseType(typeof(ReadDepartmentDto), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-        //[ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(ReadDepartmentDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ReadDepartmentDto>> GetDepartment(Guid id)
         {
             var spec = new DepartmentWithTeacherSpecifications(id);

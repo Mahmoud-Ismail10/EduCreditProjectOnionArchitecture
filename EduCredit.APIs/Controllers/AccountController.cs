@@ -6,6 +6,7 @@ using EduCredit.Core.Services.Contract;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace EduCredit.APIs.Controllers
 {
@@ -23,19 +24,17 @@ namespace EduCredit.APIs.Controllers
             _auth = auth;
             _mapper = mapper;
         }
+
         [HttpPost("login")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse),StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<TokenResponseDto>> Login([FromBody] LoginDto loginDto)
         {
-
             var response = await _auth.LoginAsync(loginDto.Email,loginDto.Password);
-
             if (response == null)
             {
                 return Unauthorized(new ApiResponse(401, "Invalid email or password."));
             }
-
             return Ok(response);
         }
         //[HttpPost("refresh-token")]
