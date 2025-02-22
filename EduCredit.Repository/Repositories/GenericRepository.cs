@@ -23,7 +23,6 @@ namespace EduCredit.Repository.Repositories
         public async Task CreateAsync(T entity)
         {
             await _dbcontext.Set<T>().AddAsync(entity);
-            await _dbcontext.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(Guid id)
@@ -32,14 +31,12 @@ namespace EduCredit.Repository.Repositories
             if (entity != null)
             {
                 _dbcontext.Set<T>().Remove(entity);
-                await _dbcontext.SaveChangesAsync();
             }
         }
 
         public async Task UpdateAsync(T entity)
         {
             _dbcontext.Set<T>().Update(entity);
-            await _dbcontext.SaveChangesAsync();
         }
 
         public IReadOnlyList<T> GetAllSpecification(ISpecification<T> spec, out int count)

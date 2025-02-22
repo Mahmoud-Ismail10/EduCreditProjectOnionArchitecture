@@ -2,6 +2,7 @@
 using EduCredit.Core;
 using EduCredit.Core.Models;
 using EduCredit.Core.Services.Contract;
+using EduCredit.Core.Specifications.RefreshTokenSpecifications;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using System;
@@ -17,80 +18,48 @@ namespace EduCredit.Service.Services
     {
         private readonly UserManager<Person> _userManager;
         private readonly ITokenService _tokenService;
-        //private readonly IUnitOfWork _unitofWork;
+        private readonly IUnitOfWork _unitofWork;
         private readonly ILogger<AuthService> _logger;
 
-        public AuthService(UserManager<Person> userManager, ITokenService tokenService, ILogger<AuthService> logger)
+        public AuthService(UserManager<Person> userManager, ITokenService tokenService, ILogger<AuthService> logger, IUnitOfWork unitofWork)
         {
             _userManager = userManager;
             _tokenService = tokenService;
-           // _unitofWork = unitofWork;
+            _unitofWork = unitofWork;
             _logger = logger;
         }
 
-        public async Task<string> LoginAsync(string email, string password)
+
+        public async Task<string?> LoginAsync(string email, string password, Enum Role)
         {
             var user = await _userManager.FindByEmailAsync(email);
-            
             if (user == null)
             {
-                _logger.LogWarning("Login failed: Email not found - {Email}", email);
-                return $"Login failed: Email not found - {email}";
+                return "Invalid Email !";
             }
-            
-            if (!await _userManager.CheckPasswordAsync(user, password))
+            //check if the password is correct
+            var result = await _userManager.CheckPasswordAsync(user, password);
+            if (!result)
             {
-                _logger.LogWarning("Login failed: Incorrect password for {Email}", email);
-                return $"Login failed: Incorrect password for {email}";
+                return "Invalid password !";
+            }
+            //check if Role is correct
+            var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault();
+            if (!(role == Role.ToString()) || role == null)
+            {
+                return "UnAuthorized !";
             }
 
-            var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault() ?? "User";
-            var token = _tokenService.GenerateAccessToken(user.Id, user.Email, role);
-
-            _logger.LogInformation("User {Email} successfully logged in.", email);
-            return token;
+            return null;
         }
 
 
-
-        //private async Task<object> GenerateAndStoreTokensAsync(Person user, RefreshToken? oldRefreshToken = null)
+        #region Old Version
+        //private async Task<string> GenerateAndStoreTokensAsync(Person user, RefreshToken? oldRefreshToken = null)
         //{
-        //    var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault() ?? "Student";
-        //    var requestToken = BuildTokenRequest(user, role);
 
-        //    var tokens = _tokenService.GenerateToken(user.Id,user.Email,role);
-
-        //    if (oldRefreshToken != null)
-        //    {
-        //        oldRefreshToken.IsRevoked = true;
-        //       await _unitofWork.Repository<RefreshToken>().UpdateAsync(oldRefreshToken);
-        //    }
-
-        //    var newRefreshToken = new RefreshToken
-        //    {
-        //        Token = tokens.ToString()!,
-        //        ExpiryDate = DateTime.UtcNow.AddDays(7),
-        //        UserId = user.Id
-        //    };
-
-        //    await _unitofWork.Repository<RefreshToken>().CreateAsync(newRefreshToken);
-        //    await _unitofWork.completeAsync();
-
-        //    return tokens;
         //}
-
-        //private object BuildTokenRequest(Person user, string role)
-        //{
-        //    return new 
-        //    {
-        //        email = user.Email,
-        //        ExpireDate = DateTime.UtcNow,
-        //        Role = role,
-        //        UserId = user.Id
-        //    };
-        //}
-
-        //public async Task<object> RefreshTokenAsync(string refreshToken)
+        //public async Task<string?> RefreshTokenAsync(string refreshToken)
         //{
         //    var spec = new RefreshTokenByTokenSpecifications(refreshToken);
         //    var existingRefreshToken = await _unitofWork.Repository<RefreshToken>()
@@ -98,20 +67,43 @@ namespace EduCredit.Service.Services
 
         //    if (existingRefreshToken == null || existingRefreshToken.ExpiryDate < DateTime.UtcNow || existingRefreshToken.IsRevoked)
         //    {
-        //        _logger.LogWarning("Invalid or expired refresh token attempt.");
-        //        return null;
+        //        return "Invalid or expired refresh token attempt.";
         //    }
 
         //    var user = await _userManager.FindByIdAsync(existingRefreshToken.UserId.ToString());
         //    if (user == null)
         //    {
-        //        _logger.LogWarning("User not found for refresh token.");
-        //        return null;
+        //        return "User not found for refresh token.";
         //    }
 
         //    var tokens = await GenerateAndStoreTokensAsync(user, existingRefreshToken);
-        //    _logger.LogInformation("Refresh token successfully used for user {UserId}.", user.Id);
         //    return tokens;
         //}
+        #endregion
+
+        //Get RefreshToken
+        //Check if it is expired
+        //if it is expired generate new one
+        //if it is not expired return it
+        public async Task<string> RefreshTokenAsync(string refreshToken)
+        {
+            var spec = new RefreshTokenByTokenSpecifications(refreshToken);
+            var existingRefreshToken = await _unitofWork.Repository<RefreshToken>()
+                .GetByIdSpecificationAsync(spec);
+            if (existingRefreshToken == null || existingRefreshToken.ExpiryDate < DateTime.UtcNow || existingRefreshToken.IsRevoked)
+            {
+                return "Invalid or expired refresh token attempt.";
+            }
+            var user = await _userManager.FindByIdAsync(existingRefreshToken.UserId.ToString());
+            if (user == null)
+            {
+                return "User not found for refresh token.";
+            }
+            var newRefreshToken = _tokenService.GenerateRefreshToken();
+            existingRefreshToken.Token = newRefreshToken;
+            await _unitofWork.Repository<RefreshToken>().UpdateAsync(existingRefreshToken);
+            await _unitofWork.completeAsync();
+            return newRefreshToken;
+        }
     }
 }

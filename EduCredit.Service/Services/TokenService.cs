@@ -1,4 +1,5 @@
-﻿using EduCredit.Core.Services.Contract;
+﻿using EduCredit.Core.Models;
+using EduCredit.Core.Services.Contract;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -21,7 +22,7 @@ namespace EduCredit.Service.Services
             _configuration = configuration;
         }
 
-        public string GenerateAccessToken(Guid userId, string email, string role)
+        public string GenerateAccessToken(string email, string role)
         {
             var jwtSettings = _configuration.GetSection("JwtSettings");
             var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]));
@@ -29,7 +30,6 @@ namespace EduCredit.Service.Services
 
             var claims = new[]
             {
-                 new Claim(JwtRegisteredClaimNames.NameId, userId.ToString()),
                  new Claim(JwtRegisteredClaimNames.Email, email),
                  new Claim(ClaimTypes.Role, role),
                  new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
@@ -46,13 +46,13 @@ namespace EduCredit.Service.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        //public string GenerateRefreshToken()
-        //{
-        //    var randomNumber = new byte[64];
-        //    using var rng = RandomNumberGenerator.Create();
-        //    rng.GetBytes(randomNumber);
-        //    return Convert.ToBase64String(randomNumber);
-        //}
+        public string GenerateRefreshToken()
+        {
+            var randomNumber = new byte[32];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomNumber);
+            return Convert.ToBase64String(randomNumber);
+        }
     }
 
 }

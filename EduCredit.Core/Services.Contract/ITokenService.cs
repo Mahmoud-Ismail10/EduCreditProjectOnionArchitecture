@@ -8,6 +8,7 @@ namespace EduCredit.Core.Services.Contract
 {
     public interface ITokenService
     {
-        string GenerateAccessToken(Guid userId, string email, string role);
+        string GenerateAccessToken( string email, string role);
+       string GenerateRefreshToken();
     }
 }
