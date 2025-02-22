@@ -1,4 +1,5 @@
-﻿using EduCredit.Core.Relations;
+﻿using EduCredit.Core.Enums;
+using EduCredit.Core.Relations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace EduCredit.Core.Models
     {
         public float CreditHours { get; set; }
         public float GPA { get; set; }
-        public byte Level { get; set; }
+        public Level Level { get; set; }
 
         /// One-to-many: Between Student and Department
         public Guid DepartmentId { get; set; } // Foreign Key
@@ -21,7 +22,7 @@ namespace EduCredit.Core.Models
         public Guid TeacherId { get; set; } // Foreign Key
         public Teacher Teacher { get; set; }
 
-        /// Many-to-many: Between Student and Course (JoinTable)
-        public ICollection<Enrollment> Enrollments { get; set; } = new HashSet<Enrollment>();
+        /// One-to-many: Between Student and EnrollmentTable 
+        public ICollection<EnrollmentTable> EnrollmentTables { get; set; } = new HashSet<EnrollmentTable>();
     }
 }

@@ -54,15 +54,19 @@ namespace EduCredit.Repository.Data.Configurations
                 .HasColumnType("float")
                 .HasDefaultValue(0);
 
+            /// Store level in database as string and fetch it from DB as Level
             builder.Property(s => s.Level)
-                .HasColumnType("tinyint") /// equivalent byte in .Net
-                .HasDefaultValue(1);
+                .HasConversion(
+                Lvl => Lvl.ToString(),
+                Lvl => (Level)Enum.Parse(typeof(Level), Lvl));
 
+            /// One-to-many: Between Student and Department
             builder.HasOne(s => s.Department)
                 .WithMany(s => s.Students)
                 .HasForeignKey(s => s.DepartmentId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            /// One-to-many: Between Student and Teacher (Guidance)
             builder.HasOne(s => s.Teacher)
                 .WithMany(s => s.Students)
                 .HasForeignKey(s => s.TeacherId)

@@ -13,7 +13,7 @@ namespace EduCredit.Repository.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Enrollment> builder)
         {
-            builder.HasKey(e => new {e.StudentId, e.CourseId});
+            builder.HasKey(e => new {e.EnrollmentTableId, e.CourseId});
 
             builder.Property(e => e.Grade)
                 .HasColumnType("float");
@@ -21,9 +21,9 @@ namespace EduCredit.Repository.Data.Configurations
             builder.Property(e => e.IsPassAtCourse)
                 .HasColumnType("bit");
 
-            builder.HasOne(e => e.Student)
+            builder.HasOne(e => e.EnrollmentTable)
                 .WithMany(e => e.Enrollments)
-                .HasForeignKey(e => e.StudentId);
+                .HasForeignKey(e => e.EnrollmentTableId);
 
             builder.HasOne(tc => tc.Course)
                 .WithMany(e => e.Enrollments)

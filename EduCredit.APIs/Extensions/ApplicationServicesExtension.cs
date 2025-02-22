@@ -169,7 +169,6 @@ namespace EduCredit.APIs.Extensions
             #endregion
             return app;
         }
-
         public static async Task<WebApplication> LoggerMiddleWare(this WebApplication app)
         {
             #region Update Database Automaticaly

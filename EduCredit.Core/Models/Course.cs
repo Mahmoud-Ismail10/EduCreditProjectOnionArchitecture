@@ -26,7 +26,7 @@ namespace EduCredit.Core.Models
         /// Many-to-many: Between Course and Teacher (JoinTable)
         public ICollection<Schedule> Schedules { get; set; } = new HashSet<Schedule>();
 
-        /// Many-to-many: Between Course and Student (JoinTable)
+        /// Many-to-many: Between Course and EnrollmentTable (JoinTable)
         public ICollection<Enrollment> Enrollments { get; set; } = new HashSet<Enrollment>();
     }
 }

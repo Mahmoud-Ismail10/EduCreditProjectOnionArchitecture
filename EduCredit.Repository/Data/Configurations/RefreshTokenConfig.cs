@@ -9,29 +9,29 @@ using System.Threading.Tasks;
 
 namespace EduCredit.Repository.Data.Configurations
 {
-    public class RefreshTokenConfig : IEntityTypeConfiguration<RefreshToken>
-    {
-        public void Configure(EntityTypeBuilder<RefreshToken> builder)
-        {
-            builder.HasKey(rt => rt.Id);
+    //public class RefreshTokenConfig : IEntityTypeConfiguration<RefreshToken>
+    //{
+        //public void Configure(EntityTypeBuilder<RefreshToken> builder)
+        //{
+        //    builder.HasKey(rt => rt.Id);
 
-            builder.Property(rt => rt.Token)
-                .IsRequired()
-                .HasMaxLength(500);
+        //    builder.Property(rt => rt.Token)
+        //        .IsRequired()
+        //        .HasMaxLength(500);
 
-            builder.Property(rt => rt.ExpiryDate)
-                .IsRequired();
+        //    builder.Property(rt => rt.ExpiryDate)
+        //        .IsRequired();
 
-            builder.Property(rt => rt.IsRevoked)
-                .HasDefaultValue(false);
+        //    builder.Property(rt => rt.IsRevoked)
+        //        .HasDefaultValue(false);
 
-            builder.HasIndex(rt => rt.Token)
-                .IsUnique();
+        //    builder.HasIndex(rt => rt.Token)
+        //        .IsUnique();
 
-            builder.HasOne<Person>()
-                .WithMany(rt => rt.RefreshTokens)
-                .HasForeignKey(rt => rt.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-        }
-    }
+        //    builder.HasOne<Person>()
+        //        .WithMany(rt => rt.RefreshTokens)
+        //        .HasForeignKey(rt => rt.UserId)
+        //        .OnDelete(DeleteBehavior.Cascade);
+        //}
+    //}
 }

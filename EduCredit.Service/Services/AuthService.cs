@@ -2,7 +2,7 @@
 using EduCredit.Core;
 using EduCredit.Core.Models;
 using EduCredit.Core.Services.Contract;
-using EduCredit.Core.Specifications.RefreshTokenSpecifications;
+//using EduCredit.Core.Specifications.RefreshTokenSpecifications;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using System;
@@ -85,25 +85,25 @@ namespace EduCredit.Service.Services
         //Check if it is expired
         //if it is expired generate new one
         //if it is not expired return it
-        public async Task<string> RefreshTokenAsync(string refreshToken)
-        {
-            var spec = new RefreshTokenByTokenSpecifications(refreshToken);
-            var existingRefreshToken = await _unitofWork.Repository<RefreshToken>()
-                .GetByIdSpecificationAsync(spec);
-            if (existingRefreshToken == null || existingRefreshToken.ExpiryDate < DateTime.UtcNow || existingRefreshToken.IsRevoked)
-            {
-                return "Invalid or expired refresh token attempt.";
-            }
-            var user = await _userManager.FindByIdAsync(existingRefreshToken.UserId.ToString());
-            if (user == null)
-            {
-                return "User not found for refresh token.";
-            }
-            var newRefreshToken = _tokenService.GenerateRefreshToken();
-            existingRefreshToken.Token = newRefreshToken;
-            await _unitofWork.Repository<RefreshToken>().UpdateAsync(existingRefreshToken);
-            await _unitofWork.completeAsync();
-            return newRefreshToken;
-        }
+        //public async Task<string> RefreshTokenAsync(string refreshToken)
+        //{
+        //    var spec = new RefreshTokenByTokenSpecifications(refreshToken);
+        //    var existingRefreshToken = await _unitofWork.Repository<RefreshToken>()
+        //        .GetByIdSpecificationAsync(spec);
+        //    if (existingRefreshToken == null || existingRefreshToken.ExpiryDate < DateTime.UtcNow || existingRefreshToken.IsRevoked)
+        //    {
+        //        return "Invalid or expired refresh token attempt.";
+        //    }
+        //    var user = await _userManager.FindByIdAsync(existingRefreshToken.UserId.ToString());
+        //    if (user == null)
+        //    {
+        //        return "User not found for refresh token.";
+        //    }
+        //    var newRefreshToken = _tokenService.GenerateRefreshToken();
+        //    existingRefreshToken.Token = newRefreshToken;
+        //    await _unitofWork.Repository<RefreshToken>().UpdateAsync(existingRefreshToken);
+        //    await _unitofWork.completeAsync();
+        //    return newRefreshToken;
+        //}
     }
 }
