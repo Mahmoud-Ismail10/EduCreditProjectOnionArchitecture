@@ -1,4 +1,4 @@
-﻿namespace EduCredit.APIs.DTOs.AuthDTOs
+﻿namespace EduCredit.Service.DTOs.AuthDTOs
 {
     public class TokenRequestDto
     {

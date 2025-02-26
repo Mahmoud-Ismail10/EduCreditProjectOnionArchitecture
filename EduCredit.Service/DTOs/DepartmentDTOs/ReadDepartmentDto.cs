@@ -1,4 +1,4 @@
-﻿namespace EduCredit.APIs.DTOs.DepartmentDTOs
+﻿namespace EduCredit.Service.DTOs.DepartmentDTOs
 {
     public class ReadDepartmentDto : BaseDepartmentDto
     {

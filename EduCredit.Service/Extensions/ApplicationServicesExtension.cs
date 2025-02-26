@@ -1,8 +1,4 @@
-﻿using EduCredit.APIs.Errors;
-using EduCredit.APIs.Filters;
-using EduCredit.APIs.Helper;
-using EduCredit.APIs.Middlewares;
-using EduCredit.Core.Models;
+﻿using EduCredit.Core.Models;
 using EduCredit.Core;
 using EduCredit.Core.Repositories.Contract;
 using EduCredit.Core.Security;
@@ -16,13 +12,24 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
-using EduCredit.Repository.Data.Identity;
 using EduCredit.Core.Services.Contract;
 using EduCredit.Service.Services;
+using Microsoft.Extensions.DependencyInjection;
+using EduCredit.Service.Helper;
+using EduCredit.Service.Errors;
+using EduCredit.Service.Filters;
+using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Builder;
+using EduCredit.Service.Middlewares;
+using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using EduCredit.Repository.Data.Identity;
+using EduCredit.Service.Services.Contract;
 
-namespace EduCredit.APIs.Extensions
+namespace EduCredit.Service.Extensions
 {
-    public static class ApplicationServicesExtension // static class
+    public static class ApplicationServicesExtension  // static class
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services) // Make it Extension Method (this)
         {
@@ -36,19 +43,17 @@ namespace EduCredit.APIs.Extensions
                 options.Password.RequireLowercase = false;
                 options.Password.RequireNonAlphanumeric = false;
             }).AddEntityFrameworkStores<EduCreditContext>().AddDefaultTokenProviders();
-
-            //services.AddScoped<RoleSeeder>();
-            //services.AddScoped<UserSeeder>();
+    
             services.AddScoped<IUnitOfWork, UnitOfWork>();
-            services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            /// Add life time for Services
+            services.AddScoped(typeof(IDepartmentServices), typeof(DepartmentServices));
+            //services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ITokenService, TokenService>();
 
-            #region New Services
             /// Auto Mapper use parameter less ctor of MappingProfiles
             services.AddAutoMapper(typeof(MappingProfiles));
 
-            services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             /// Custom Validation Errors
             services.Configure<ApiBehaviorOptions>(options =>
             {
@@ -66,7 +71,6 @@ namespace EduCredit.APIs.Extensions
                 };
             });
             #endregion 
-            #endregion
             return services;
         }
         public static IServiceCollection AddSwaggerServices(this IServiceCollection services)
@@ -190,7 +194,7 @@ namespace EduCredit.APIs.Extensions
                 }
                 catch (Exception ex)
                 {
-                    var logger = loggerFactory.CreateLogger<Program>();
+                    var logger = loggerFactory.CreateLogger("Migration");
                     logger.LogError(ex, "An error occurred during migration!");
                 }
             }

@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EduCredit.APIs.DTOs.AuthDTOs
+namespace EduCredit.Service.DTOs.AuthDTOs
 {
-    public class RegisterTeacherAndStudentDto : BaseRegisterDto
+    public class RegisterStudentAndTeacherDto : BaseRegisterDto
     {
         [Required]
         public Guid DepartmentId { get; set; }

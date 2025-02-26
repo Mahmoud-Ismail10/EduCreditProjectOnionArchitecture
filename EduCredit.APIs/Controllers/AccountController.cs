@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using EduCredit.APIs.DTOs.AuthDTOs;
-using EduCredit.APIs.Errors;
 using EduCredit.Core.Models;
 using EduCredit.Core.Services.Contract;
+using EduCredit.Service.DTOs.AuthDTOs;
+using EduCredit.Service.Errors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

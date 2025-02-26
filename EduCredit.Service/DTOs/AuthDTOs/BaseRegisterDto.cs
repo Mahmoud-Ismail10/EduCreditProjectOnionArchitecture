@@ -1,7 +1,7 @@
 ﻿using EduCredit.Core.Enums;
 using System.ComponentModel.DataAnnotations;
 
-namespace EduCredit.APIs.DTOs.AuthDTOs
+namespace EduCredit.Service.DTOs.AuthDTOs
 {
     public class BaseRegisterDto
     {

@@ -9,7 +9,7 @@ namespace EduCredit.Core.Services.Contract
 {
     public interface IAuthService
     {
-        Task<string?> LoginAsync(string email, string password,Enum role);
+        Task<string?> LoginAsync(string email, string password, Enum role);
         //Task<object> RefreshTokenAsync(string refreshtoken);
 
     }

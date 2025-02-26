@@ -1,19 +1,14 @@
 ﻿using EduCredit.Core.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace EduCredit.APIs.DTOs.DepartmentDTOs
+namespace EduCredit.Service.DTOs.DepartmentDTOs
 {
     public class BaseDepartmentDto
     {
         [Required]
-        [MaxLength(20)]
-        [Display(Name = "Department Name")]
-        [RegularExpression(pattern: "^[A-Za-z ]+$",
+        [RegularExpression(pattern: "^[A-Za-z\\s]{3,}$",
                            ErrorMessage = "Name must be char only and more than 2 char")]
         public string Name { get; set; }
-
-        [Display(Name = "Department Head")]
         public Guid? DepartmentHeadId { get; set; }
-        public string DepartmentHeadName { get; set; }
     }
 }

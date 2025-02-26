@@ -1,4 +1,4 @@
-﻿using EduCredit.APIs.Errors;
+﻿using EduCredit.Service.Errors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 

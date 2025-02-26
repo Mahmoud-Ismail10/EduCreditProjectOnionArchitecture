@@ -1,7 +1,7 @@
 ﻿using EduCredit.Core.Enums;
 using System.ComponentModel.DataAnnotations;
 
-namespace EduCredit.APIs.DTOs.AuthDTOs
+namespace EduCredit.Service.DTOs.AuthDTOs
 {
     public class LoginDto
     {
@@ -10,8 +10,8 @@ namespace EduCredit.APIs.DTOs.AuthDTOs
 
         [Required]
         public string Password { get; set; }
+
         [Required]
         public Roles Role { get; set; }
-
     }
 }

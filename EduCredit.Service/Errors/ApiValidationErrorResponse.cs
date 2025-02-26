@@ -1,4 +1,4 @@
-﻿namespace EduCredit.APIs.Errors
+﻿namespace EduCredit.Service.Errors
 {
     public class ApiValidationErrorResponse : ApiResponse
     {

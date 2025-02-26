@@ -2,7 +2,7 @@
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace EduCredit.APIs.Filters
+namespace EduCredit.Service.Filters
 {
     public class SecurityRequirementsOperationFilter : IOperationFilter
     {

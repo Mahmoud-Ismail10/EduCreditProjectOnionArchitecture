@@ -35,19 +35,19 @@ namespace EduCredit.Service.Services
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
             {
-                return "Invalid Email !";
+                return "Invalid Email!";
             }
             //check if the password is correct
             var result = await _userManager.CheckPasswordAsync(user, password);
             if (!result)
             {
-                return "Invalid password !";
+                return "Invalid password!";
             }
             //check if Role is correct
             var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault();
             if (!(role == Role.ToString()) || role == null)
             {
-                return "UnAuthorized !";
+                return "UnAuthorized!";
             }
 
             return null;

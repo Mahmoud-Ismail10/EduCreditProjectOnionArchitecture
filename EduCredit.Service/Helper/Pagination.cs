@@ -1,4 +1,4 @@
-﻿namespace EduCredit.APIs.Helper
+﻿namespace EduCredit.Service.Helper
 {
     public class Pagination<T>
     {

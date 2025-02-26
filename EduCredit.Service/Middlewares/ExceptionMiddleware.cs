@@ -1,8 +1,12 @@
-﻿using EduCredit.APIs.Errors;
+﻿using EduCredit.Service.Errors;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Text.Json;
 
-namespace EduCredit.APIs.Middlewares
+namespace EduCredit.Service.Middlewares
 {
     public class ExceptionMiddleware
     {

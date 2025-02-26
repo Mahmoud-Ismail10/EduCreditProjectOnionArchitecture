@@ -1,11 +1,7 @@
-
-using EduCredit.APIs.Errors;
-using EduCredit.APIs.Extensions;
-using EduCredit.APIs.Helper;
-using EduCredit.APIs.Middlewares;
 using EduCredit.Core.Repositories.Contract;
 using EduCredit.Repository.Data;
 using EduCredit.Repository.Repositories;
+using EduCredit.Service.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

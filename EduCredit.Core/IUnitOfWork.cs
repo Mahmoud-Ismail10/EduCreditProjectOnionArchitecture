@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace EduCredit.Core
 {
-    public interface IUnitOfWork
+    public interface IUnitOfWork : IAsyncDisposable
     {
+        /// Generic Method
         IGenericRepository<TEntity> Repository<TEntity>() where TEntity : class;
-
-        Task<int> completeAsync();
+        Task<int> CompleteAsync();
     }
 }
