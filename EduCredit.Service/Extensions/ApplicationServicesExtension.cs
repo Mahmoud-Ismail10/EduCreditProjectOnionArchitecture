@@ -26,6 +26,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using EduCredit.Repository.Data.Identity;
 using EduCredit.Service.Services.Contract;
+using Microsoft.Extensions.Options;
 
 namespace EduCredit.Service.Extensions
 {
@@ -50,7 +51,11 @@ namespace EduCredit.Service.Extensions
             //services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IEmailServices, EmailServices>();
 
+            services.AddScoped<ITokenBlacklistService, TokenBlacklistService>();
+            var configuration = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
+            services.AddSingleton<EmailSetting>(configuration.GetSection(nameof(EmailSetting)).Get<EmailSetting>());
             /// Auto Mapper use parameter less ctor of MappingProfiles
             services.AddAutoMapper(typeof(MappingProfiles));
 
@@ -165,10 +170,11 @@ namespace EduCredit.Service.Extensions
                     );
                 }
             });
+            app.UseAuthentication();
+            app.UseMiddleware<BlackListMiddleware>();
             app.UseAuthorization();
             /// Used when data contains static files (pictures)  
             //app.UseStaticFiles();
-
             app.MapControllers();
             #endregion
             return app;

@@ -1,114 +1,210 @@
 ﻿using AutoMapper;
+using EduCredit.Core.Enums;
 using EduCredit.Core.Models;
+using EduCredit.Core.Security;
 using EduCredit.Core.Services.Contract;
 using EduCredit.Service.DTOs.AuthDTOs;
 using EduCredit.Service.Errors;
+using EduCredit.Service.Services.Contract;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Net;
+using System.Security.Claims;
+using System.Text;
+using System.Web;
 
 namespace EduCredit.APIs.Controllers
 {
    
     public class AccountController : BaseApiController
     {
-
-        private readonly UserManager<Person> _userManager;
+        #region Fields
         private readonly IAuthService _auth;
         private readonly ITokenService _tokenService;
+        private readonly ITokenBlacklistService _blacklistService;
         private readonly IMapper _mapper;
+        #endregion
 
-        public AccountController(UserManager<Person> userManager, IAuthService auth,IMapper mapper, ITokenService tokenService)
+        #region Constructor
+        public AccountController( IAuthService auth, ITokenService tokenService,ITokenBlacklistService blacklistService,IMapper mapper)
         {
-            _userManager = userManager;
             _auth = auth;
-            _mapper = mapper;
             _tokenService = tokenService;
+            _blacklistService = blacklistService;
+            _mapper = mapper;
+        }
+        #endregion
+
+        #region Endpoints
+        #region Register
+        [HttpPost("AdminRegistration")]
+        [Authorize(Roles= AuthorizationConstants.SuperAdminRole)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> Register([FromBody] RegisterAdminDto registerDto, Roles role, string RedirectUrl)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new ApiResponse(400, "Invalid Data!"));
+            // Mapping RegisterAdminDto to Person
+            var Mappedadmin = _mapper.Map<RegisterAdminDto, Person>(registerDto);
+            var result = await _auth.RegisterAsync(Mappedadmin,role,RedirectUrl);
+            if (result.StatusCode != 200)
+                return BadRequest(new ApiResponse(400, result.ErrorMessage));
+
+            return Created();
         }
 
-        //[HttpPost("login")]
-        //[ProducesResponseType(StatusCodes.Status200OK)]
-        //[ProducesResponseType(typeof(ApiResponse),StatusCodes.Status401Unauthorized)]
-        //public async Task<ActionResult<TokenResponseDto>> Login([FromBody] LoginDto loginDto)
-        //{
-        //    var response = await _auth.LoginAsync(loginDto.Email,loginDto.Password);
-        //    if (response == null)
-        //    {
-        //        return Unauthorized(new ApiResponse(401, "Invalid email or password."));
-        //    }
-        //    return Ok(response);
-        //}
+        [HttpPost("UserRegistration")]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> Register([FromBody] RegisterStudentAndTeacherDto registerDto,Roles role, string RedirectUrl)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new ApiResponse(400, "Invalid Data!"));
+            // Mapping RegisterStudentAndTeacherDto to Person
+            var MappedUser = _mapper.Map<RegisterStudentAndTeacherDto, Person>(registerDto);
+            var result = await _auth.RegisterAsync(MappedUser,role,RedirectUrl);
+            if (result.StatusCode != 200)
+                return BadRequest(new ApiResponse(400, result.ErrorMessage));
+            return Created();
+        }
+        #endregion
 
+        #region ConfirmEmail
+        [HttpGet("confirm-email")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> ConfirmEmail([FromQuery] string userId, [FromQuery] string token, [FromQuery] string redirectUrl)
+        {
+            if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(token) || string.IsNullOrWhiteSpace(redirectUrl))
+                return BadRequest(new ApiResponse(400, "Invalid data!"));
+            var result = await _auth.ConfirmEmailAsync(userId, token);
+            // If the confirmation fails, return a bad request
+            if (result.StatusCode!=200)
+            {
+                return BadRequest(new ApiResponse(400,result.ErrorMessage));
+            }
+            // Redirect the user to the frontend after successful confirmation
+            return Redirect($"{redirectUrl}?status=success");
+        }
+
+        #endregion
+
+        #region Login
         [HttpPost("login")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+    
         public async Task<ActionResult<TokenResponseDto>> Login([FromBody] LoginDto loginDto)
         {
-            #region Not Clean Code
-            ////check if the model state is valid
-            //if (!ModelState.IsValid)
-            //{
-            //    return BadRequest(new ApiResponse(400, "Invalid model state."));
-            //}
-            ////check if the user exists
-            //var user = await _userManager.FindByEmailAsync(loginDto.Email);
-            //if (user == null)
-            //{
-            //    return Unauthorized(new ApiResponse(401, "This email is not exist !"));
-            //}
-            ////check if the password is correct
-            //var result = await _userManager.CheckPasswordAsync(user, loginDto.Password);
-            //if (!result)
-            //{
-            //    return Unauthorized(new ApiResponse(401, "Invalid password."));
-            //}
-            ////check if Role is correct
-            //var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault();
-            //if (!(role == loginDto.Role.ToString()) || role == null)
-            //{
-            //    return Unauthorized(new ApiResponse(401, "Un Authorized."));
-            //}
-            ////generate token
-            //var token = _tokenService.GenerateAccessToken(user.Id, loginDto.Email, role);
-            //return Ok(new TokenResponseDto
-            //{
-            //    AccessToken = token
-            //});
-            #endregion
 
-            if(!ModelState.IsValid)
-            {
-                return BadRequest(new ApiResponse(400, "Invalid Data !"));
-            }
-            var response = await _auth.LoginAsync(loginDto.Email, loginDto.Password, loginDto.Role);
+            if (!ModelState.IsValid)
+                return BadRequest(new ApiResponse(400, "Invalid Data!"));
 
-            if (response != null)
-            {
-                return Unauthorized(new ApiResponse(401, response));
-            }
-            //generate token
-            var token = _tokenService.GenerateAccessToken(loginDto.Email, loginDto.Role.ToString());
+            var (tokens, errors) = await _auth.LoginAsync(loginDto);
 
-            return Ok(new TokenResponseDto
-            {
-                AccessToken = token
-            });
-         
+            if (errors.StatusCode != 200)
+                return Unauthorized(new ApiResponse(401, errors.ErrorMessage));
 
+            return Ok(tokens);
+        }
+        #endregion
+
+        #region RefreshToken
+
+        [HttpPost("refresh-token")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<TokenResponseDto>> RefreshToken([FromBody] RefreshTokenRequestDto request)
+        {
+            var response = await _auth.RefreshTokenAsync(request.RefreshToken);
+
+            if (response.StatusCode!=200)
+                return Unauthorized(new ApiResponse(401, response.ErrorMessage));
+
+            return Ok(response.Data);
+        }
+        #endregion
+
+        #region Logout
+        [HttpGet("logout")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult> Logout()
+        {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ","");
+            if (string.IsNullOrWhiteSpace(token))
+                return Unauthorized(new ApiResponse(401, "UnAuthrize!"));
+            var expiry = TimeSpan.FromHours(1);
+            await _blacklistService.AddTokenToBlacklistAsync(token, expiry);
+            return Ok(new ApiResponse (200, "Logged out successfully"));
+        }
+        #endregion
+
+        #region ForgotPassword
+        [HttpPost("forgot-password")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> ForgotPassword([FromBody] ForgotPasswordDto forgotPasswordDto, string RedirectUrl)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new ApiResponse(400, "Invalid Data!"));
+            var response = await _auth.ForgotPasswordAsync(forgotPasswordDto, RedirectUrl);
+            if (response.StatusCode != 200)
+                return BadRequest(new ApiResponse(400, response.ErrorMessage));
+            return Ok(new ApiResponse(200, "Password reset link sent successfully"));
+        }
+        #endregion
+
+        #region ResetPassword
+        [HttpPost("reset-password")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new ApiResponse(400, "Invalid Data!"));
+            var response = await _auth.ResetPasswordAsync(resetPasswordDto);
+            if (response.StatusCode != 200)
+                return BadRequest(new ApiResponse(400, response.ErrorMessage));
+            return Ok(new ApiResponse(200, "Password reset successfully"));
+        }
+        #endregion
+
+        #region changePassword
+        [HttpPost("change-password")]
+        [Authorize]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new ApiResponse(400, "Invalid Data!"));
+
+            ///  UserId From Token
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized(new ApiResponse(401, "User not authenticated"));
+            if (userId != changePasswordDto.user_Id)
+                return Unauthorized(new ApiResponse(401, "User not authenticated"));
+            var response = await _auth.ChangePasswordAsync(userId, changePasswordDto);
+
+            if (response.StatusCode != 200)
+                return BadRequest(new ApiResponse(400, response.ErrorMessage));
+
+            return Ok(new ApiResponse(200, "Password changed successfully"));
         }
 
-        //[HttpPost("refresh-token")]
-        //public async Task<ActionResult<TokenResponseDto>> RefreshToken([FromBody] string refreshToken)
-        //{
-        //    var response = await _auth.RefreshTokenAsync(refreshToken);
 
-        //    if (response == null)
-        //    {
-        //        return Unauthorized(new ApiResponse(401, "Invalid or expired refresh token."));
-        //    }
+        #endregion
 
-        //    return Ok(response);
-        //}
+        #endregion
     }
 }

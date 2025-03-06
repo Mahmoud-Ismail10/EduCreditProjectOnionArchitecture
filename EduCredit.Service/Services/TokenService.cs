@@ -15,14 +15,21 @@ namespace EduCredit.Service.Services
 {
     public class TokenService : ITokenService
     {
+        #region Fields
         private readonly IConfiguration _configuration;
+        #endregion
 
+        #region Constructor
         public TokenService(IConfiguration configuration)
         {
             _configuration = configuration;
         }
+        #endregion
 
-        public string GenerateAccessToken(string email, string role)
+        #region Methods
+
+        #region GenerateAccessToken
+        public string GenerateAccessToken(string email, string role,string UserId)
         {
             var jwtSettings = _configuration.GetSection("JwtSettings");
             var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]));
@@ -30,29 +37,45 @@ namespace EduCredit.Service.Services
 
             var claims = new[]
             {
-                 new Claim(JwtRegisteredClaimNames.Email, email),
-                 new Claim(ClaimTypes.Role, role),
-                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+               new Claim(JwtRegisteredClaimNames.Email, email),
+               new Claim(ClaimTypes.NameIdentifier, UserId),
+               new Claim(ClaimTypes.Role, role),
+               new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
+
+            var expiryMinutes = double.Parse(jwtSettings["RememberMeAccessTokenExpiryMinutes"]);
 
             var token = new JwtSecurityToken(
                 issuer: jwtSettings["ValidIssuer"],
                 audience: jwtSettings["ValidAudience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(double.Parse(jwtSettings["AccessTokenExpiryMinutes"])),
+                expires: DateTime.UtcNow.AddMinutes(expiryMinutes),
                 signingCredentials: creds
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+        #endregion
 
-        public string GenerateRefreshToken()
+        #region GenerateRefreshToken
+        public RefreshToken GenerateRefreshToken()
         {
+            var jwtSettings = _configuration.GetSection("JwtSettings");
+            var expiryDays = int.Parse(jwtSettings["RefreshTokenExpiryDays"]);
+
             var randomNumber = new byte[32];
             using var rng = RandomNumberGenerator.Create();
             rng.GetBytes(randomNumber);
-            return Convert.ToBase64String(randomNumber);
+
+            return new RefreshToken
+            {
+                Token = Convert.ToBase64String(randomNumber),
+                ExpiryDate = DateTime.UtcNow.AddDays(expiryDays)
+            };
         }
+        #endregion
+
+        #endregion
     }
 
 }

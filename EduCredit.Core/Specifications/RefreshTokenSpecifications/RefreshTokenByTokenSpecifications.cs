@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace EduCredit.Core.Specifications.RefreshTokenSpecifications
 {
-    //public class RefreshTokenByTokenSpecifications : BaseSpecifications<RefreshToken>
-    //{
-    //    public RefreshTokenByTokenSpecifications(string token) : base(x => x.Token == token)
-    //    {
-    //    }
-    //}
+    public class RefreshTokenByTokenSpecifications : BaseSpecifications<RefreshToken>
+    {
+        public RefreshTokenByTokenSpecifications(string token) : base(x => x.Token == token)
+        {
+        }
+    }
 }

@@ -6,11 +6,9 @@ using System.Threading.Tasks;
 
 namespace EduCredit.Core.Enums
 {
-    public enum Roles
+    public enum EmailType
     {
-        SuperAdminRole,
-        AdminRole,
-        TeacherRole,
-        StudentRole
+        ConfirmEmail,
+        ForgotPassword
     }
 }

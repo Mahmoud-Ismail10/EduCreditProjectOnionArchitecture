@@ -4,6 +4,7 @@ using EduCredit.Repository.Repositories;
 using EduCredit.Service.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 
 namespace EduCredit.APIs
 {
@@ -16,13 +17,17 @@ namespace EduCredit.APIs
             builder.Services.AddApplicationServices(); // Extension Method
             builder.Services.AddJwtAuthentication(builder.Configuration); // Extension Method
             builder.Services.AddCustomAuthorizationPolicies(); // Extension Method
+            ///Redis Connection
+            var RedisConnection = builder.Configuration.GetConnectionString("Redis");
+            builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(RedisConnection));
+
             /// Connection String
             builder.Services.AddDbContext<EduCreditContext>(Options =>
             Options.UseSqlServer(builder.Configuration.GetConnectionString("CS")));
 
             var app = builder.Build();
 
-            app.LoggerMiddleWare(); // Extension Method
+            await app.LoggerMiddleWare(); // Extension Method
 
             app.UseMiddleWares(); // Extension Method
 

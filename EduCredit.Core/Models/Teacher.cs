@@ -12,7 +12,7 @@ namespace EduCredit.Core.Models
         public DateOnly AppointmentDate { get; set; }
 
         /// One-to-many: Between Teacher and Department
-        public Guid DepartmentId { get; set; } // Foreign Key
+        public Guid? DepartmentId { get; set; } // Foreign Key
         public Department Department { get; set; }
 
         /// One-to-many: Between Teacher and Student (Guidance)

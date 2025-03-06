@@ -15,11 +15,11 @@ namespace EduCredit.Core.Models
         public Level Level { get; set; }
 
         /// One-to-many: Between Student and Department
-        public Guid DepartmentId { get; set; } // Foreign Key
+        public Guid? DepartmentId { get; set; } // Foreign Key
         public Department Department { get; set; }
 
         /// One-to-many: Between Student and Teacher (Guidance)
-        public Guid TeacherId { get; set; } // Foreign Key
+        public Guid? TeacherId { get; set; } // Foreign Key
         public Teacher Teacher { get; set; }
 
         /// One-to-many: Between Student and EnrollmentTable 

@@ -1,4 +1,7 @@
-﻿using EduCredit.Core.Models;
+﻿using EduCredit.Core.Enums;
+using EduCredit.Core.Models;
+using EduCredit.Service.DTOs.AuthDTOs;
+using EduCredit.Service.Errors;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,8 +12,12 @@ namespace EduCredit.Core.Services.Contract
 {
     public interface IAuthService
     {
-        Task<string?> LoginAsync(string email, string password, Enum role);
-        //Task<object> RefreshTokenAsync(string refreshtoken);
-
+        Task<(TokenResponseDto?, ApiResponse)> LoginAsync(LoginDto loginDto);
+        Task<ApiResponse<TokenResponseDto>> RefreshTokenAsync(string refreshtoken);
+        Task<ApiResponse> RegisterAsync(Person person,Roles role, string RedirectUrl);
+        Task<ApiResponse> ChangePasswordAsync(string userId, ChangePasswordDto changePasswordDto);
+        Task<ApiResponse> ConfirmEmailAsync(string userId, string token);
+        Task<ApiResponse> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto, string RedirectUrl);
+        Task<ApiResponse> ResetPasswordAsync(ResetPasswordDto resetPasswordDto);
     }
 }

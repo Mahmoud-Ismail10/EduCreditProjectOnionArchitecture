@@ -33,7 +33,7 @@ namespace EduCredit.Repository.Data
         public DbSet<Enrollment> Enrollments { get; set; }
         public DbSet<EnrollmentTable> EnrollmentTables { get; set; }
         public DbSet<Schedule> Schedules { get; set; }
-        //public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
