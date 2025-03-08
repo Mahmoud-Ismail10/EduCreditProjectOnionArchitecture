@@ -75,7 +75,7 @@ namespace EduCredit.Service.Services
             var emailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var encodedToken = HttpUtility.UrlEncode(emailToken);
 
-            var emailConfirmationUrl = $"{RedirectUrl}?userId={user.Id}&token={encodedToken}";
+            var emailConfirmationUrl = $"https://educredit.runasp.net/api/Account/confirm-email?userId={user.Id}&token={encodedToken}&redirectUrl={RedirectUrl}";
 
             // Send confirmation email
             var emailSent = await _emailService.SendEmailAsync(person.Email, emailConfirmationUrl,EmailType.ConfirmEmail);
@@ -135,16 +135,16 @@ namespace EduCredit.Service.Services
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
                 return new ApiResponse(404, "User not found!");
-            // Decode the token
-            var decodedToken = HttpUtility.UrlDecode(token).Trim(); // Securely decode token
+            //// Decode the token
+            //var decodedToken = HttpUtility.UrlDecode(token).Trim(); // Securely decode token
             // Confirm the email
-            var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+            var result = await _userManager.ConfirmEmailAsync(user, token);
             // Check if the email was confirmed successfully
             if (!result.Succeeded)
             {
-                var errors = result.Errors.Select(E => E.Description);
                 
-                return new ApiResponse(400, $"Failed to confirm the email!,{errors} ");
+                
+                return new ApiResponse(400, $"Failed to confirm the email! ");
             }
 
             return new ApiResponse(200, "Email confirmed successfully!");

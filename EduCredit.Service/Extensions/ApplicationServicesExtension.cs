@@ -75,6 +75,13 @@ namespace EduCredit.Service.Extensions
                     return new BadRequestObjectResult(response);
                 };
             });
+            services.AddCors(Options =>
+            {
+                Options.AddPolicy("AllowAll",
+                    policy => policy.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader());
+            });
             #endregion 
             return services;
         }
@@ -151,11 +158,11 @@ namespace EduCredit.Service.Extensions
             // Configure the HTTP request pipeline.
             app.UseMiddleware<ExceptionMiddleware>();
 
-            if (app.Environment.IsDevelopment())
-            {
+            //if (app.Environment.IsDevelopment())
+            //{
                 app.UseSwagger();
                 app.UseSwaggerUI();
-            }
+            //}
             /// Use when there is an End Point not exist error and we need to Redirect it to another End Point.
             app.UseStatusCodePagesWithRedirects("/Error");
 
@@ -175,6 +182,7 @@ namespace EduCredit.Service.Extensions
             app.UseAuthorization();
             /// Used when data contains static files (pictures)  
             //app.UseStaticFiles();
+            app.UseCors("AllowAll");
             app.MapControllers();
             #endregion
             return app;
