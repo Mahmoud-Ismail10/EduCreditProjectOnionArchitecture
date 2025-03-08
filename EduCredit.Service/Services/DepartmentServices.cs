@@ -43,12 +43,7 @@ namespace EduCredit.Service.Services
             return createDeptDto;
         }
 
-        public void DeleteDepartment(Guid deptId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IReadOnlyList<ReadDepartmentDto?> GetAllDepartmentAsync(DepartmentSpecificationParams specParams, out int count)
+        public IReadOnlyList<ReadDepartmentDto?> GetAllDepartment(DepartmentSpecificationParams specParams, out int count)
         {
             var departmentRepo = _unitOfWork.Repository<Department>();
             var spec = new DepartmentWithTeacherSpecifications(specParams);
@@ -64,13 +59,32 @@ namespace EduCredit.Service.Services
             var spec = new DepartmentWithTeacherSpecifications(id);
             var department = await departmentRepo.GetByIdSpecificationAsync(spec);
             if (department is null) return null;
-            var departmentDto = _mapper.Map<Department, ReadDepartmentDto>(department);
-            return departmentDto;
+            return _mapper.Map<Department, ReadDepartmentDto>(department);
         }
 
-        public void UpdateDepertment(UpdateDepartmentDto updateDeptDto)
+        public async Task<UpdateDepartmentDto?> UpdateDepertmentAsync(UpdateDepartmentDto updateDeptDto, Guid id)
         {
-            throw new NotImplementedException();
+            var spec = new DepartmentWithTeacherSpecifications(id);
+            var departmentFromDB = await _unitOfWork.Repository<Department>().GetByIdSpecificationAsync(spec);
+            if (departmentFromDB is null) return null;
+
+            var newDepartment = _mapper.Map(updateDeptDto, departmentFromDB);
+            await _unitOfWork.Repository<Department>().Update(newDepartment);
+
+            int result = await _unitOfWork.CompleteAsync();
+            if (result <= 0) return null;
+            return _mapper.Map<Department, UpdateDepartmentDto>(newDepartment);
+        }
+
+        public async Task<bool> DeleteDepartmentAsync(Guid id)
+        {
+            var spec = new DepartmentWithTeacherSpecifications(id);
+            var department = await _unitOfWork.Repository<Department>().GetByIdSpecificationAsync(spec);
+            if (department is null) return false;
+
+            await _unitOfWork.Repository<Department>().Delete(department);
+            await _unitOfWork.CompleteAsync();
+            return true;
         }
     }
 }

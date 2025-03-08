@@ -14,7 +14,7 @@ namespace EduCredit.Core.Repositories.Contract
         Task<T?> GetByIdSpecificationAsync(ISpecification<T> spec);
         IReadOnlyList<T?> GetAllSpecification(ISpecification<T> spec, out int count);
         Task CreateAsync(T entity);
-        void Update(T entity);
-        void Delete(Guid id);
+        Task Update(T entity);
+        Task Delete(T entity);
     }
 }
