@@ -10,9 +10,10 @@ namespace EduCredit.Service.Helper
     {
         public MappingProfiles()
         {
-            CreateMap<Department, ReadDepartmentDto>();
-
-            CreateMap<CreateDepartmentDto, Department>();
+            CreateMap<Department, ReadDepartmentDto>()
+                .ForMember(d => d.DepartmentHeadFullName, o => o.MapFrom(s => s.DepartmentHead.FullName)).ReverseMap();
+            CreateMap<CreateDepartmentDto, Department>().ReverseMap();
+            CreateMap<UpdateDepartmentDto, Department>().ReverseMap();
 
             CreateMap<RegisterAdminDto, Person>().ReverseMap();
             CreateMap<RegisterStudentAndTeacherDto, Person>().ReverseMap();

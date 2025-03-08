@@ -129,7 +129,7 @@ namespace EduCredit.Service.Extensions
                     ValidateAudience = true,
                     ValidAudience = jwtSettings["ValidAudience"],
 
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"])),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"] ?? string.Empty)),
 
                     RequireExpirationTime = true,
                 };
@@ -166,7 +166,7 @@ namespace EduCredit.Service.Extensions
                 {
                     context.HttpContext.Response.ContentType = "application/json";
                     await context.HttpContext.Response.WriteAsync(
-                        System.Text.Json.JsonSerializer.Serialize(new ApiResponse(401, "Unauthorized !"))
+                        System.Text.Json.JsonSerializer.Serialize(new ApiResponse(401, "Unauthorized!"))
                     );
                 }
             });

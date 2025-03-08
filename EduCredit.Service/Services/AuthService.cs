@@ -136,9 +136,9 @@ namespace EduCredit.Service.Services
             if (user == null)
                 return new ApiResponse(404, "User not found!");
             // Decode the token
-            var decodedToken = HttpUtility.UrlDecode(token).Trim(); // Securely decode token
+            //var decodedToken = HttpUtility.UrlDecode(token).Trim(); // Securely decode token
             // Confirm the email
-            var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+            var result = await _userManager.ConfirmEmailAsync(user, token);
             // Check if the email was confirmed successfully
             if (!result.Succeeded)
             {

@@ -17,6 +17,7 @@ namespace EduCredit.APIs
             builder.Services.AddApplicationServices(); // Extension Method
             builder.Services.AddJwtAuthentication(builder.Configuration); // Extension Method
             builder.Services.AddCustomAuthorizationPolicies(); // Extension Method
+
             ///Redis Connection
             var RedisConnection = builder.Configuration.GetConnectionString("Redis");
             builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(RedisConnection));

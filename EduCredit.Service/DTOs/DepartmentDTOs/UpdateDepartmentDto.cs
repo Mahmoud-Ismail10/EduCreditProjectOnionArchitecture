@@ -8,5 +8,6 @@ namespace EduCredit.Service.DTOs.DepartmentDTOs
 {
     public class UpdateDepartmentDto : BaseDepartmentDto
     {
+        public Guid? DepartmentHeadId { get; set; }
     }
 }

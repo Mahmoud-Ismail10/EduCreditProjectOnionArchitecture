@@ -25,18 +25,16 @@ namespace EduCredit.Repository.Repositories
             await _dbcontext.Set<T>().AddAsync(entity);
         }
 
-        public void Delete(Guid id)
+        public Task Delete(T entity)
         {
-            var entity = _dbcontext.Set<T>().Find(id);
-            if (entity != null)
-            {
-                _dbcontext.Set<T>().Remove(entity);
-            }
+            _dbcontext.Set<T>().Remove(entity);
+            return Task.CompletedTask;
         }
 
-        public void Update(T entity)
+        public Task Update(T entity)
         {
             _dbcontext.Set<T>().Update(entity);
+            return Task.CompletedTask;
         }
 
         public IReadOnlyList<T?> GetAllSpecification(ISpecification<T> spec, out int count)
