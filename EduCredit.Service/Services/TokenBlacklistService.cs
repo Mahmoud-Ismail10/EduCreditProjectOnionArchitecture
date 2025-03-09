@@ -9,15 +9,40 @@ namespace EduCredit.Service.Services
         private readonly IDatabase _db;
         public TokenBlacklistService(IConnectionMultiplexer Db) 
         {
-            _db = Db.GetDatabase();
+            try
+            {
+                _db = Db.GetDatabase();
+                Console.WriteLine("✅ Redis Connected Successfully!");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Redis Connection Error: {ex.Message}");
+            }
         }
         public async Task AddTokenToBlacklistAsync(string token,TimeSpan expiry)
         {
-            await _db.StringSetAsync($"blacklist:{token}", "invalid", expiry);
+            try
+            {
+                await _db.StringSetAsync($"blacklist:{token}", "invalid", expiry);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Redis Error: {ex.Message}");
+                return ;
+            }
         }
         public async Task<bool> IsTokenBlacklistedAsync(string token)
         {
-            return await _db.KeyExistsAsync($"blacklisted:{token}");
+            try
+            {
+                return await _db.KeyExistsAsync($"blacklist:{token}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Redis Error: {ex.Message}");
+                return false;
+            }
         }
+
     }
 }

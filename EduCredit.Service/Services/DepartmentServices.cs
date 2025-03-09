@@ -69,7 +69,7 @@ namespace EduCredit.Service.Services
             if (departmentFromDB is null) return null;
 
             var newDepartment = _mapper.Map(updateDeptDto, departmentFromDB);
-            await _unitOfWork.Repository<Department>().Update(newDepartment);
+           await  _unitOfWork.Repository<Department>().Update(newDepartment);
 
             int result = await _unitOfWork.CompleteAsync();
             if (result <= 0) return null;

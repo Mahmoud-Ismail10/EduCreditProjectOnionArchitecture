@@ -1,10 +1,8 @@
 ﻿using EduCredit.Core.Models;
 using EduCredit.Core;
-using EduCredit.Core.Repositories.Contract;
 using EduCredit.Core.Security;
 using EduCredit.Repository;
 using EduCredit.Repository.Data;
-using EduCredit.Repository.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -21,12 +19,12 @@ using EduCredit.Service.Filters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Builder;
 using EduCredit.Service.Middlewares;
-using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using EduCredit.Repository.Data.Identity;
 using EduCredit.Service.Services.Contract;
-using Microsoft.Extensions.Options;
+using AspNetCoreRateLimit;
+
 
 namespace EduCredit.Service.Extensions
 {
@@ -46,6 +44,10 @@ namespace EduCredit.Service.Extensions
             }).AddEntityFrameworkStores<EduCreditContext>().AddDefaultTokenProviders();
     
             /// Add life time for Services
+<<<<<<< HEAD
+=======
+            services.AddScoped<ICacheService,CacheService>();
+>>>>>>> 291322764de2e3e96b4e16585c6f1ba3a51ecfbe
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped(typeof(IDepartmentServices), typeof(DepartmentServices));
             services.AddScoped<IAuthService, AuthService>();
@@ -74,8 +76,40 @@ namespace EduCredit.Service.Extensions
                     return new BadRequestObjectResult(response);
                 };
             });
-            #endregion 
-            return services;
+
+            #region Cors
+            services.AddCors(Options =>
+            {
+                Options.AddPolicy("AllowAll",
+                    policy => policy.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader());
+            });
+            #endregion
+
+            #region Rate Limit
+            services.AddMemoryCache();
+            services.AddDistributedMemoryCache();
+            services.AddSingleton<IIpPolicyStore, DistributedCacheIpPolicyStore>();
+            services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>(); 
+            services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+            services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>();
+
+            services.Configure<IpRateLimitOptions>(options =>
+            {
+                options.GeneralRules = new List<RateLimitRule>
+                {
+                    new RateLimitRule
+                    {
+                        Endpoint = "*",
+                        Limit = 100,
+                        Period = "1m"
+                    }
+                };
+            });
+                #endregion
+                #endregion
+                return services;
         }
         public static IServiceCollection AddSwaggerServices(this IServiceCollection services)
         {
@@ -150,11 +184,11 @@ namespace EduCredit.Service.Extensions
             // Configure the HTTP request pipeline.
             app.UseMiddleware<ExceptionMiddleware>();
 
-            if (app.Environment.IsDevelopment())
-            {
+            //if (app.Environment.IsDevelopment())
+            //{
                 app.UseSwagger();
                 app.UseSwaggerUI();
-            }
+            //}
             /// Use when there is an End Point not exist error and we need to Redirect it to another End Point.
             app.UseStatusCodePagesWithRedirects("/Error");
 
@@ -174,6 +208,8 @@ namespace EduCredit.Service.Extensions
             app.UseAuthorization();
             /// Used when data contains static files (pictures)  
             //app.UseStaticFiles();
+            app.UseCors("AllowAll");
+            app.UseIpRateLimiting();
             app.MapControllers();
             #endregion
             return app;

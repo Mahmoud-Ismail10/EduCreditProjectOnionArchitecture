@@ -2,7 +2,7 @@
 using EduCredit.Core.Models;
 using EduCredit.Service.DTOs.AuthDTOs;
 using EduCredit.Service.DTOs.DepartmentDTOs;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using EduCredit.Service.DTOs.UserDTOs;
 
 namespace EduCredit.Service.Helper
 {
@@ -17,6 +17,9 @@ namespace EduCredit.Service.Helper
 
             CreateMap<RegisterAdminDto, Person>().ReverseMap();
             CreateMap<RegisterStudentAndTeacherDto, Person>().ReverseMap();
+
+            CreateMap< Person, GetUserInfoDto>()
+                .ForMember(d=>d.Name,o=>o.MapFrom(s=>s.FullName)).ReverseMap();
         }
     }
 }
