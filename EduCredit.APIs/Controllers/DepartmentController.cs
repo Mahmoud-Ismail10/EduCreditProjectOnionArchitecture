@@ -39,6 +39,7 @@ namespace EduCredit.APIs.Controllers
 
         /// GET: api/Department
         [HttpGet]
+        [Cache(30)]
         [ProducesResponseType(typeof(ReadDepartmentDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public ActionResult<IReadOnlyList<ReadDepartmentDto>> GetDepartments([FromQuery] DepartmentSpecificationParams specParams) // Create class contains all of params (refactor)
@@ -51,6 +52,7 @@ namespace EduCredit.APIs.Controllers
 
         /// GET: api/Department/{id}
         [HttpGet("{id}")]
+        [Cache(30)]
         [ProducesResponseType(typeof(ReadDepartmentDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<ReadDepartmentDto>> GetDepartment(Guid id)

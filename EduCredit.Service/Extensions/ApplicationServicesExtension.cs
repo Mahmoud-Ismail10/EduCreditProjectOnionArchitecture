@@ -1,10 +1,8 @@
 ﻿using EduCredit.Core.Models;
 using EduCredit.Core;
-using EduCredit.Core.Repositories.Contract;
 using EduCredit.Core.Security;
 using EduCredit.Repository;
 using EduCredit.Repository.Data;
-using EduCredit.Repository.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -21,12 +19,12 @@ using EduCredit.Service.Filters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Builder;
 using EduCredit.Service.Middlewares;
-using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using EduCredit.Repository.Data.Identity;
 using EduCredit.Service.Services.Contract;
-using Microsoft.Extensions.Options;
+using AspNetCoreRateLimit;
+
 
 namespace EduCredit.Service.Extensions
 {
@@ -45,15 +43,16 @@ namespace EduCredit.Service.Extensions
                 options.Password.RequireNonAlphanumeric = false;
             }).AddEntityFrameworkStores<EduCreditContext>().AddDefaultTokenProviders();
     
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
             /// Add life time for Services
+            services.AddScoped<ICacheService,CacheService>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped(typeof(IDepartmentServices), typeof(DepartmentServices));
             //services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IEmailServices, EmailServices>();
-
             services.AddScoped<ITokenBlacklistService, TokenBlacklistService>();
+
             var configuration = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
             services.AddSingleton<EmailSetting>(configuration.GetSection(nameof(EmailSetting)).Get<EmailSetting>());
             /// Auto Mapper use parameter less ctor of MappingProfiles
@@ -75,6 +74,8 @@ namespace EduCredit.Service.Extensions
                     return new BadRequestObjectResult(response);
                 };
             });
+
+            #region Cors
             services.AddCors(Options =>
             {
                 Options.AddPolicy("AllowAll",
@@ -82,8 +83,31 @@ namespace EduCredit.Service.Extensions
                     .AllowAnyMethod()
                     .AllowAnyHeader());
             });
-            #endregion 
-            return services;
+            #endregion
+
+            #region Rate Limit
+            services.AddMemoryCache();
+            services.AddDistributedMemoryCache();
+            services.AddSingleton<IIpPolicyStore, DistributedCacheIpPolicyStore>();
+            services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>(); 
+            services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+            services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>();
+
+            services.Configure<IpRateLimitOptions>(options =>
+            {
+                options.GeneralRules = new List<RateLimitRule>
+                {
+                    new RateLimitRule
+                    {
+                        Endpoint = "*",
+                        Limit = 100,
+                        Period = "1m"
+                    }
+                };
+            });
+                #endregion
+                #endregion
+                return services;
         }
         public static IServiceCollection AddSwaggerServices(this IServiceCollection services)
         {
@@ -183,6 +207,7 @@ namespace EduCredit.Service.Extensions
             /// Used when data contains static files (pictures)  
             //app.UseStaticFiles();
             app.UseCors("AllowAll");
+            app.UseIpRateLimiting();
             app.MapControllers();
             #endregion
             return app;

@@ -46,9 +46,9 @@ namespace EduCredit.Service.Services
             // Create a new user based on the role
             Person user = role switch
             {
-                Roles.StudentRole => await CreateUser<Student>(person),
-                Roles.TeacherRole => await CreateUser<Teacher>(person),
-                Roles.AdminRole => await CreateUser<Admin>(person),
+                Roles.StudentRole =>  CreateUser<Student>(person),
+                Roles.TeacherRole =>  CreateUser<Teacher>(person),
+                Roles.AdminRole =>  CreateUser<Admin>(person),
                 _ => null
             };
 
@@ -87,7 +87,7 @@ namespace EduCredit.Service.Services
             return new ApiResponse(200, "User registered successfully! Please confirm your email.");
         }
         // Create a new user based on the role
-        private async Task<T> CreateUser<T>(Person person) where T : Person, new()
+        private T CreateUser<T>(Person person) where T : Person, new()
         {
             string userName = person.FullName.Replace(" ", "");
             // Create a new user
@@ -123,7 +123,7 @@ namespace EduCredit.Service.Services
                     break;
             }
 
-            return newUser;
+            return  newUser;
         }
 
         #endregion
@@ -135,11 +135,7 @@ namespace EduCredit.Service.Services
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
                 return new ApiResponse(404, "User not found!");
-<<<<<<< HEAD
-            //// Decode the token
-=======
-            // Decode the token
->>>>>>> 90cd5817de29a84bd0e7ad09897df356d0b828da
+
             //var decodedToken = HttpUtility.UrlDecode(token).Trim(); // Securely decode token
             // Confirm the email
             var result = await _userManager.ConfirmEmailAsync(user, token);

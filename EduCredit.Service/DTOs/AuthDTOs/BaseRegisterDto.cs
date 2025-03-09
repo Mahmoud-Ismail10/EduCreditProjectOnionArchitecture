@@ -22,7 +22,7 @@ namespace EduCredit.Service.DTOs.AuthDTOs
         public string Address { get; set; }
 
         [Required(ErrorMessage = "National ID is required")]
-        [RegularExpression(@"^\d{10,14}$", ErrorMessage = "National ID must be between 10 and 14 digits")]
+        [RegularExpression(@"^\d{10,15}$", ErrorMessage = "National ID must be between 10 and 14 digits")]
         public string NationalId { get; set; }
 
         [Required(ErrorMessage = "Phone Number is required")]
