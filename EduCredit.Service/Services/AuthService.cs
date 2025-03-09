@@ -251,10 +251,10 @@ namespace EduCredit.Service.Services
             var passwordResetUrl = $"{RedirectUrl}?userId={user.Id}&token={encodedToken}";
 
             // Send password reset email
-            var emailSent = await _emailService.SendEmailAsync(forgotPasswordDto.Email, passwordResetUrl,EmailType.ForgotPassword);
+            var emailSent = await _emailService.SendEmailAsync(forgotPasswordDto.Email, passwordResetUrl, EmailType.ForgotPassword);
             if (emailSent.StatusCode != 200)
                 return new ApiResponse(400, "Failed to send the email!");
-            return new ApiResponse(200, "Password reset email sent successfully!");
+            return new ApiResponse(200);
         }
         #endregion
 

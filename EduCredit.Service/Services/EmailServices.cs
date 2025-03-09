@@ -20,24 +20,28 @@ namespace EduCredit.Service.Services
         {
             _email = email;
         }
-        public async Task<ApiResponse> SendEmailAsync(string email, string ConfirmEmailUrl,EmailType emailType)
+
+        public async Task<ApiResponse> SendEmailAsync(string email, string ConfirmEmailUrl, EmailType emailType)
         {
             try
             {
                 using (var client = new SmtpClient())
                 {
-                    await client.ConnectAsync(_email.Host, _email.Port, false);
-                    await client.AuthenticateAsync(_email.Email, _email.Password);
+                    /// (1) Start connection with host and send port
+                    await client.ConnectAsync(_email.Host, _email.Port, true);
+                    /// (2) Send Credentials
+                    await client.AuthenticateAsync(_email.Email, _email.Password); 
 
                     var emailMessage = new MimeMessage();
-                    emailMessage.From.Add(new MailboxAddress("From : ", _email.Email));
-                    emailMessage.To.Add(new MailboxAddress("To : ", email));
-                    emailMessage.Subject = emailType switch
+                    emailMessage.From.Add(new MailboxAddress(_email.From, _email.Email)); // Display Name, Email Address of source
+                    emailMessage.To.Add(MailboxAddress.Parse(email)); // Email Address of destination
+                    emailMessage.Subject = emailType switch // The text that will be pressed (Provided Link)
                     {
                         EmailType.ConfirmEmail => "Confirm Your Email",
                         EmailType.ForgotPassword => "Reset Password",
                         _ => "Email Confirmation"
                     };
+
                     var bodyBuilder = new BodyBuilder
                     {
                         HtmlBody = emailType switch
@@ -53,14 +57,14 @@ namespace EduCredit.Service.Services
                             _ => "Please confirm your email using the provided link."
                         }
                     };
+                    emailMessage.Body = bodyBuilder.ToMessageBody(); // Body of message
 
-
-                    emailMessage.Body = bodyBuilder.ToMessageBody();
-
+                    /// (3) Send content of message
                     await client.SendAsync(emailMessage);
-                    await client.DisconnectAsync(true);
+                    /// (4) Close Connection
+                    await client.DisconnectAsync(true); 
                 }
-                return new ApiResponse(200, "Email sent successfully");
+                return new ApiResponse(200);
             }
             catch (Exception ex)
             {

@@ -45,15 +45,14 @@ namespace EduCredit.Service.Extensions
                 options.Password.RequireNonAlphanumeric = false;
             }).AddEntityFrameworkStores<EduCreditContext>().AddDefaultTokenProviders();
     
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
             /// Add life time for Services
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped(typeof(IDepartmentServices), typeof(DepartmentServices));
-            //services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IEmailServices, EmailServices>();
-
             services.AddScoped<ITokenBlacklistService, TokenBlacklistService>();
+
             var configuration = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
             services.AddSingleton<EmailSetting>(configuration.GetSection(nameof(EmailSetting)).Get<EmailSetting>());
             /// Auto Mapper use parameter less ctor of MappingProfiles

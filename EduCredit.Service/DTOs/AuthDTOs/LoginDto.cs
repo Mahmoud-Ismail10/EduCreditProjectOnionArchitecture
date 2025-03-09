@@ -6,6 +6,7 @@ namespace EduCredit.Service.DTOs.AuthDTOs
     public class LoginDto
     {
         [Required]
+        [EmailAddress]
         public string Email { get; set; }
 
         [Required]
