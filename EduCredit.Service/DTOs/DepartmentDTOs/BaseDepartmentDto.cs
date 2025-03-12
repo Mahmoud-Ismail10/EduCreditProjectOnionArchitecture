@@ -5,9 +5,10 @@ namespace EduCredit.Service.DTOs.DepartmentDTOs
 {
     public class BaseDepartmentDto
     {
-        [Required]
-        [RegularExpression(pattern: "^[A-Za-z\\s]{3,}$",
-                           ErrorMessage = "Name must be char only and more than 2 char")]
+        [Required(ErrorMessage = "Department Name is required")]
+        [MinLength(3, ErrorMessage = "Name must be at least 3 characters")]
+        [MaxLength(50, ErrorMessage = "Name cannot exceed 50 characters")]
+        [RegularExpression(pattern: "^[A-Za-z\\s]{3,}$", ErrorMessage = "Name must contain only letters and spaces")]
         public string Name { get; set; }
     }
 }

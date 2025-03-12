@@ -17,6 +17,12 @@ namespace EduCredit.Core.Relations
         public Course Course { get; set; }
 
         public Day Day { get; set; } // enum
-        public TimeOnly Time { get; set; }
+        public TimeOnly LectureStart { get; set; }
+        public TimeOnly LectureEnd { get; set; }
+        public string LectureLocation { get; set; }
+        public DateOnly ExamDate { get; set; }
+        public TimeOnly ExamStart { get; set; }
+        public TimeOnly ExamEnd { get; set; }
+        public string ExamLocation { get; set; }
     }
 }

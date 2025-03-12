@@ -23,8 +23,8 @@ namespace EduCredit.Repository.Data.Configurations
             builder.Property(c => c.MinimumDegree)
                 .HasColumnType("float");
 
-            builder.Property(c => c.ExamDate)
-                .HasColumnType("datetime");
+            builder.Property(c => c.Duration)
+                .HasColumnType("int");
 
             /// Self-reference to represent the previous course
             builder.HasOne(c => c.PreviousCourse)

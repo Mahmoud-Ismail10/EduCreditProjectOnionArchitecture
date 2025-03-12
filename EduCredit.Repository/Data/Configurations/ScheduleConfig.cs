@@ -22,8 +22,26 @@ namespace EduCredit.Repository.Data.Configurations
                 Dy => Dy.ToString(),
                 Dy => (Day)Enum.Parse(typeof(Day), Dy));
 
-            builder.Property(s => s.Time)
+            builder.Property(s => s.LectureStart)
                 .HasColumnType("time");
+            
+            builder.Property(s => s.LectureEnd)
+                .HasColumnType("time");
+            
+            builder.Property(s => s.LectureLocation)
+                .HasMaxLength(50);
+
+            builder.Property(s => s.ExamDate)
+                .HasColumnType("date");
+
+            builder.Property(s => s.ExamStart)
+                .HasColumnType("time");
+
+            builder.Property(s => s.ExamEnd)
+                .HasColumnType("time");
+
+            builder.Property(s => s.ExamLocation)
+                .HasMaxLength(50);
 
             builder.HasOne(s => s.Teacher)
                 .WithMany(s => s.Schedules)

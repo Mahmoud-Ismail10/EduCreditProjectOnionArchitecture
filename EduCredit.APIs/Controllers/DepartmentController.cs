@@ -9,6 +9,7 @@ using EduCredit.Service.Helper;
 using EduCredit.Service.Services.Contract;
 using EduCredit.Core.Models;
 using EduCredit.Core.Specifications.DepartmentSpecifications;
+using EduCredit.Service.Services;
 
 namespace EduCredit.APIs.Controllers
 {
@@ -45,7 +46,7 @@ namespace EduCredit.APIs.Controllers
         public ActionResult<IReadOnlyList<ReadDepartmentDto>> GetDepartments([FromQuery] DepartmentSpecificationParams specParams) // Create class contains all of params (refactor)
         {
             int count;
-            var departmentsDto = _departmentServices.GetAllDepartment(specParams, out count);
+            var departmentsDto = _departmentServices.GetAllDepartments(specParams, out count);
             if (departmentsDto is null) return NotFound(new ApiResponse(404));
             return Ok(new Pagination<ReadDepartmentDto>(specParams.PageSize, specParams.PageIndex, count, departmentsDto)); // Status code = 200
         }
@@ -66,11 +67,15 @@ namespace EduCredit.APIs.Controllers
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(UpdateDepartmentDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-        public async Task<ActionResult<UpdateDepartmentDto>> UpdateDepartment([FromBody] UpdateDepartmentDto updateDeptDto, Guid id)
+        public async Task<ActionResult<UpdateDepartmentDto>> UpdateDepartment(Guid id, [FromBody] UpdateDepartmentDto updateDeptDto)
         {
-            var departmentDto = await _departmentServices.UpdateDepertmentAsync(updateDeptDto, id);
-            if (departmentDto is null) return NotFound(new ApiResponse(404));
-            return Ok(departmentDto);
+            if (ModelState.IsValid)
+            {
+                var departmentDto = await _departmentServices.UpdateDepertmentAsync(updateDeptDto, id);
+                if (departmentDto is null) return NotFound(new ApiResponse(404));
+                return Ok(departmentDto);
+            }
+            return BadRequest(new ApiResponse(400));
         }
 
         /// DELETE: api/Department/{id}
@@ -79,9 +84,13 @@ namespace EduCredit.APIs.Controllers
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public async Task<ActionResult> DeleteDepartment(Guid id)
         {
-            bool result = await _departmentServices.DeleteDepartmentAsync(id);
-            if (!result) return NotFound(new ApiResponse(404));
-            return Ok(new ApiResponse(200, "Department deleted successfully"));
+            var response = await _departmentServices.DeleteDepartmentAsync(id);
+            if (response.StatusCode == 200)
+                return Ok(new ApiResponse(200, "Department deleted successfully"));
+            else if (response.StatusCode == 404)
+                return NotFound(new ApiResponse(404, "Department not found!"));
+            else
+                return BadRequest(new ApiResponse(400, "It is not suitable to delete the Department!"));
         }
     }
 }

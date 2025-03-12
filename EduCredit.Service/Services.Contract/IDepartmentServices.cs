@@ -1,5 +1,6 @@
 ﻿using EduCredit.Core.Specifications.DepartmentSpecifications;
 using EduCredit.Service.DTOs.DepartmentDTOs;
+using EduCredit.Service.Errors;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,8 +13,8 @@ namespace EduCredit.Service.Services.Contract
     {
         Task<CreateDepartmentDto?> CreateDepartmentAsync(CreateDepartmentDto createDeptDto);
         Task<ReadDepartmentDto?> GetDepartmentByIdAsync(Guid id);
-        IReadOnlyList<ReadDepartmentDto?> GetAllDepartment(DepartmentSpecificationParams specParams, out int count);
+        IReadOnlyList<ReadDepartmentDto?> GetAllDepartments(DepartmentSpecificationParams specParams, out int count);
         Task<UpdateDepartmentDto?> UpdateDepertmentAsync(UpdateDepartmentDto updateDeptDto, Guid id);
-        Task<bool> DeleteDepartmentAsync(Guid id);
+        Task<ApiResponse> DeleteDepartmentAsync(Guid id);
     }
 }

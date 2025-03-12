@@ -43,21 +43,18 @@ namespace EduCredit.Service.Services
             return createDeptDto;
         }
 
-        public IReadOnlyList<ReadDepartmentDto?> GetAllDepartment(DepartmentSpecificationParams specParams, out int count)
+        public IReadOnlyList<ReadDepartmentDto?> GetAllDepartments(DepartmentSpecificationParams specParams, out int count)
         {
-            var departmentRepo = _unitOfWork.Repository<Department>();
             var spec = new DepartmentWithTeacherSpecifications(specParams);
-            var departments = departmentRepo.GetAllSpecification(spec, out count);
+            var departments = _unitOfWork.Repository<Department>().GetAllSpecification(spec, out count);
             if (departments is null) return null;
-            var departmentsDto = _mapper.Map<IReadOnlyList<Department>, IReadOnlyList<ReadDepartmentDto>>(departments);
-            return departmentsDto;
+            return _mapper.Map<IReadOnlyList<Department>, IReadOnlyList<ReadDepartmentDto>>(departments);
         }
 
         public async Task<ReadDepartmentDto?> GetDepartmentByIdAsync(Guid id)
         {
-            var departmentRepo = _unitOfWork.Repository<Department>();
             var spec = new DepartmentWithTeacherSpecifications(id);
-            var department = await departmentRepo.GetByIdSpecificationAsync(spec);
+            var department = await _unitOfWork.Repository<Department>().GetByIdSpecificationAsync(spec);
             if (department is null) return null;
             return _mapper.Map<Department, ReadDepartmentDto>(department);
         }
@@ -69,22 +66,22 @@ namespace EduCredit.Service.Services
             if (departmentFromDB is null) return null;
 
             var newDepartment = _mapper.Map(updateDeptDto, departmentFromDB);
-           await  _unitOfWork.Repository<Department>().Update(newDepartment);
+            await _unitOfWork.Repository<Department>().Update(newDepartment);
 
             int result = await _unitOfWork.CompleteAsync();
             if (result <= 0) return null;
             return _mapper.Map<Department, UpdateDepartmentDto>(newDepartment);
         }
 
-        public async Task<bool> DeleteDepartmentAsync(Guid id)
+        public async Task<ApiResponse> DeleteDepartmentAsync(Guid id)
         {
-            var spec = new DepartmentWithTeacherSpecifications(id);
-            var department = await _unitOfWork.Repository<Department>().GetByIdSpecificationAsync(spec);
-            if (department is null) return false;
+            var department = await _unitOfWork.Repository<Department>().GetByIdAsync(id);
+            if (department == null) return new ApiResponse(404);
 
             await _unitOfWork.Repository<Department>().Delete(department);
-            await _unitOfWork.CompleteAsync();
-            return true;
+            int result = await _unitOfWork.CompleteAsync();
+            if (result <= 0) return new ApiResponse(400);
+            return new ApiResponse(200);
         }
     }
 }

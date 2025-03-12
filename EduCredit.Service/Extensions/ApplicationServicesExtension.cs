@@ -44,12 +44,10 @@ namespace EduCredit.Service.Extensions
             }).AddEntityFrameworkStores<EduCreditContext>().AddDefaultTokenProviders();
     
             /// Add life time for Services
-<<<<<<< HEAD
-=======
             services.AddScoped<ICacheService,CacheService>();
->>>>>>> 291322764de2e3e96b4e16585c6f1ba3a51ecfbe
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped(typeof(IDepartmentServices), typeof(DepartmentServices));
+            services.AddScoped(typeof(ICourseServices), typeof(CourseServices));
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IEmailServices, EmailServices>();

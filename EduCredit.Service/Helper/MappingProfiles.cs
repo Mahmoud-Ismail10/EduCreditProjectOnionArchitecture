@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using EduCredit.Core.Models;
 using EduCredit.Service.DTOs.AuthDTOs;
+using EduCredit.Service.DTOs.CourseDTOs;
 using EduCredit.Service.DTOs.DepartmentDTOs;
 using EduCredit.Service.DTOs.UserDTOs;
 
@@ -14,6 +15,12 @@ namespace EduCredit.Service.Helper
                 .ForMember(d => d.DepartmentHeadFullName, o => o.MapFrom(s => s.DepartmentHead.FullName)).ReverseMap();
             CreateMap<CreateDepartmentDto, Department>().ReverseMap();
             CreateMap<UpdateDepartmentDto, Department>().ReverseMap();
+
+            CreateMap<Course, ReadCourseDto>()
+                .ForMember(d => d.PreviousCourseName, o => o.MapFrom(s => s.PreviousCourse.Name))
+                .ForMember(d => d.DepartmentName, o => o.MapFrom(s => s.Department.Name)).ReverseMap();
+            CreateMap<CreateCourseDto, Course>().ReverseMap();
+            CreateMap<UpdateCourseDto, Course>().ReverseMap();
 
             CreateMap<RegisterAdminDto, Person>().ReverseMap();
             CreateMap<RegisterStudentAndTeacherDto, Person>().ReverseMap();

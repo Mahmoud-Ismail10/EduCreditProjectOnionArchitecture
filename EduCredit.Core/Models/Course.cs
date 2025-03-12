@@ -13,7 +13,7 @@ namespace EduCredit.Core.Models
         public string Name { get; set; }
         public float CreditHours { get; set; }
         public float MinimumDegree { get; set; }
-        public DateTime ExamDate { get; set; }
+        public int Duration { get; set; }
 
         /// Self-reference to represent the previous course
         public Guid? PreviousCourseId { get; set; } // Foreign Key allow null

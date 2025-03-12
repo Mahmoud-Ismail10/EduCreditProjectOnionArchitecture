@@ -8,7 +8,7 @@ namespace EduCredit.Service.DTOs.AuthDTOs
       
         [Required(ErrorMessage = "Full Name is required")]
         [MinLength(3, ErrorMessage = "Full Name must be at least 3 characters")]
-        [MaxLength(60, ErrorMessage = "Full Name cannot exceed 60 characters")]
+        [MaxLength(60, ErrorMessage = "Full Name cannot exceed 100 characters")]
         [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "Full Name must contain only letters and spaces")]
         public string FullName { get; set; }
 
