@@ -10,6 +10,6 @@ namespace EduCredit.Service.Services.Contract
 {
     public interface IUserService
     {
-        Task<ApiResponse<GetUserInfoDto>> GetUserInfoAsync(string? userId, string? userRole);
+        Task<GetUserInfoDto?> GetUserInfoAsync(string? userId, string? userRole);
     }
 }

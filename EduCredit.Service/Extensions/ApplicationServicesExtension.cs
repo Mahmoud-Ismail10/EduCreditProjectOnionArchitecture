@@ -51,6 +51,8 @@ namespace EduCredit.Service.Extensions
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped(typeof(IDepartmentServices), typeof(DepartmentServices));
             services.AddScoped(typeof(ITeacherServices), typeof(TeacherServices));
+            services.AddScoped(typeof(IUserService), typeof(UserService));
+
             //services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped(typeof(ICourseServices), typeof(CourseServices));
             services.AddScoped<IAuthService, AuthService>();

@@ -42,11 +42,7 @@ namespace EduCredit.Repository.Repositories
             return ApplyQuery(spec, out count).ToList();
         }
 
-        public async Task<T?> GetByIdAsync(Guid id)
-        {
-            return await _dbcontext.Set<T>().FindAsync(id);
-        }
-
+      
         public async Task<T?> GetByIdSpecificationAsync(ISpecification<T> spec)
         {
             return await ApplyQuery(spec, out _).FirstOrDefaultAsync(); /// 'Find' local looking first then looking at DB
@@ -57,9 +53,15 @@ namespace EduCredit.Repository.Repositories
             return SpecificationEvaluator<T>.GetQuery(_dbcontext.Set<T>(), spec, out count);
         }
 
-        public async Task<T?> GetByIdAsync(string? Id)
+       
+
+  
+
+     
+
+        public async Task<T?> GetByIdAsync(Guid id)
         {
-            return await _dbcontext.Set<T>().FindAsync(Id);
+            return await _dbcontext.Set<T>().FindAsync(id);
         }
     }
 }

@@ -27,10 +27,10 @@ namespace EduCredit.Service.Services
         }
 
 
-        public async Task<ApiResponse<GetUserInfoDto>> GetUserInfoAsync(string? userId, string? userRole)
+        public async Task< GetUserInfoDto?> GetUserInfoAsync(string? userId, string? userRole)
         {
             if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(userRole))
-                return new ApiResponse<GetUserInfoDto>(404, "User Not Found");
+                return null;
 
             Person? user = userRole switch
             {
@@ -41,14 +41,17 @@ namespace EduCredit.Service.Services
             };
 
             if (user == null)
-                return new ApiResponse<GetUserInfoDto>(404, "User Not Found");
+                return null;
 
             var userDto = _mapper.Map<GetUserInfoDto>(user);
-            return new ApiResponse<GetUserInfoDto>(200, "Success", userDto);
+            return userDto;
         }
         private async Task<Person?> GetUserByRoleAsync<T>(string userId) where T : Person
         {
-            return await _unitOfWork.Repository<T>().GetByIdAsync(userId);
+            if (!Guid.TryParse(userId, out var userGuid))
+                return null; 
+
+            return await _unitOfWork.Repository<T>().GetByIdAsync(userGuid);
         }
 
 

@@ -27,7 +27,7 @@ namespace EduCredit.APIs.Controllers
         [ProducesResponseType(typeof(GetUserInfoDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<ApiResponse<GetUserInfoDto>>> GetUserInfo()
+        public async Task<ActionResult<GetUserInfoDto>> GetUserInfo()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var userRole = User.FindFirstValue(ClaimTypes.Role);
@@ -37,8 +37,8 @@ namespace EduCredit.APIs.Controllers
 
             var result = await _userService.GetUserInfoAsync(userId, userRole);
 
-            if (result == null || result.StatusCode == 404)
-                return NotFound(new ApiResponse<GetUserInfoDto>(404, "User Not Found"));
+            if (result == null)
+                return NotFound(new ApiResponse(404, "User Not Found"));
 
             return Ok(result);
         }
