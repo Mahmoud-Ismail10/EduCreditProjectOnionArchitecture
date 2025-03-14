@@ -1,4 +1,6 @@
-﻿namespace EduCredit.Service.DTOs.DepartmentDTOs
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace EduCredit.Service.DTOs.DepartmentDTOs
 {
     public class ReadDepartmentDto : BaseDepartmentDto
     {

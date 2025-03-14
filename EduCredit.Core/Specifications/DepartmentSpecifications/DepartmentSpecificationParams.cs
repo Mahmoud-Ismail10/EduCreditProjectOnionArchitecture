@@ -9,5 +9,6 @@ namespace EduCredit.Core.Specifications.DepartmentSpecifications
     public class DepartmentSpecificationParams : BaseSpecificationParams
     {
         public Guid? DepartmentHeadId { get; set; }
+
     }
 }

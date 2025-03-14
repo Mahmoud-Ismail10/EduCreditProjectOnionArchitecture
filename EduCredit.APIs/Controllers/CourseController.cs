@@ -1,8 +1,10 @@
-﻿using EduCredit.Core.Specifications.CourseSpecifications;
+﻿using EduCredit.Core.Security;
+using EduCredit.Core.Specifications.CourseSpecifications;
 using EduCredit.Service.DTOs.CourseDTOs;
 using EduCredit.Service.Errors;
 using EduCredit.Service.Helper;
 using EduCredit.Service.Services.Contract;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -19,6 +21,7 @@ namespace EduCredit.APIs.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(CreateCourseDto), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<CreateCourseDto>> CreateCourse([FromBody] CreateCourseDto createCourseDto)
@@ -32,7 +35,7 @@ namespace EduCredit.APIs.Controllers
         }
 
         [HttpGet("{id}")]
-        [Cache(30)]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ReadCourseDto), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<ReadCourseDto>> GetCourse(Guid id)
@@ -43,7 +46,7 @@ namespace EduCredit.APIs.Controllers
         }
 
         [HttpGet]
-        [Cache(30)]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ReadCourseDto), (int)HttpStatusCode.OK)]
         public ActionResult<IReadOnlyList<ReadCourseDto>> GetCourses([FromQuery] CourseSpecificationParams specParams)
@@ -55,6 +58,7 @@ namespace EduCredit.APIs.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(ReadCourseDto), (int)HttpStatusCode.OK)]
@@ -70,6 +74,7 @@ namespace EduCredit.APIs.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]

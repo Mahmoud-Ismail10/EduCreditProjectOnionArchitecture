@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using EduCredit.Core.Models;
+using EduCredit.Core.Security;
 using EduCredit.Service.DTOs.UserDTOs;
 using EduCredit.Service.Errors;
 using EduCredit.Service.Helper;
@@ -14,35 +15,34 @@ namespace EduCredit.APIs.Controllers
 {
     public class UserController : BaseApiController
     {
-        private readonly IMapper _mapper;
-        private readonly UserManager<Person> _userManager;
+        private readonly IUserService _userService;
 
-        public UserController(IMapper mapper, UserManager<Person> userManager)
+        public UserController(IMapper mapper,IUserService userService)
         {
-            _mapper = mapper;
-            _userManager = userManager;
+           _userService = userService;
         }
 
-        [HttpGet("getuserbyemail")]
-        [Cache(30)]
+        [HttpGet("GetUserInfo")]
         [Authorize]
         [ProducesResponseType(typeof(GetUserInfoDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<GetUserInfoDto>> GetUserByEmail(string userEmail)
+        public async Task<ActionResult<GetUserInfoDto>> GetUserInfo()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userRole = User.FindFirstValue(ClaimTypes.Role);
 
-            var user = await _userManager.FindByEmailAsync(userEmail);
-            if (user is null)
-                return NotFound(new ApiResponse(404, "This User Is Not Found!"));
+            if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(userRole))
+                return NotFound(new ApiResponse<GetUserInfoDto>(404, "User Not Found"));
 
-            if (string.IsNullOrWhiteSpace(userId) || userId != user.Id.ToString())
-                return Unauthorized(new ApiResponse(401, "Unauthorized!"));
+            var result = await _userService.GetUserInfoAsync(userId, userRole);
 
-            var userDto = _mapper.Map<GetUserInfoDto>(user);
-            return Ok(userDto);
+            if (result == null)
+                return NotFound(new ApiResponse(404, "User Not Found"));
+
+            return Ok(result);
         }
-    
+
+
     }
 }

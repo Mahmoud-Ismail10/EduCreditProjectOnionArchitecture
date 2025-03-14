@@ -46,14 +46,14 @@ namespace EduCredit.Service.Services
                     {
                         HtmlBody = emailType switch
                         {
-                            EmailType.ConfirmEmail => $"<p>Please confirm your email by clicking the link below:</p> <a href='{ConfirmEmailUrl}'>Confirm Email</a>",
-                            EmailType.ForgotPassword => $"<p>Please reset your password by clicking the link below:</p> <a href='{ConfirmEmailUrl}'>Reset Password</a>",
-                            _ => "Please confirm your email using the provided link."
+                            EmailType.ConfirmEmail => $"<p>Please confirm your email by clicking the link below:</p> <br> <a href=\"{ConfirmEmailUrl}\" style=\"color:blue; text-decoration:underline;\">Confirm Email</a>",
+                            EmailType.ForgotPassword => $"<p>Please reset your password by clicking the link below:</p> <br> <a href=\"{ConfirmEmailUrl}\" style=\"color:blue; text-decoration:underline;\">Reset Password</a>",
+                            _ => "<p>Please confirm your email using the provided link.</p>"
                         },
                         TextBody = emailType switch
                         {
-                            EmailType.ConfirmEmail => "Please confirm your email using the provided link.",
-                            EmailType.ForgotPassword => "Please reset your password using the provided link.",
+                            EmailType.ConfirmEmail => $"Please confirm your email using the provided link: {ConfirmEmailUrl}",
+                            EmailType.ForgotPassword => $"Please reset your password using the provided link: {ConfirmEmailUrl}",
                             _ => "Please confirm your email using the provided link."
                         }
                     };

@@ -26,48 +26,50 @@ namespace EduCredit.APIs.Controllers
         private readonly ITokenService _tokenService;
         private readonly ITokenBlacklistService _blacklistService;
         private readonly IMapper _mapper;
+        private readonly ICacheService _cacheService;
         #endregion
 
         #region Constructor
-        public AccountController( IAuthService auth, ITokenService tokenService,ITokenBlacklistService blacklistService,IMapper mapper)
+        public AccountController( IAuthService auth, ITokenService tokenService,ITokenBlacklistService blacklistService,IMapper mapper,ICacheService cacheService)
         {
             _auth = auth;
             _tokenService = tokenService;
             _blacklistService = blacklistService;
             _mapper = mapper;
+            _cacheService = cacheService;
         }
         #endregion
 
         #region Endpoints
         #region Register
-        [HttpPost("AdminRegistration")]
-        [Authorize(Roles= AuthorizationConstants.SuperAdminRole)]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult> Register([FromBody] RegisterAdminDto registerDto, Roles role, string RedirectUrl)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(new ApiResponse(400, "Invalid Data!"));
-            // Mapping RegisterAdminDto to Person
-            var Mappedadmin = _mapper.Map<RegisterAdminDto, Person>(registerDto);
-            var result = await _auth.RegisterAsync(Mappedadmin,role,RedirectUrl);
-            if (result.StatusCode != 200)
-                return BadRequest(new ApiResponse(400, result.ErrorMessage));
+        //[HttpPost("AdminRegistration")]
+        //[Authorize(Roles= AuthorizationConstants.SuperAdminRole)]
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //[ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+        //public async Task<ActionResult> Register([FromBody] RegisterAdminDto registerDto, Roles role, string RedirectUrl)
+        //{
+        //    if (!ModelState.IsValid)
+        //        return BadRequest(new ApiResponse(400, "Invalid Data!"));
+        //    // Mapping RegisterAdminDto to Person
+        //    var Mappedadmin = _mapper.Map<RegisterAdminDto, Person>(registerDto);
+        //    var result = await _auth.RegisterAsync(Mappedadmin,role,RedirectUrl);
+        //    if (result.StatusCode != 200)
+        //        return BadRequest(new ApiResponse(400, result.ErrorMessage));
 
-            return Created();
-        }
+        //    return Created();
+        //}
 
         [HttpPost("UserRegistration")]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult> Register([FromBody] RegisterStudentAndTeacherDto registerDto,Roles role, string RedirectUrl)
+        public async Task<ActionResult> Register([FromBody] BaseRegisterDto registerDto,Roles role, string RedirectUrl)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new ApiResponse(400, "Invalid Data!"));
             // Mapping RegisterStudentAndTeacherDto to Person
-            var MappedUser = _mapper.Map<RegisterStudentAndTeacherDto, Person>(registerDto);
-            var result = await _auth.RegisterAsync(MappedUser,role,RedirectUrl);
+            var MappedUser = _mapper.Map<BaseRegisterDto, Person>(registerDto);
+            var result = await _auth.RegisterAsync(registerDto, role,RedirectUrl);
             if (result.StatusCode != 200)
                 return BadRequest(new ApiResponse(400, result.ErrorMessage));
             return Created();
@@ -83,6 +85,7 @@ namespace EduCredit.APIs.Controllers
         {
             if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(token) || string.IsNullOrWhiteSpace(redirectUrl))
                 return BadRequest(new ApiResponse(400, "Invalid data!"));
+
             var result = await _auth.ConfirmEmailAsync(userId, token);
             // If the confirmation fails, return a bad request
             if (result.StatusCode!=200)
@@ -102,7 +105,7 @@ namespace EduCredit.APIs.Controllers
     
         public async Task<ActionResult<TokenResponseDto>> Login([FromBody] LoginDto loginDto)
         {
-
+            
             if (!ModelState.IsValid)
                 return BadRequest(new ApiResponse(400, "Invalid Data!"));
 
@@ -143,6 +146,7 @@ namespace EduCredit.APIs.Controllers
                 return Unauthorized(new ApiResponse(401, "UnAuthrize!"));
             var expiry = TimeSpan.FromHours(1);
             await _blacklistService.AddTokenToBlacklistAsync(token, expiry);
+            await _cacheService.DeleteCashAsync(token);
             return Ok(new ApiResponse (200, "Logged out successfully"));
         }
         #endregion

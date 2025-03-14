@@ -12,7 +12,7 @@ namespace EduCredit.Core.Specifications
 
         private const int MaxPageSize = 10;
 
-        private int pageSize;
+        private int pageSize = 10;
 
         public int PageSize
         {

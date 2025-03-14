@@ -36,94 +36,78 @@ namespace EduCredit.Service.Services
 
         #region Methods
         #region Register
-     
-        public async Task<ApiResponse> RegisterAsync(Person person, Roles role, string RedirectUrl)
+
+        public async Task<ApiResponse> RegisterAsync(BaseRegisterDto person, Roles role, string RedirectUrl)
         {
-            // Check if the user exists
-            var userExists = await _userManager.FindByEmailAsync(person.Email);
-            if (userExists != null)
+            if (await _userManager.FindByEmailAsync(person.Email) is not null)
                 return new ApiResponse(400, "This email is already registered!");
-            // Create a new user based on the role
-            Person user = role switch
+
+            var user = CreateUser(person, role);
+            if (user is null)
+                return new ApiResponse(400, "Invalid role!");
+
+            var result = await _userManager.CreateAsync(user, user.NationalId);
+            if (!result.Succeeded)
+                return new ApiResponse(400, $"Failed to register! {string.Join(", ", result.Errors.Select(e => e.Description))}");
+
+            var roleName = role.ToString();
+            if (!(await _userManager.AddToRoleAsync(user, roleName)).Succeeded)
+                return new ApiResponse(400, "Failed to assign the role!");
+
+            var emailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var confirmationUrl = GenerateConfirmationUrl(user.Id, emailToken, RedirectUrl);
+
+            var emailSent = await _emailService.SendEmailAsync(person.Email, confirmationUrl, EmailType.ConfirmEmail);
+            if (emailSent.StatusCode != 200) 
+                return new ApiResponse(400, "Failed to send confirmation email!");
+            await _unitofWork.CompleteAsync();
+            return new ApiResponse(200, "User registered successfully! Please confirm your email.");
+        }
+
+        private string GenerateConfirmationUrl(Guid userId, string token, string redirectUrl)
+        {
+            var EncodedToken = Convert.ToBase64String(Encoding.UTF8.GetBytes(token));
+            var confirmationUrl = $"https://educredit.runasp.net/api/Account/confirm-email?userId={userId}&token={EncodedToken}&redirectUrl={redirectUrl}";
+            return confirmationUrl; 
+        }
+
+        private Person? CreateUser(BaseRegisterDto person, Roles role)
+        {
+            string userName = person.FullName.Replace(" ", "");
+
+            Person? user = role switch
             {
-                Roles.StudentRole =>  CreateUser<Student>(person),
-                Roles.TeacherRole =>  CreateUser<Teacher>(person),
-                Roles.AdminRole =>  CreateUser<Admin>(person),
+                Roles.StudentRole => new Student
+                {
+                    GPA = 0.0f,
+                    Level = Level.First,
+                    DepartmentId = person.DepartmentId == Guid.Empty ? null : person.DepartmentId,
+                    CreditHours = 0.0f,
+                    TeacherId = null
+                },
+                Roles.TeacherRole => new Teacher
+                {
+                    AppointmentDate = DateOnly.FromDateTime(DateTime.UtcNow),
+                    DepartmentId = person.DepartmentId == Guid.Empty ? null : person.DepartmentId
+                },
+                Roles.AdminRole => new Admin(),
                 _ => null
             };
 
-            if (user == null)
-                return new ApiResponse(400, "Invalid role!");
-            // Register the user
-            var result = await _userManager.CreateAsync(user, user.NationalId);
-            // Check if the user has problem in register
-            if (!result.Succeeded)
-            {
-                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                return new ApiResponse(400, $"Failed to register this user! {errors}");
-            }
-            // Assign the role to the user
-            var roleName = Enum.GetName(typeof(Roles), role);
-            if (roleName == null)
-                return new ApiResponse(400, "Invalid role!");
+            if (user is null)
+                return null;
 
-            var roleResult = await _userManager.AddToRoleAsync(user, roleName);
-            if (!roleResult.Succeeded)
-                return new ApiResponse(400, "Failed to assign the role!");
+            user.Email = person.Email;
+            user.UserName = userName;
+            user.NationalId = person.NationalId;
+            user.PhoneNumber = person.PhoneNumber;
+            user.BirthDate = person.BirthDate;
+            user.Gender = person.Gender;
+            user.Address = person.Address;
+            user.FullName = person.FullName;
+            user.EmailConfirmed = false;
 
-            // Generate and encode email confirmation token
-            var emailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var encodedToken = HttpUtility.UrlEncode(emailToken);
-
-            var emailConfirmationUrl = $"https://educredit.runasp.net/api/Account/confirm-email?userId={user.Id}&token={encodedToken}&redirectUrl={RedirectUrl}";
-
-            // Send confirmation email
-            var emailSent = await _emailService.SendEmailAsync(person.Email, emailConfirmationUrl,EmailType.ConfirmEmail);
-            if (emailSent.StatusCode != 200)
-                return new ApiResponse(400, "Failed to send the email!");
-            // Save the changes
-            await _unitofWork.CompleteAsync();
-
-            return new ApiResponse(200, "User registered successfully! Please confirm your email.");
-        }
-        // Create a new user based on the role
-        private T CreateUser<T>(Person person) where T : Person, new()
-        {
-            string userName = person.FullName.Replace(" ", "");
-            // Create a new user
-            var newUser = new T
-            {
-                Email = person.Email,
-                UserName = userName,
-                NationalId = person.NationalId,
-                PhoneNumber = person.PhoneNumber,
-                BirthDate = person.BirthDate,
-                Gender = person.Gender,
-                Address = person.Address,
-                FullName = person.FullName,
-                EmailConfirmed = false
-            };
-            //adding more specific properties for each role
-            switch (newUser)
-            {
-                case Student student:
-                    student.GPA = 0.0f;
-                    student.Level = Level.First;
-                    student.DepartmentId = null;
-                    student.CreditHours = 0.0f;
-                    student.TeacherId = null;
-                    break;
-
-                case Teacher teacher:
-                    teacher.AppointmentDate = DateOnly.FromDateTime(DateTime.UtcNow);
-                    teacher.DepartmentId = Guid.Empty;
-                    break;
-
-                case Admin admin:
-                    break;
-            }
-
-            return  newUser;
+            return user;
         }
 
         #endregion
@@ -136,14 +120,15 @@ namespace EduCredit.Service.Services
             if (user == null)
                 return new ApiResponse(404, "User not found!");
 
-            //var decodedToken = HttpUtility.UrlDecode(token).Trim(); // Securely decode token
             // Confirm the email
-            var result = await _userManager.ConfirmEmailAsync(user, token);
+            var decodedToken = Encoding.UTF8.GetString(Convert.FromBase64String(token));
+            Console.WriteLine(decodedToken);
+            var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
             // Check if the email was confirmed successfully
             if (!result.Succeeded)
             {
-                
-                
+                foreach(var error in result.Errors)
+                Console.WriteLine(error.Description);
                 return new ApiResponse(400, $"Failed to confirm the email! ");
             }
 
@@ -170,7 +155,7 @@ namespace EduCredit.Service.Services
             var role = roles.SingleOrDefault();
 
             if (role is null || role != loginDto.Role.ToString())
-                return (null, new ApiResponse(400, "Unauthorized"));
+                return (null, new ApiResponse(400, "This email is not found!"));
             if (!user.EmailConfirmed)
                 return (null,new ApiResponse(400, "You need to confirm your email before logging in!"));
             // Generate the access token

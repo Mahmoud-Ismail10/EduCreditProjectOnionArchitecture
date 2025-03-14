@@ -50,11 +50,20 @@ namespace EduCredit.Service.Helper
         {
             var keyBuilder = new StringBuilder();
             keyBuilder.Append($"{request.Path}");
+
+            var token = request.Headers["Authorization"].ToString();
+            if (!string.IsNullOrEmpty(token))
+            {
+                keyBuilder.Append($"|token-{token}");
+            }
+
             foreach (var (key, value) in request.Query.OrderBy(x => x.Key))
             {
                 keyBuilder.Append($"|{key}-{value}");
             }
+
             return keyBuilder.ToString();
         }
+
     }
 }
