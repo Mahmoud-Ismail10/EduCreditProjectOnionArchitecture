@@ -42,11 +42,16 @@ namespace EduCredit.Service.Extensions
                 options.Password.RequireLowercase = false;
                 options.Password.RequireNonAlphanumeric = false;
             }).AddEntityFrameworkStores<EduCreditContext>().AddDefaultTokenProviders();
-    
+                services.Configure<DataProtectionTokenProviderOptions>(options =>
+            {
+                options.TokenLifespan = TimeSpan.FromHours(1);
+            });
             /// Add life time for Services
             services.AddScoped<ICacheService,CacheService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped(typeof(IDepartmentServices), typeof(DepartmentServices));
+            services.AddScoped(typeof(ITeacherServices), typeof(TeacherServices));
+            //services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped(typeof(ICourseServices), typeof(CourseServices));
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ITokenService, TokenService>();
@@ -197,7 +202,7 @@ namespace EduCredit.Service.Extensions
                 {
                     context.HttpContext.Response.ContentType = "application/json";
                     await context.HttpContext.Response.WriteAsync(
-                        System.Text.Json.JsonSerializer.Serialize(new ApiResponse(401, "Unauthorized!"))
+                        System.Text.Json.JsonSerializer.Serialize(new ApiResponse(401, "Token must be provided in the Authorization header."))
                     );
                 }
             });

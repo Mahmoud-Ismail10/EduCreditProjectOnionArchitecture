@@ -57,6 +57,9 @@ namespace EduCredit.Repository.Repositories
             return SpecificationEvaluator<T>.GetQuery(_dbcontext.Set<T>(), spec, out count);
         }
 
-        
+        public async Task<T?> GetByIdAsync(string? Id)
+        {
+            return await _dbcontext.Set<T>().FindAsync(Id);
+        }
     }
 }

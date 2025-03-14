@@ -4,11 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EduCredit.Core.Specifications.DepartmentSpecifications
+namespace EduCredit.Core.Specifications.TeacherSpecefications
 {
-    public class DepartmentSpecificationParams : BaseSpecificationParams
+    public class TeacherSpecificationParams
     {
-        public Guid? DepartmentHeadId { get; set; }
+        public string? Sort { get; set; }
+        public Guid? DepartmentId { get; set; }
 
         private const int MaxPageSize = 10;
 

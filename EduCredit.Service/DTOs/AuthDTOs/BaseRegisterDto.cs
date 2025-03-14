@@ -17,12 +17,12 @@ namespace EduCredit.Service.DTOs.AuthDTOs
         public string Email { get; set; }
 
         [Required(ErrorMessage = "Address is required")]
-        [MinLength(5, ErrorMessage = "Address must be at least 5 characters")]
+        [MinLength(3, ErrorMessage = "Address must be at least 3 characters")]
         [MaxLength(100, ErrorMessage = "Address cannot exceed 100 characters")]
         public string Address { get; set; }
 
         [Required(ErrorMessage = "National ID is required")]
-        [RegularExpression(@"^\d{10,15}$", ErrorMessage = "National ID must be between 10 and 14 digits")]
+        [RegularExpression(@"^\d{10,15}$", ErrorMessage = "National ID must be between 10 and 15 digits")]
         public string NationalId { get; set; }
 
         [Required(ErrorMessage = "Phone Number is required")]
@@ -34,6 +34,8 @@ namespace EduCredit.Service.DTOs.AuthDTOs
 
         [Required(ErrorMessage = "Birth Date is required")]
         public DateOnly BirthDate { get; set; }
+
+        public Guid? DepartmentId { get; set; }
     }
 
 
