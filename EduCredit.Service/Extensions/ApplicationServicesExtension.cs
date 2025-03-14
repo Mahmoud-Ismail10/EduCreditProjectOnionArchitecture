@@ -24,6 +24,8 @@ using Microsoft.Extensions.Logging;
 using EduCredit.Repository.Data.Identity;
 using EduCredit.Service.Services.Contract;
 using AspNetCoreRateLimit;
+using EduCredit.Core.Repositories.Contract;
+using EduCredit.Repository.Repositories;
 
 
 namespace EduCredit.Service.Extensions
@@ -46,6 +48,8 @@ namespace EduCredit.Service.Extensions
             /// Add life time for Services
             services.AddScoped<ICacheService,CacheService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped(typeof(IEnrollmentRepo), typeof(EnrollmentRepo));
+            services.AddScoped(typeof(IEnrollmentServices), typeof(EnrollmentServices));
             services.AddScoped(typeof(IDepartmentServices), typeof(DepartmentServices));
             services.AddScoped(typeof(ICourseServices), typeof(CourseServices));
             services.AddScoped<IAuthService, AuthService>();

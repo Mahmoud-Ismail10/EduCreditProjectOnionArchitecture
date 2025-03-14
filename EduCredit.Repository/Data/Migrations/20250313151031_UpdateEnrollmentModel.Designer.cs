@@ -4,6 +4,7 @@ using EduCredit.Repository.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EduCredit.Repository.Data.Migrations
 {
     [DbContext(typeof(EduCreditContext))]
-    partial class EduCreditContextModelSnapshot : ModelSnapshot
+    [Migration("20250313151031_UpdateEnrollmentModel")]
+    partial class UpdateEnrollmentModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -244,10 +247,8 @@ namespace EduCredit.Repository.Data.Migrations
                         .HasMaxLength(2)
                         .HasColumnType("nvarchar(2)");
 
-                    b.Property<double>("Grade")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("float")
-                        .HasDefaultValue(0.0);
+                    b.Property<double?>("Grade")
+                        .HasColumnType("float");
 
                     b.Property<bool?>("IsPassAtCourse")
                         .HasColumnType("bit");

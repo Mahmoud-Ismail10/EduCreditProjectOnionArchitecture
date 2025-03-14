@@ -1,4 +1,5 @@
-﻿using EduCredit.Core.Relations;
+﻿using EduCredit.Core.Enums;
+using EduCredit.Core.Relations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -16,7 +17,17 @@ namespace EduCredit.Repository.Data.Configurations
             builder.HasKey(e => new {e.EnrollmentTableId, e.CourseId});
 
             builder.Property(e => e.Grade)
+                .HasColumnType("float")
+                .HasDefaultValue(0.0f);
+
+            builder.Property(e => e.Percentage)
                 .HasColumnType("float");
+
+            builder.Property(e => e.Appreciation)
+                .HasMaxLength(2)
+                .HasConversion(
+                App => App.ToString(),
+                App => (Appreciation)Enum.Parse(typeof(Appreciation), App));
 
             builder.Property(e => e.IsPassAtCourse)
                 .HasColumnType("bit");

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EduCredit.Core.Relations;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +9,6 @@ namespace EduCredit.Core.Repositories.Contract
 {
     public interface IEnrollmentRepo
     {
+        Task<Enrollment?> GetEnrollmentByIdsAsync(Guid enrollmentTableId, Guid courseId);
     }
 }

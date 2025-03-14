@@ -67,6 +67,7 @@ namespace EduCredit.APIs.Controllers
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(UpdateDepartmentDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
         public async Task<ActionResult<UpdateDepartmentDto>> UpdateDepartment(Guid id, [FromBody] UpdateDepartmentDto updateDeptDto)
         {
             if (ModelState.IsValid)
@@ -82,6 +83,7 @@ namespace EduCredit.APIs.Controllers
         [HttpDelete("{id}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
         public async Task<ActionResult> DeleteDepartment(Guid id)
         {
             var response = await _departmentServices.DeleteDepartmentAsync(id);

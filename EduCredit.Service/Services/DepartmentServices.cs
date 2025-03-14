@@ -70,7 +70,7 @@ namespace EduCredit.Service.Services
 
             int result = await _unitOfWork.CompleteAsync();
             if (result <= 0) return null;
-            return _mapper.Map<Department, UpdateDepartmentDto>(newDepartment);
+            return updateDeptDto;
         }
 
         public async Task<ApiResponse> DeleteDepartmentAsync(Guid id)
