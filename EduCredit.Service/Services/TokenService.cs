@@ -35,13 +35,14 @@ namespace EduCredit.Service.Services
             var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]));
             var creds = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
 
-            var claims = new[]
+            var claims = new List<Claim>
             {
-               new Claim(JwtRegisteredClaimNames.Email, email),
-               new Claim(ClaimTypes.NameIdentifier, UserId),
-               new Claim(ClaimTypes.Role, role),
-               new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                     new Claim("email", email),
+                     new Claim("userId", UserId), 
+                     new Claim("role", role),
+                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()) 
             };
+
 
             var expiryMinutes = double.Parse(jwtSettings["RememberMeAccessTokenExpiryMinutes"]);
 

@@ -63,12 +63,12 @@ namespace EduCredit.APIs.Controllers
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult> Register([FromBody] BaseRegisterDto registerDto,Roles role, string RedirectUrl)
+        public async Task<ActionResult> Register([FromBody] BaseUserDto registerDto,Roles role, string RedirectUrl)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new ApiResponse(400, "Invalid Data!"));
             // Mapping RegisterStudentAndTeacherDto to Person
-            var MappedUser = _mapper.Map<BaseRegisterDto, Person>(registerDto);
+            var MappedUser = _mapper.Map<BaseUserDto, Person>(registerDto);
             var result = await _auth.RegisterAsync(registerDto, role,RedirectUrl);
             if (result.StatusCode != 200)
                 return BadRequest(new ApiResponse(400, result.ErrorMessage));
@@ -193,7 +193,8 @@ namespace EduCredit.APIs.Controllers
                 return BadRequest(new ApiResponse(400, "Invalid Data!"));
 
             ///  UserId From Token
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = User.FindFirstValue("userId");
+
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized(new ApiResponse(401, "User not authenticated"));
             if (userId != changePasswordDto.user_Id)

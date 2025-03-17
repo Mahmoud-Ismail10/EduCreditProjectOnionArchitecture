@@ -10,6 +10,8 @@ using EduCredit.Service.Services.Contract;
 using EduCredit.Core.Models;
 using EduCredit.Core.Specifications.DepartmentSpecifications;
 using EduCredit.Service.Services;
+using EduCredit.Core.Security;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EduCredit.APIs.Controllers
 {
@@ -26,6 +28,7 @@ namespace EduCredit.APIs.Controllers
 
         /// POST: api/Department
         [HttpPost]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]
         [ProducesResponseType(typeof(CreateDepartmentDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
         public async Task<ActionResult<ReadDepartmentDto>> CreateDepartment([FromBody] CreateDepartmentDto createDeptDto)
@@ -40,6 +43,7 @@ namespace EduCredit.APIs.Controllers
 
         /// GET: api/Department
         [HttpGet]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]
         [ProducesResponseType(typeof(Pagination<ReadDepartmentDto>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public ActionResult<IReadOnlyList<ReadDepartmentDto>> GetDepartments([FromQuery] DepartmentSpecificationParams specParams) // Create class contains all of params (refactor)
@@ -52,6 +56,7 @@ namespace EduCredit.APIs.Controllers
 
         /// GET: api/Department/{id}
         [HttpGet("{id}")]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]
         [ProducesResponseType(typeof(ReadDepartmentDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<ReadDepartmentDto>> GetDepartment(Guid id)
@@ -63,6 +68,7 @@ namespace EduCredit.APIs.Controllers
 
         /// PUT: api/Department/{id}
         [HttpPut("{id}")]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]
         [ProducesResponseType(typeof(UpdateDepartmentDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
@@ -79,18 +85,20 @@ namespace EduCredit.APIs.Controllers
 
         /// DELETE: api/Department/{id}
         [HttpDelete("{id}")]
+       [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
         public async Task<ActionResult> DeleteDepartment(Guid id)
         {
             var response = await _departmentServices.DeleteDepartmentAsync(id);
+           
             if (response.StatusCode == 200)
                 return Ok(new ApiResponse(200, "Department deleted successfully"));
             else if (response.StatusCode == 404)
                 return NotFound(new ApiResponse(404, "Department not found!"));
             else
-                return BadRequest(new ApiResponse(400, "It is not suitable to delete the Department!"));
+                return BadRequest(new ApiResponse(400, response.ErrorMessage));
         }
     }
 }

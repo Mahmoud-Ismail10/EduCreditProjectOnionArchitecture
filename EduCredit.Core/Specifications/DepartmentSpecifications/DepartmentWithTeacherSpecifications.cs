@@ -16,6 +16,7 @@ namespace EduCredit.Core.Specifications.DepartmentSpecifications
             (!spec.DepartmentHeadId.HasValue || d.DepartmentHeadId == spec.DepartmentHeadId.Value))
         {
             Includes.Add(d => d.DepartmentHead);
+            Includes.Add(c => c.Courses);
             if (!string.IsNullOrEmpty(spec.Sort))
             {
                 /// if client return another value other than 'nameAsc', 'nameDesc' is the sorting value is 'nameAsc'
@@ -38,6 +39,8 @@ namespace EduCredit.Core.Specifications.DepartmentSpecifications
         public DepartmentWithTeacherSpecifications(Guid id) : base(d => d.Id == id)
         {
             Includes.Add(d => d.DepartmentHead);
+
+            Includes.Add(c => c.Courses);
         }
     }
 }

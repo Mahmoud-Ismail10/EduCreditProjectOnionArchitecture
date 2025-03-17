@@ -8,6 +8,7 @@ using EduCredit.Core.Security;
 using EduCredit.Service.Errors;
 using EduCredit.Service.Services.Contract;
 using MailKit.Net.Smtp;
+using MailKit.Security;
 using MimeKit;
 
 namespace EduCredit.Service.Services
@@ -28,7 +29,7 @@ namespace EduCredit.Service.Services
                 using (var client = new SmtpClient())
                 {
                     /// (1) Start connection with host and send port
-                    await client.ConnectAsync(_email.Host, _email.Port, true);
+                    await client.ConnectAsync(_email.Host, _email.Port, SecureSocketOptions.StartTls);
                     /// (2) Send Credentials
                     await client.AuthenticateAsync(_email.Email, _email.Password); 
 

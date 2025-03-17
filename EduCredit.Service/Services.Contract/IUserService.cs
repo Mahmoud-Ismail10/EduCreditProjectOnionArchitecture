@@ -1,4 +1,4 @@
-﻿using EduCredit.Service.DTOs.UserDTOs;
+﻿using EduCredit.Service.DTOs.AuthDTOs;
 using EduCredit.Service.Errors;
 using System;
 using System.Collections.Generic;
@@ -10,6 +10,6 @@ namespace EduCredit.Service.Services.Contract
 {
     public interface IUserService
     {
-        Task<GetUserInfoDto?> GetUserInfoAsync(string? userId, string? userRole);
+        Task<BaseRegisterDto?> GetUserInfoAsync(string? userId, string? userRole);
     }
 }

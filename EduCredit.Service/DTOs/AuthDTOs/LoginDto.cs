@@ -12,7 +12,7 @@ namespace EduCredit.Service.DTOs.AuthDTOs
         [Required]
         public string Password { get; set; }
 
-        [Required]
-        public Roles Role { get; set; }
+        //[Required]
+        //public Roles Role { get; set; }
     }
 }

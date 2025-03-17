@@ -1,6 +1,5 @@
 ﻿using EduCredit.Core.Specifications.TeacherSpecefications;
 using EduCredit.Service.DTOs.TeacherDTOs;
-using EduCredit.Service.DTOs.UserDTOs;
 using EduCredit.Service.Errors;
 using System;
 using System.Collections.Generic;

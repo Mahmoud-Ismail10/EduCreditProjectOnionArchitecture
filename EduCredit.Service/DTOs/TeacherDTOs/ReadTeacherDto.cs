@@ -1,4 +1,4 @@
-﻿using EduCredit.Service.DTOs.UserDTOs;
+﻿using EduCredit.Service.DTOs.AuthDTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace EduCredit.Service.DTOs.TeacherDTOs
 {
-    public class ReadTeacherDto : GetUserInfoDto
+    public class ReadTeacherDto : BaseRegisterDto
     {
         [JsonPropertyOrder(1)]
         public Guid Id { get; set; }

@@ -1,13 +1,12 @@
 ﻿using AutoMapper;
 using EduCredit.Core.Models;
 using EduCredit.Core.Relations;
+using EduCredit.Service.DTOs.AdminDTOs;
 using EduCredit.Service.DTOs.AuthDTOs;
 using EduCredit.Service.DTOs.CourseDTOs;
 using EduCredit.Service.DTOs.DepartmentDTOs;
 using EduCredit.Service.DTOs.EnrollmentDTOs;
 using EduCredit.Service.DTOs.TeacherDTOs;
-using EduCredit.Service.DTOs.UserDTOs;
-
 namespace EduCredit.Service.Helper
 {
     public class MappingProfiles : Profile
@@ -29,15 +28,21 @@ namespace EduCredit.Service.Helper
 
             CreateMap<Teacher, ReadTeacherDto>()
                 .ForMember(d => d.Id, o => o.MapFrom(s => s.Id))
-                .ForMember(d => d.Name, o => o.MapFrom(s => s.FullName))
+                .ForMember(d => d.FullName, o => o.MapFrom(s => s.FullName))
                .ForMember(d => d.DepartmentFullName, o => o.MapFrom(s => s.Department.Name))
                .ReverseMap();
             CreateMap<UpdateTeacherDto, Teacher>().ReverseMap();
 
-            CreateMap<BaseRegisterDto, Person>().ReverseMap();
+            CreateMap<Admin, ReadAdminDto>()
+                .ForMember(d => d.Id, o => o.MapFrom(s => s.Id))
+                .ForMember(d => d.FullName, o => o.MapFrom(s => s.FullName))
+              .ReverseMap();
+            CreateMap<UpdateAdminDto, Admin>().ReverseMap();
 
-            CreateMap< Person, GetUserInfoDto>()
-                .ForMember(d=>d.Name,o=>o.MapFrom(s=>s.FullName)).ReverseMap();
+            CreateMap<BaseUserDto, Person>().ReverseMap();
+
+            CreateMap< Person, BaseRegisterDto>()
+                .ForMember(d=>d.FullName, o=>o.MapFrom(s=>s.FullName)).ReverseMap();
         }
     }
 }

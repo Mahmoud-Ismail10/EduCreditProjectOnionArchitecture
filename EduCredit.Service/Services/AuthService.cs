@@ -9,6 +9,10 @@ using EduCredit.Service.Services.Contract;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
+using Org.BouncyCastle.Crypto.Parameters;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Text;
 using System.Web;
@@ -37,7 +41,7 @@ namespace EduCredit.Service.Services
         #region Methods
         #region Register
 
-        public async Task<ApiResponse> RegisterAsync(BaseRegisterDto person, Roles role, string RedirectUrl)
+        public async Task<ApiResponse> RegisterAsync(BaseUserDto person, Roles role, string RedirectUrl)
         {
             if (await _userManager.FindByEmailAsync(person.Email) is not null)
                 return new ApiResponse(400, "This email is already registered!");
@@ -71,7 +75,7 @@ namespace EduCredit.Service.Services
             return confirmationUrl; 
         }
 
-        private Person? CreateUser(BaseRegisterDto person, Roles role)
+        private Person? CreateUser(BaseUserDto person, Roles role)
         {
             string userName = person.FullName.Replace(" ", "");
 
@@ -154,8 +158,8 @@ namespace EduCredit.Service.Services
             var roles = await _userManager.GetRolesAsync(user);
             var role = roles.SingleOrDefault();
 
-            if (role is null || role != loginDto.Role.ToString())
-                return (null, new ApiResponse(400, "This email is not found!"));
+            //if (role is null || role != loginDto.Role.ToString())
+            //    return (null, new ApiResponse(400, "This email is not found!"));
             if (!user.EmailConfirmed)
                 return (null,new ApiResponse(400, "You need to confirm your email before logging in!"));
             // Generate the access token

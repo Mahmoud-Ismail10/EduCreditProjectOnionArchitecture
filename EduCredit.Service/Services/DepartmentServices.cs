@@ -75,12 +75,19 @@ namespace EduCredit.Service.Services
 
         public async Task<ApiResponse> DeleteDepartmentAsync(Guid id)
         {
-            var department = await _unitOfWork.Repository<Department>().GetByIdAsync(id);
+
+            var spec = new DepartmentWithTeacherSpecifications(id);
+            var department = await _unitOfWork.Repository<Department>().GetByIdSpecificationAsync(spec);
+
             if (department == null) return new ApiResponse(404);
 
+            if (department.Courses.Count > 0)
+            {
+                return new ApiResponse(400, "Courses are associated with this department. Please delete the courses first.");
+            }
             await _unitOfWork.Repository<Department>().Delete(department);
             int result = await _unitOfWork.CompleteAsync();
-            if (result <= 0) return new ApiResponse(400);
+            if (result <= 0) return new ApiResponse(400, "It is not suitable to delete the Department!");
             return new ApiResponse(200);
         }
     }

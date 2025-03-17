@@ -9,15 +9,7 @@ namespace EduCredit.Service.Services
         private readonly IDatabase _db;
         public TokenBlacklistService(IConnectionMultiplexer Db) 
         {
-            try
-            {
-                _db = Db.GetDatabase();
-                Console.WriteLine("✅ Redis Connected Successfully!");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"❌ Redis Connection Error: {ex.Message}");
-            }
+              _db = Db.GetDatabase();
         }
         public async Task AddTokenToBlacklistAsync(string token,TimeSpan expiry)
         {

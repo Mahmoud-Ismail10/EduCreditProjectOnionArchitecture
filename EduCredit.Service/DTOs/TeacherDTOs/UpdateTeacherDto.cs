@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace EduCredit.Service.DTOs.TeacherDTOs
 {
-    public class UpdateTeacherDto:BaseRegisterDto
+    public class UpdateTeacherDto:BaseUserDto
     {
         public DateOnly AppointmentDate { get; set; }
     }

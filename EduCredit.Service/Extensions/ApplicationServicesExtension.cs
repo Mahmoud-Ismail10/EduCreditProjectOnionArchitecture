@@ -26,6 +26,8 @@ using EduCredit.Service.Services.Contract;
 using AspNetCoreRateLimit;
 using EduCredit.Core.Repositories.Contract;
 using EduCredit.Repository.Repositories;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
 
 
 namespace EduCredit.Service.Extensions
@@ -55,6 +57,7 @@ namespace EduCredit.Service.Extensions
             services.AddScoped(typeof(IEnrollmentServices), typeof(EnrollmentServices));
             services.AddScoped(typeof(IDepartmentServices), typeof(DepartmentServices));
             services.AddScoped(typeof(ITeacherServices), typeof(TeacherServices));
+            services.AddScoped(typeof(IAdminServices), typeof(AdminServices));
             services.AddScoped(typeof(IUserService), typeof(UserService));
 
             //services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
@@ -149,8 +152,14 @@ namespace EduCredit.Service.Extensions
         }
         public static void AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
-
             var jwtSettings = configuration.GetSection("JwtSettings");
+
+            var secretKey = jwtSettings["SecretKey"];
+            if (string.IsNullOrWhiteSpace(secretKey))
+                throw new ArgumentNullException("JWT SecretKey is missing in configuration.");
+
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+
             services.AddAuthentication(op =>
             {
                 op.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -171,12 +180,37 @@ namespace EduCredit.Service.Extensions
                     ValidateAudience = true,
                     ValidAudience = jwtSettings["ValidAudience"],
 
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"] ?? string.Empty)),
-
+                    IssuerSigningKey = securityKey,
                     RequireExpirationTime = true,
+                    NameClaimType = "email",
+                    RoleClaimType = "role",
+                };
+
+                op.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = context =>
+                    {
+                        var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
+                        if (claimsIdentity != null)
+                        {
+                            var emailClaim = claimsIdentity.FindFirst(ClaimTypes.Email)?.Value;
+                            var roleClaim = claimsIdentity.FindFirst(ClaimTypes.Role)?.Value;
+
+                            claimsIdentity.TryRemoveClaim(claimsIdentity.FindFirst(ClaimTypes.Email));
+                            claimsIdentity.TryRemoveClaim(claimsIdentity.FindFirst(ClaimTypes.Role));
+
+                            if (!string.IsNullOrWhiteSpace(emailClaim))
+                                claimsIdentity.AddClaim(new Claim("email", emailClaim));
+
+                            if (!string.IsNullOrWhiteSpace(roleClaim))
+                                claimsIdentity.AddClaim(new Claim("role", roleClaim));
+                        }
+                        return Task.CompletedTask;
+                    }
                 };
             });
         }
+
         public static void AddCustomAuthorizationPolicies(this IServiceCollection service)
         {
             service.AddAuthorization(op =>

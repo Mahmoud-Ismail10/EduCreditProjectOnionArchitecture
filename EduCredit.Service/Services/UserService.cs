@@ -3,7 +3,7 @@ using EduCredit.Core;
 using EduCredit.Core.Enums;
 using EduCredit.Core.Models;
 using EduCredit.Core.Security;
-using EduCredit.Service.DTOs.UserDTOs;
+using EduCredit.Service.DTOs.AuthDTOs;
 using EduCredit.Service.Errors;
 using EduCredit.Service.Services.Contract;
 using System;
@@ -27,7 +27,7 @@ namespace EduCredit.Service.Services
         }
 
 
-        public async Task< GetUserInfoDto?> GetUserInfoAsync(string? userId, string? userRole)
+        public async Task< BaseRegisterDto?> GetUserInfoAsync(string? userId, string? userRole)
         {
             if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(userRole))
                 return null;
@@ -43,7 +43,7 @@ namespace EduCredit.Service.Services
             if (user == null)
                 return null;
 
-            var userDto = _mapper.Map<GetUserInfoDto>(user);
+            var userDto = _mapper.Map<BaseRegisterDto>(user);
             return userDto;
         }
         private async Task<Person?> GetUserByRoleAsync<T>(string userId) where T : Person

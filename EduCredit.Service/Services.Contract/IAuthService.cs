@@ -14,7 +14,7 @@ namespace EduCredit.Core.Services.Contract
     {
         Task<(TokenResponseDto?, ApiResponse)> LoginAsync(LoginDto loginDto);
         Task<ApiResponse<TokenResponseDto>> RefreshTokenAsync(string refreshtoken);
-        Task<ApiResponse> RegisterAsync(BaseRegisterDto person,Roles role, string RedirectUrl);
+        Task<ApiResponse> RegisterAsync(BaseUserDto person,Roles role, string RedirectUrl);
         Task<ApiResponse> ChangePasswordAsync(string userId, ChangePasswordDto changePasswordDto);
         Task<ApiResponse> ConfirmEmailAsync(string userId, string token);
         Task<ApiResponse> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto, string RedirectUrl);

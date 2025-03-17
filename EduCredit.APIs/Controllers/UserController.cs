@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using EduCredit.Core.Models;
 using EduCredit.Core.Security;
-using EduCredit.Service.DTOs.UserDTOs;
+using EduCredit.Service.DTOs.AuthDTOs;
 using EduCredit.Service.Errors;
 using EduCredit.Service.Helper;
 using EduCredit.Service.Services.Contract;
@@ -24,16 +24,16 @@ namespace EduCredit.APIs.Controllers
 
         [HttpGet("GetUserInfo")]
         [Authorize]
-        [ProducesResponseType(typeof(GetUserInfoDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseRegisterDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<GetUserInfoDto>> GetUserInfo()
+        public async Task<ActionResult<BaseRegisterDto>> GetUserInfo()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var userRole = User.FindFirstValue(ClaimTypes.Role);
+            var userId = User.FindFirstValue("userId");
+            var userRole = User.FindFirstValue("role");
 
-            if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(userRole))
-                return NotFound(new ApiResponse<GetUserInfoDto>(404, "User Not Found"));
+            if (userId is null || userRole is null)
+                return Unauthorized(new ApiResponse(401, "Unauthorized: Invalid user "));
 
             var result = await _userService.GetUserInfoAsync(userId, userRole);
 

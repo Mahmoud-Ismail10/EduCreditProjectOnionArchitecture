@@ -35,7 +35,6 @@ namespace EduCredit.Service.DTOs.AuthDTOs
         [Required(ErrorMessage = "Birth Date is required")]
         public DateOnly BirthDate { get; set; }
 
-        public Guid? DepartmentId { get; set; }
     }
 
 
