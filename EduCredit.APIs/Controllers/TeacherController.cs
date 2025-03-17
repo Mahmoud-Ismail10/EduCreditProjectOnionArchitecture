@@ -21,9 +21,9 @@ namespace EduCredit.APIs.Controllers
             _teacherServices = teacherServices;
         }
 
-        /// GET: api/Techers
+        /// GET: api/Teachers
         [HttpGet]
-        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(Pagination<ReadTeacherDto>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public ActionResult<IReadOnlyList<ReadTeacherDto>> GetAllTeachers([FromQuery] TeacherSpecificationParams specParams) // Create class contains all of params (refactor)
@@ -36,7 +36,7 @@ namespace EduCredit.APIs.Controllers
 
         /// GET: api/Teacher/{id}
         [HttpGet("{id}")]
-        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ReadTeacherDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<ReadTeacherDto>> GetTeacher(Guid id)
@@ -48,7 +48,7 @@ namespace EduCredit.APIs.Controllers
 
         /// PUT: api/Teacher/{id}
         [HttpPut("{id}")]
-        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(UpdateTeacherDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<UpdateTeacherDto>> UpdateTeacher([FromBody] UpdateTeacherDto updateteachertDto, Guid id)
@@ -60,7 +60,7 @@ namespace EduCredit.APIs.Controllers
 
         /// DELETE: api/Teacher/{id}
         [HttpDelete("{id}")]
-        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]

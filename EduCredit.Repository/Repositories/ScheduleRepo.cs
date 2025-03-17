@@ -1,4 +1,5 @@
-﻿using EduCredit.Core.Relations;
+﻿using EduCredit.Core.Models;
+using EduCredit.Core.Relations;
 using EduCredit.Core.Repositories.Contract;
 using EduCredit.Repository.Data;
 using System;

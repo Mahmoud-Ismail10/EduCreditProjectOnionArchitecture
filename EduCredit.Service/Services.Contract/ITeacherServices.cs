@@ -15,5 +15,6 @@ namespace EduCredit.Service.Services.Contract
         Task<ReadTeacherDto?> GetTeacherByIdAsync(Guid id);
         Task<UpdateTeacherDto?> UpdateTeacherAsync(UpdateTeacherDto updateteacherDto, Guid id);
         Task<ApiResponse> DeleteTeacherAsync(Guid id);
+        ReadTeacherDto? AssignGuideToStudent(Guid? departmentId);
     }
 }

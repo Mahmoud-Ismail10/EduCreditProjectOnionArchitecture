@@ -4,6 +4,7 @@ using EduCredit.Core.Models;
 using EduCredit.Core.Services.Contract;
 using EduCredit.Core.Specifications.RefreshTokenSpecifications;
 using EduCredit.Service.DTOs.AuthDTOs;
+using EduCredit.Service.DTOs.TeacherDTOs;
 using EduCredit.Service.Errors;
 using EduCredit.Service.Services.Contract;
 using Microsoft.AspNetCore.Identity;
@@ -26,15 +27,21 @@ namespace EduCredit.Service.Services
         private readonly ITokenService _tokenService;
         private readonly IUnitOfWork _unitofWork;
         private readonly IEmailServices _emailService;
+        private readonly ITeacherServices _teacherServices;
         #endregion
 
         #region Constructor
-        public AuthService(UserManager<Person> userManager, ITokenService tokenService, IUnitOfWork unitofWork,IEmailServices emailService)
+        public AuthService(UserManager<Person> userManager,
+            ITokenService tokenService,
+            IUnitOfWork unitofWork,
+            IEmailServices emailService,
+            ITeacherServices teacherServices)
         {
             _userManager = userManager;
             _tokenService = tokenService;
             _unitofWork = unitofWork;
             _emailService = emailService;
+            _teacherServices = teacherServices;
         }
         #endregion
 
@@ -62,7 +69,7 @@ namespace EduCredit.Service.Services
             var confirmationUrl = GenerateConfirmationUrl(user.Id, emailToken, RedirectUrl);
 
             var emailSent = await _emailService.SendEmailAsync(person.Email, confirmationUrl, EmailType.ConfirmEmail);
-            if (emailSent.StatusCode != 200) 
+            if (emailSent.StatusCode != 200)
                 return new ApiResponse(400, "Failed to send confirmation email!");
             await _unitofWork.CompleteAsync();
             return new ApiResponse(200, "User registered successfully! Please confirm your email.");
@@ -72,30 +79,41 @@ namespace EduCredit.Service.Services
         {
             var EncodedToken = Convert.ToBase64String(Encoding.UTF8.GetBytes(token));
             var confirmationUrl = $"https://educredit.runasp.net/api/Account/confirm-email?userId={userId}&token={EncodedToken}&redirectUrl={redirectUrl}";
-            return confirmationUrl; 
+            return confirmationUrl;
         }
 
         private Person? CreateUser(BaseUserDto person, Roles role)
         {
             string userName = person.FullName.Replace(" ", "");
 
-            Person? user = role switch
+            Person? user;
+            switch (role)
             {
-                Roles.StudentRole => new Student
-                {
-                    GPA = 0.0f,
-                    Level = Level.First,
-                    DepartmentId = person.DepartmentId == Guid.Empty ? null : person.DepartmentId,
-                    CreditHours = 0.0f,
-                    TeacherId = null
-                },
-                Roles.TeacherRole => new Teacher
-                {
-                    AppointmentDate = DateOnly.FromDateTime(DateTime.UtcNow),
-                    DepartmentId = person.DepartmentId == Guid.Empty ? null : person.DepartmentId
-                },
-                Roles.AdminRole => new Admin(),
-                _ => null
+                case Roles.StudentRole:
+                    var guide = _teacherServices.AssignGuideToStudent(person.DepartmentId);
+                    if (guide is null) throw new Exception("There are no teachers available in the department");
+                    user = new Student
+                    {
+                        GPA = 0.0f,
+                        Level = Level.First,
+                        DepartmentId = person.DepartmentId == Guid.Empty ? null : person.DepartmentId,
+                        CreditHours = 0.0f,
+                        TeacherId = guide.Id
+                    };
+                    break;
+                case Roles.TeacherRole:
+                    user = new Teacher
+                    {
+                        AppointmentDate = DateOnly.FromDateTime(DateTime.UtcNow),
+                        DepartmentId = person.DepartmentId == Guid.Empty ? null : person.DepartmentId
+                    };
+                    break;
+                case Roles.AdminRole:
+                    user = new Admin();
+                    break;
+                default:
+                    user = null;
+                    break;
             };
 
             if (user is null)
@@ -131,8 +149,8 @@ namespace EduCredit.Service.Services
             // Check if the email was confirmed successfully
             if (!result.Succeeded)
             {
-                foreach(var error in result.Errors)
-                Console.WriteLine(error.Description);
+                foreach (var error in result.Errors)
+                    Console.WriteLine(error.Description);
                 return new ApiResponse(400, $"Failed to confirm the email! ");
             }
 
@@ -161,7 +179,7 @@ namespace EduCredit.Service.Services
             //if (role is null || role != loginDto.Role.ToString())
             //    return (null, new ApiResponse(400, "This email is not found!"));
             if (!user.EmailConfirmed)
-                return (null,new ApiResponse(400, "You need to confirm your email before logging in!"));
+                return (null, new ApiResponse(400, "You need to confirm your email before logging in!"));
             // Generate the access token
             var accessToken = _tokenService.GenerateAccessToken(user.Email, role, user.Id.ToString());
             // Check if the user has a refresh token
@@ -193,7 +211,7 @@ namespace EduCredit.Service.Services
             var spec = new RefreshTokenByTokenSpecifications(refreshToken);
             var existingRefreshToken = await _unitofWork.Repository<RefreshToken>().GetByIdSpecificationAsync(spec);
 
-            if (existingRefreshToken is null || existingRefreshToken.ExpiryDate < DateTime.UtcNow || existingRefreshToken.IsRevoked )
+            if (existingRefreshToken is null || existingRefreshToken.ExpiryDate < DateTime.UtcNow || existingRefreshToken.IsRevoked)
             {
                 return new ApiResponse<TokenResponseDto>(400, "Invalid or expired refresh token, please log in again!");
             }
@@ -207,7 +225,7 @@ namespace EduCredit.Service.Services
             var role = roles.FirstOrDefault();
 
             // Generate the new access token
-            var accessToken = _tokenService.GenerateAccessToken(existingRefreshToken.Person.Email, role,user.Id.ToString());
+            var accessToken = _tokenService.GenerateAccessToken(existingRefreshToken.Person.Email, role, user.Id.ToString());
 
             //Generate a new refresh token
             var newRefreshToken = _tokenService.GenerateRefreshToken();
@@ -227,7 +245,7 @@ namespace EduCredit.Service.Services
         #endregion
 
         #region ForgotPassword
-        public async Task<ApiResponse> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto,string RedirectUrl)
+        public async Task<ApiResponse> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto, string RedirectUrl)
         {
             // Find the user
             var user = await _userManager.FindByEmailAsync(forgotPasswordDto.Email);

@@ -26,14 +26,14 @@ namespace EduCredit.Service.Errors
             };
         }
     }
-        public class ApiResponse<T> : ApiResponse
-        {
-            public T? Data { get; set; }
+    public class ApiResponse<T> : ApiResponse
+    {
+        public T? Data { get; set; }
 
-            public ApiResponse(int statusCode, string message, T? data = default)
-                : base(statusCode, message)
-            {
-                Data = data;
-            }
+        public ApiResponse(int statusCode, string message, T? data = default)
+            : base(statusCode, message)
+        {
+            Data = data;
         }
+    }
 }

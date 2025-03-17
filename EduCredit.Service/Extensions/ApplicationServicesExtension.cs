@@ -54,10 +54,12 @@ namespace EduCredit.Service.Extensions
             services.AddScoped<ICacheService,CacheService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped(typeof(IEnrollmentRepo), typeof(EnrollmentRepo));
+            services.AddScoped(typeof(ITeacherRepo), typeof(TeacherRepo));
             services.AddScoped(typeof(IEnrollmentServices), typeof(EnrollmentServices));
             services.AddScoped(typeof(IDepartmentServices), typeof(DepartmentServices));
             services.AddScoped(typeof(ITeacherServices), typeof(TeacherServices));
             services.AddScoped(typeof(IAdminServices), typeof(AdminServices));
+            services.AddScoped(typeof(IStudentServices), typeof(StudentServices));
             services.AddScoped(typeof(IUserService), typeof(UserService));
 
             //services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));

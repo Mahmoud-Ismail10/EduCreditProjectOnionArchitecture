@@ -5,6 +5,7 @@ using EduCredit.Core.Specifications.TeacherSpecefications;
 using EduCredit.Service.DTOs.TeacherDTOs;
 using EduCredit.Service.Errors;
 using EduCredit.Service.Services.Contract;
+using System;
 
 namespace EduCredit.Service.Services
 {
@@ -12,6 +13,7 @@ namespace EduCredit.Service.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly Random _random = new Random();
 
         public TeacherServices(IUnitOfWork unitOfWork, IMapper mapper)
         {
@@ -23,10 +25,8 @@ namespace EduCredit.Service.Services
             var teacherRepo = _unitOfWork.Repository<Teacher>();
             var spec = new TeacherWithDepartmentSpecifications(specParams);
             var teachers = teacherRepo.GetAllSpecification(spec, out count);
-            if (teachers is null) 
-                return null;
-            var TeachersDto = _mapper.Map<IReadOnlyList<Teacher>, IReadOnlyList<ReadTeacherDto>>(teachers);
-            return TeachersDto;
+            if (teachers is null) return null;
+            return _mapper.Map<IReadOnlyList<Teacher>, IReadOnlyList<ReadTeacherDto>>(teachers); ;
         }
         public async Task<ReadTeacherDto?> GetTeacherByIdAsync(Guid id)
         {
@@ -60,6 +60,15 @@ namespace EduCredit.Service.Services
             int result = await _unitOfWork.CompleteAsync();
             if (result <= 0) return new ApiResponse(400);
             return new ApiResponse(200);
+        }
+
+        public ReadTeacherDto? AssignGuideToStudent(Guid? departmentId)
+        {
+            var teachers = _unitOfWork._teacherRepo.GetTeachersAreNotReachMaximumOfStudentsByDepartmentId(departmentId);
+            if (teachers is null) return null;
+
+            var selectedTeacher = teachers[_random.Next(teachers.Count)];
+            return _mapper.Map<Teacher, ReadTeacherDto>(selectedTeacher);
         }
 
     }

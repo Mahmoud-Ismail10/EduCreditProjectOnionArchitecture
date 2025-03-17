@@ -6,6 +6,7 @@ using EduCredit.Service.DTOs.AuthDTOs;
 using EduCredit.Service.DTOs.CourseDTOs;
 using EduCredit.Service.DTOs.DepartmentDTOs;
 using EduCredit.Service.DTOs.EnrollmentDTOs;
+using EduCredit.Service.DTOs.StudentDTOs;
 using EduCredit.Service.DTOs.TeacherDTOs;
 namespace EduCredit.Service.Helper
 {
@@ -33,6 +34,10 @@ namespace EduCredit.Service.Helper
                .ReverseMap();
             CreateMap<UpdateTeacherDto, Teacher>().ReverseMap();
 
+            CreateMap<Student, ReadStudentDto>();
+            CreateMap<Student, UpdateStudentDto>();
+
+            CreateMap<BaseRegisterDto, Person>().ReverseMap();
             CreateMap<Admin, ReadAdminDto>()
                 .ForMember(d => d.Id, o => o.MapFrom(s => s.Id))
                 .ForMember(d => d.FullName, o => o.MapFrom(s => s.FullName))
