@@ -1,14 +1,20 @@
-﻿using System;
+﻿using EduCredit.Core.Enums;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace EduCredit.Service.DTOs.EnrollmentDTOs
 {
-    public class ReadEnrollmentDto : BaseEnrollmentDto
+    public class UpdateEnrollmentDto
     {
         public Guid EnrollmentTableId { get; set; }
         public Guid CourseId { get; set; }
+        public float Grade { get; set; }
+        public float? Percentage { get; set; }
+        public Appreciation? Appreciation { get; set; }
+        public bool? IsPassAtCourse { get; set; }
     }
 }

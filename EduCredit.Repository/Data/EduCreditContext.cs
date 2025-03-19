@@ -33,6 +33,8 @@ namespace EduCredit.Repository.Data
         public DbSet<Enrollment> Enrollments { get; set; }
         public DbSet<EnrollmentTable> EnrollmentTables { get; set; }
         public DbSet<Schedule> Schedules { get; set; }
+        public DbSet<Semester> Semesters { get; set; }
+        public DbSet<SemesterCourse> SemesterCourses { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 
 

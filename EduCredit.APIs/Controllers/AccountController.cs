@@ -67,9 +67,7 @@ namespace EduCredit.APIs.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(new ApiResponse(400, "Invalid Data!"));
-            // Mapping RegisterStudentAndTeacherDto to Person
-            var MappedUser = _mapper.Map<BaseUserDto, Person>(registerDto);
-            var result = await _auth.RegisterAsync(registerDto, role,RedirectUrl);
+            var result = await _auth.RegisterAsync(registerDto, role, RedirectUrl);
             if (result.StatusCode != 200)
                 return BadRequest(new ApiResponse(400, result.ErrorMessage));
             return Created();

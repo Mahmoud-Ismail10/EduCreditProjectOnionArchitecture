@@ -27,34 +27,29 @@ namespace EduCredit.Service.Services
             _mapper = mapper;
         }
 
-        public async Task<ApiResponse> AssignOrUpdateGrade(Guid enrollmentTableId, Guid courseId, UpdateEnrollmentDto updateEnrollmentDto)
+        public async Task<ApiResponse> AssignOrUpdateGrade(UpdateEnrollmentDto updateEnrollmentDto)
         {
-            var enrollment = await _unitOfWork._enrollmentRepo.GetEnrollmentByIdsAsync(enrollmentTableId, courseId);
+            var enrollment = await _unitOfWork._enrollmentRepo.GetEnrollmentByIdsAsync(updateEnrollmentDto.EnrollmentTableId, updateEnrollmentDto.CourseId);
             if (enrollment is null) return new ApiResponse(404);
 
             enrollment.Grade = updateEnrollmentDto.Grade;
-            var course = await _unitOfWork.Repository<Course>().GetByIdAsync(courseId);
-            enrollment.Percentage = (updateEnrollmentDto.Grade / (course.CreditHours * 100)) * 100;
+            var course = await _unitOfWork.Repository<Course>().GetByIdAsync(updateEnrollmentDto.CourseId);
+            enrollment.Percentage = (enrollment.Grade / (course.CreditHours * 100)) * 100;
             if (enrollment.Grade >= course.MinimumDegree)
                 updateEnrollmentDto.IsPassAtCourse = true;
             else
                 updateEnrollmentDto.IsPassAtCourse = false;
-            if (enrollment.Percentage >= 90)
-                enrollment.Appreciation = Appreciation.Aplus;
-            else if (enrollment.Percentage >= 85)
-                enrollment.Appreciation = Appreciation.A;
-            else if (enrollment.Percentage >= 80)
-                enrollment.Appreciation = Appreciation.Bplus;
-            else if (enrollment.Percentage >= 75)
-                enrollment.Appreciation = Appreciation.B;
-            else if (enrollment.Percentage >= 70)
-                enrollment.Appreciation = Appreciation.Cplus;
-            else if (enrollment.Percentage >= 65)
-                enrollment.Appreciation = Appreciation.C;
-            else if (enrollment.Percentage >= 60)
-                enrollment.Appreciation = Appreciation.D;
-            else
-                enrollment.Appreciation = Appreciation.F;
+            enrollment.Appreciation = enrollment.Percentage switch
+            {
+                >= 90 => Appreciation.Aplus,
+                >= 85 => Appreciation.A,
+                >= 80 => Appreciation.Bplus,
+                >= 75 => Appreciation.B,
+                >= 70 => Appreciation.Cplus,
+                >= 65 => Appreciation.C,
+                >= 60 => Appreciation.D,
+                _ => Appreciation.F
+            };
 
             await _unitOfWork.Repository<Enrollment>().Update(enrollment);
             int result = await _unitOfWork.CompleteAsync();
@@ -62,14 +57,26 @@ namespace EduCredit.Service.Services
             return new ApiResponse(200);
         }
 
-        public async Task<ApiResponse> AssignEnrollment(CreateEnrollmentDto createEnrollmentDto)
-        {
-            Enrollment enrollment = _mapper.Map<CreateEnrollmentDto, Enrollment>(createEnrollmentDto);
-            await _unitOfWork.Repository<Enrollment>().CreateAsync(enrollment);
-            int result = await _unitOfWork.CompleteAsync();
-            if (result <= 0) return new ApiResponse(400);
-            return new ApiResponse(200);
-        }
+        //public async Task<ApiResponse> AssignEnrollment(EnrollmentDto enrollmentDto)
+        //{
+        //    // Check if EnrollmentTable exist or no
+        //    var enrollmentTable = await _unitOfWork.Repository<EnrollmentTable>().GetByIdAsync(enrollmentDto.EnrollmentTableId);
+        //    if (enrollmentTable is null) return new ApiResponse(400, "Invalid EnrollmentTable!");
+
+        //    // Check if Course exist or no
+        //    var course = await _unitOfWork.Repository<Course>().GetByIdAsync(enrollmentDto.CourseId);
+        //    if (course is null) return new ApiResponse(400, "Invalid Course!");
+
+        //    // Check if Enrollment exist or no
+        //    var existingEnrollment = await _unitOfWork._enrollmentRepo.GetEnrollmentByIdsAsync(enrollmentDto.EnrollmentTableId, enrollmentDto.CourseId);
+        //    if (existingEnrollment is not null) return new ApiResponse(400, "Enrollment already exists for this course!");
+
+        //    Enrollment enrollment = _mapper.Map<EnrollmentDto, Enrollment>(enrollmentDto);
+        //    await _unitOfWork.Repository<Enrollment>().CreateAsync(enrollment);
+        //    int result = await _unitOfWork.CompleteAsync();
+        //    if (result <= 0) return new ApiResponse(400, "Failed to assign enrollment!");
+        //    return new ApiResponse(200);
+        //}
 
         public async Task<ApiResponse> DeleteEnrollment(Guid enrollmentTableId, Guid courseId)
         {

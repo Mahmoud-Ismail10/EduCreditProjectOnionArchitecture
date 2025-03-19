@@ -22,7 +22,7 @@ namespace EduCredit.APIs.Controllers
 
         /// GET: api/Admin
         [HttpGet]
-        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(Pagination<ReadAdminDto>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public ActionResult<IReadOnlyList<ReadAdminDto>> GetAllAdmins([FromQuery] AdminSpecificationParams specParams) // Create class contains all of params (refactor)
@@ -35,7 +35,7 @@ namespace EduCredit.APIs.Controllers
 
         /// GET: api/Admin/{id}
         [HttpGet("{id}")]
-        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ReadAdminDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<ReadAdminDto>> GetAdmin(Guid id)
@@ -47,7 +47,7 @@ namespace EduCredit.APIs.Controllers
 
         /// PUT: api/Admin/{id}
         [HttpPut("{id}")]
-        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(UpdateAdminDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<UpdateAdminDto>> UpdateAdmin([FromBody] UpdateAdminDto updateAdmintDto, Guid id)
@@ -59,7 +59,7 @@ namespace EduCredit.APIs.Controllers
 
         /// DELETE: api/Admin/{id}
         [HttpDelete("{id}")]
-        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]

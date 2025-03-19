@@ -14,7 +14,7 @@ namespace EduCredit.Repository.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Schedule> builder)
         {
-            builder.HasKey(s => new {s.TeacherId, s.CourseId});
+            builder.HasKey(s => new { s.TeacherId, s.CourseId });
 
             /// Store day in database as string and fetch it from DB as Day(Enum)
             builder.Property(t => t.Day)
@@ -23,22 +23,32 @@ namespace EduCredit.Repository.Data.Configurations
                 Dy => (Day)Enum.Parse(typeof(Day), Dy));
 
             builder.Property(s => s.LectureStart)
-                .HasColumnType("time");
-            
+                .HasConversion(v => v.ToTimeSpan(),
+                             v => TimeOnly.FromTimeSpan(v))
+                .IsRequired();
+
             builder.Property(s => s.LectureEnd)
-                .HasColumnType("time");
-            
+                .HasConversion(v => v.ToTimeSpan(),
+                             v => TimeOnly.FromTimeSpan(v))
+                .IsRequired();
+
             builder.Property(s => s.LectureLocation)
                 .HasMaxLength(50);
 
             builder.Property(s => s.ExamDate)
-                .HasColumnType("date");
+                .HasConversion(v => v.ToDateTime(TimeOnly.MinValue),
+                             v => DateOnly.FromDateTime(v))
+                .IsRequired();
 
             builder.Property(s => s.ExamStart)
-                .HasColumnType("time");
+                .HasConversion(v => v.ToTimeSpan(),
+                             v => TimeOnly.FromTimeSpan(v))
+                .IsRequired();
 
             builder.Property(s => s.ExamEnd)
-                .HasColumnType("time");
+                .HasConversion(v => v.ToTimeSpan(),
+                             v => TimeOnly.FromTimeSpan(v))
+                .IsRequired();
 
             builder.Property(s => s.ExamLocation)
                 .HasMaxLength(50);

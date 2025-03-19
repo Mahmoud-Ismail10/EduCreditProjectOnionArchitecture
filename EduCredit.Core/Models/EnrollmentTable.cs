@@ -12,7 +12,11 @@ namespace EduCredit.Core.Models
     {
         public Guid Id { get; set; }
         public Status Status { get; set; }
-        public DateOnly Session { get; set; }
+        public string? StudentNotes { get; set; }
+        public string? GuideNotes { get; set; }
+
+        /// One-to-many: Between EnrollmentTable and Semester
+        public Guid SemesterId { get; set; } // Foreign Key
         public Semester Semester { get; set; }
 
         /// One-to-many: Between EnrollmentTable and Student

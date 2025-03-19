@@ -1,0 +1,83 @@
+﻿using AutoMapper;
+using EduCredit.Core;
+using EduCredit.Core.Models;
+using EduCredit.Core.Relations;
+using EduCredit.Service.DTOs.SemesterCourseDTOs;
+using EduCredit.Service.DTOs.SemesterDTOs;
+using EduCredit.Service.Errors;
+using EduCredit.Service.Services.Contract;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace EduCredit.Service.Services
+{
+    public class SemesterServices : ISemesterServices
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+
+        public SemesterServices(IUnitOfWork unitOfWork, IMapper mapper)
+        {
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+        }
+
+        public async Task<ApiResponse> CreateSemester(CreateSemesterDto createSemesterDto)
+        {
+            var semester = _mapper.Map<CreateSemesterDto, Semester>(createSemesterDto);
+            await _unitOfWork.Repository<Semester>().CreateAsync(semester);
+            int result = await _unitOfWork.CompleteAsync();
+            if (result <= 0) return new ApiResponse(400);
+            return new ApiResponse(200);
+        }
+
+        public async Task<ApiResponse> UpdateSemester(UpdateSemesterDto updateSemesterDto, Guid semesterId)
+        {
+            var semester = await _unitOfWork.Repository<Semester>().GetByIdAsync(semesterId);
+            if (semester is null) return new ApiResponse(404);
+
+            var newSemester = _mapper.Map(updateSemesterDto, semester);
+            await _unitOfWork.Repository<Semester>().Update(newSemester);
+            int result = await _unitOfWork.CompleteAsync();
+
+            if (result <= 0) return new ApiResponse(400);
+            return new ApiResponse(200);
+        }
+
+        public async Task<ApiResponse> DeleteSemester(Guid semesterId)
+        {
+            var semester = await _unitOfWork.Repository<Semester>().GetByIdAsync(semesterId);
+            if (semester is null) return new ApiResponse(404);
+
+            await _unitOfWork.Repository<Semester>().Delete(semester);
+            int result = await _unitOfWork.CompleteAsync();
+
+            if (result <= 0) return new ApiResponse(400);
+            return new ApiResponse(200);
+        }
+
+        public async Task<ApiResponse> AssignCoursesToSemester(SemesterCourseDto semesterCourseDto)
+        {
+            // Check if semester exist or no
+            var semesterExists = await _unitOfWork.Repository<Semester>().GetByIdAsync(semesterCourseDto.SemesterId);
+            if (semesterExists is null) return new ApiResponse(404, "Semester not found!");
+
+            // Fetch all valid course IDs from DB
+            var existingCourseIds = await _unitOfWork._courseRepo.GetValidCourseIds(semesterCourseDto.CourseIds);
+
+            // Check if all requested courses exist
+            var missingCourses = semesterCourseDto.CourseIds.Except(existingCourseIds).ToList();
+            if (missingCourses.Any())
+                return new ApiResponse(404, $"Courses not found: {string.Join(", ", missingCourses)}");
+
+            bool result = await _unitOfWork._semesterRepo.AssignCoursesToSemester(semesterCourseDto.SemesterId, semesterCourseDto.CourseIds);
+            if (!result)
+                return new ApiResponse(400, "Failed to assign courses to the semester!");
+            return new ApiResponse(200, "Courses successfully assigned to the semester!");
+        }
+    }
+}

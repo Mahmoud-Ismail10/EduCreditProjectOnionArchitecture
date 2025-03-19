@@ -17,20 +17,26 @@ namespace EduCredit.Repository.Data.Configurations
             builder.Property(et => et.Status)
                 .HasConversion(
                 Sts => Sts.ToString(),
-                Sts => (Status)Enum.Parse(typeof(Status), Sts));
+                Sts => (Status)Enum.Parse(typeof(Status), Sts))
+                .IsRequired();
 
-            builder.Property(et => et.Session)
-                .HasColumnType("date");
+            builder.Property(e => e.StudentNotes)
+                .HasMaxLength(500);
 
-            builder.Property(et => et.Semester)
-                .HasConversion(
-                Smstr => Smstr.ToString(),
-                Smstr => (Semester)Enum.Parse(typeof(Semester), Smstr));
+            builder.Property(e => e.GuideNotes)
+                .HasMaxLength(500);
 
+            /// One-to-Many: EnrollmentTable → Semester
+            builder.HasOne(e => e.Semester)
+                .WithMany(e => e.EnrollmentTables)
+                .HasForeignKey(e => e.SemesterId)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete
+
+            /// One-to-Many: EnrollmentTable → Student
             builder.HasOne(et => et.Student)
                 .WithMany(et => et.EnrollmentTables)
                 .HasForeignKey(et => et.StudentId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Cascade); // Cascade delete if student is removed
         }
     }
 }

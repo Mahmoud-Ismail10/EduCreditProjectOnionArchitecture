@@ -28,5 +28,8 @@ namespace EduCredit.Core.Models
 
         /// Many-to-many: Between Course and EnrollmentTable (JoinTable)
         public ICollection<Enrollment> Enrollments { get; set; } = new HashSet<Enrollment>();
+
+        /// Many-to-many: Between Course and Semester (JoinTable)
+        public ICollection<SemesterCourse> SemesterCourses { get; set; } = new HashSet<SemesterCourse>();
     }
 }

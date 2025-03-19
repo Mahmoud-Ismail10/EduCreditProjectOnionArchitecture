@@ -38,7 +38,9 @@ namespace EduCredit.Repository.Data.Configurations
                 .HasMaxLength(20);
 
             builder.Property(s => s.BirthDate)
-                .HasColumnType("date");
+                .HasConversion(v => v.ToDateTime(TimeOnly.MinValue),
+                              v => DateOnly.FromDateTime(v))
+                .IsRequired();
 
             /// Store gender in database as string and fetch it from DB as Gender
             builder.Property(s => s.Gender)
@@ -48,11 +50,11 @@ namespace EduCredit.Repository.Data.Configurations
 
             builder.Property(s => s.CreditHours)
                 .HasColumnType("float")
-                .HasDefaultValue(0);
+                .HasDefaultValue(0.0f);
 
             builder.Property(s => s.GPA)
                 .HasColumnType("float")
-                .HasDefaultValue(0);
+                .HasDefaultValue(0.0f);
 
             /// Store level in database as string and fetch it from DB as Level
             builder.Property(s => s.Level)

@@ -11,8 +11,8 @@ namespace EduCredit.Service.Services.Contract
 {
     public interface IEnrollmentServices
     {
-        Task<ApiResponse> AssignOrUpdateGrade(Guid enrollmentTableId, Guid courseId, UpdateEnrollmentDto updateEnrollmentDto);
-        Task<ApiResponse> AssignEnrollment(CreateEnrollmentDto createEnrollmentDto);
+        Task<ApiResponse> AssignOrUpdateGrade(UpdateEnrollmentDto updateEnrollmentDto);
+        //Task<ApiResponse> AssignEnrollment(EnrollmentDto enrollmentDto);
         Task<ApiResponse> DeleteEnrollment(Guid enrollmentTableId, Guid courseId);
     }
 }

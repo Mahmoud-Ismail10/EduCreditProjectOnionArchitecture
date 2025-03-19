@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace EduCredit.Core.Repositories.Contract
 {
-    public interface ICourseRepo
+    public interface ISemesterRepo
     {
-        Task<IReadOnlyList<Guid>> GetValidCourseIds(List<Guid> courseIds);
+        Task<bool> AssignCoursesToSemester(Guid semesterId, List<Guid> courseIds);
     }
 }

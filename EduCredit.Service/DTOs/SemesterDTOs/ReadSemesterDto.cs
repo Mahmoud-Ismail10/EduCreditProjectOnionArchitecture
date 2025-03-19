@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EduCredit.Service.DTOs.EnrollmentDTOs
+namespace EduCredit.Service.DTOs.SemesterDTOs
 {
-    public class UpdateEnrollmentDto : BaseEnrollmentDto
+    public class ReadSemesterDto : BaseSemesterDto
     {
+        public Guid Id { get; set; }
+
     }
 }

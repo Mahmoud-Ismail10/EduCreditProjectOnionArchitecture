@@ -37,7 +37,9 @@ namespace EduCredit.Repository.Data.Configurations
                 .HasMaxLength(20);
 
             builder.Property(t => t.BirthDate)
-                .HasColumnType("date");
+                .HasConversion(v => v.ToDateTime(TimeOnly.MinValue),
+                              v => DateOnly.FromDateTime(v))
+                .IsRequired();
 
             /// Store gender in database as string and fetch it from DB as Gender
             builder.Property(t => t.Gender)

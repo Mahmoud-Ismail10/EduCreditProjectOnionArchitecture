@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EduCredit.Service.DTOs.AuthDTOs
 {
-    public class BaseUserDto:BaseRegisterDto
+    public class BaseUserDto : BaseRegisterDto
     {
         public Guid? DepartmentId { get; set; }
     }

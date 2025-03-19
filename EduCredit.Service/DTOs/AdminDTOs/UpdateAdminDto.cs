@@ -1,8 +1,9 @@
-﻿using EduCredit.Service.DTOs.AuthDTOs;
+﻿using EduCredit.Core.Enums;
+using EduCredit.Service.DTOs.AuthDTOs;
 
 namespace EduCredit.Service.DTOs.AdminDTOs
 {
-    public class UpdateAdminDto: BaseRegisterDto
+    public class UpdateAdminDto : BaseRegisterDto
     {
     }
 }

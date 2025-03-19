@@ -15,7 +15,7 @@ namespace EduCredit.Service.Services.Contract
     {
         IReadOnlyList<ReadAdminDto?> GetAllAdmins(AdminSpecificationParams specParams, out int count);
         Task<ReadAdminDto?> GetAdminByIdAsync(Guid id);
-        Task<UpdateAdminDto?> UpdateAdminAsync(UpdateAdminDto updateadminrDto, Guid id);
+        Task<UpdateAdminDto?> UpdateAdminAsync(UpdateAdminDto updateadminDto, Guid id);
         Task<ApiResponse> DeleteAdminAsync(Guid id);
     }
 }
