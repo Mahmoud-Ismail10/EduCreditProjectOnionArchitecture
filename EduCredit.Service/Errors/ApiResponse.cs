@@ -22,7 +22,6 @@ namespace EduCredit.Service.Errors
                 401 => "UnAutherized!",
                 404 => "Not Found!",
                 500 => "Server Error",
-                201 => "Created",
                 _ => null
             };
         }
