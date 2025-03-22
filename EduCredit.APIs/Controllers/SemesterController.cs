@@ -22,21 +22,21 @@ namespace EduCredit.APIs.Controllers
         }
 
         /// POST: api/Semester
-        [HttpPost]
-        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
-        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult> CreateSemester([FromBody] CreateSemesterDto createSemesterDto)
-        {
-            if (ModelState.IsValid)
-            {
-                var response = await _semesterServices.CreateSemester(createSemesterDto);
-                if (response.StatusCode == 200)
-                    return Ok(new ApiResponse(200, "Semester created successfully"));
-                return BadRequest(new ApiResponse(400, "Unable to create semester!"));
-            }
-            return BadRequest(new ApiResponse(400, "Invalid input data!"));
-        }
+        //[HttpPost]
+        //[Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
+        //[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
+        //[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
+        //public async Task<ActionResult> CreateSemester([FromBody] CreateSemesterDto createSemesterDto)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        var response = await _semesterServices.CreateSemester(createSemesterDto);
+        //        if (response.StatusCode == 200)
+        //            return Ok(new ApiResponse(200, "Semester created successfully"));
+        //        return BadRequest(new ApiResponse(400, "Unable to create semester!"));
+        //    }
+        //    return BadRequest(new ApiResponse(400, "Invalid input data!"));
+        //}
 
         /// PUT: api/Semester/{id}
         [HttpPut("{id}")]
@@ -73,20 +73,36 @@ namespace EduCredit.APIs.Controllers
         }
 
         /// POST: api/Semester
-        [HttpPost]
+        //[HttpPost]
+        //[Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
+        //[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
+        //[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        //[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
+        //public async Task<ActionResult> AssignCoursesToSemester(SemesterCourseDto semesterCourseDto)
+        //{
+        //    var response = await _semesterServices.AssignCoursesToSemester(semesterCourseDto);
+        //    if (response.StatusCode == 200)
+        //        return Ok(new ApiResponse(200, response.ErrorMessage));
+        //    else if (response.StatusCode == 400)
+        //        return BadRequest(new ApiResponse(400, response.ErrorMessage));
+        //    else
+        //        return NotFound(new ApiResponse(404, response.ErrorMessage));
+        //}
+
+        [HttpPost("AssignCoursesToSemester")]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult> AssignCoursesToSemester(SemesterCourseDto semesterCourseDto)
+        public async Task<ActionResult> AssignCoursesToSemester([FromBody] CreateSemesterDto createSemesterDto)
         {
-            var response = await _semesterServices.AssignCoursesToSemester(semesterCourseDto);
-            if (response.StatusCode == 200)
-                return Ok(new ApiResponse(200, response.ErrorMessage));
-            else if (response.StatusCode == 400)
-                return BadRequest(new ApiResponse(400, response.ErrorMessage));
-            else
-                return NotFound(new ApiResponse(404, response.ErrorMessage));
+            if (ModelState.IsValid)
+            {
+                var response = await _semesterServices.CreateSemester(createSemesterDto);
+                if (response.StatusCode == 200)
+                    return Ok(new ApiResponse(200, "Semester created successfully with assigned courses"));
+                return BadRequest(new ApiResponse(400, "Unable to create semester!"));
+            }
+            return BadRequest(new ApiResponse(400, "Invalid input data!"));
         }
 
     }

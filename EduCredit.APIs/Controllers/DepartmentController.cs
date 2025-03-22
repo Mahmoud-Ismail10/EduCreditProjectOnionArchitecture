@@ -29,14 +29,16 @@ namespace EduCredit.APIs.Controllers
         /// POST: api/Department
         [HttpPost]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
-        [ProducesResponseType(typeof(CreateDepartmentDto), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<ReadDepartmentDto>> CreateDepartment([FromBody] CreateDepartmentDto createDeptDto)
+        public async Task<ActionResult<ApiResponse>> CreateDepartment([FromBody] CreateDepartmentDto createDeptDto)
         {
             if (ModelState.IsValid)
             {
                 var departmentDto = await _departmentServices.CreateDepartmentAsync(createDeptDto);
-                return Ok(departmentDto);
+                if(departmentDto is null)
+                    return Ok(new ApiResponse(400));
+                return Ok(new ApiResponse(200, "Department Added successfully"));
             }
             return BadRequest(new ApiResponse(400));
         }

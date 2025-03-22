@@ -18,6 +18,7 @@ namespace EduCredit.Core.Specifications.CourseSpecifications
         {
             Includes.Add(d => d.Department);
             Includes.Add(d => d.PreviousCourse);
+            Includes.Add(d => d.SemesterCourses);
             if (!string.IsNullOrEmpty(spec.Sort))
             {
                 switch (spec.Sort.ToLower())
@@ -33,10 +34,18 @@ namespace EduCredit.Core.Specifications.CourseSpecifications
             ApplyPagination((spec.PageIndex - 1) * spec.PageSize, spec.PageSize);
         }
         /// for get one course (with Criteria)
-        public CourseWithDeptAndPrevCourseSpecification(Guid id) : base(d => d.Id == id)
+        //public CourseWithDeptAndPrevCourseSpecification(Guid id) : base(d => d.Id == id)
+        //{
+        //    Includes.Add(d => d.Department);
+        //    Includes.Add(d => d.PreviousCourse);
+        //    Includes.Add(d => d.SemesterCourses);
+        //}
+        public CourseWithDeptAndPrevCourseSpecification(Guid semesterId)
+        : base(c => c.SemesterCourses.Any(sc => sc.SemesterId == semesterId))
         {
             Includes.Add(d => d.Department);
             Includes.Add(d => d.PreviousCourse);
+            Includes.Add(c => c.SemesterCourses); 
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using EduCredit.Core.Security;
+﻿using EduCredit.Core.Models;
+using EduCredit.Core.Security;
 using EduCredit.Core.Specifications.CourseSpecifications;
 using EduCredit.Service.DTOs.CourseDTOs;
 using EduCredit.Service.Errors;
@@ -23,13 +24,15 @@ namespace EduCredit.APIs.Controllers
         [HttpPost]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(CreateCourseDto), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<CreateCourseDto>> CreateCourse([FromBody] CreateCourseDto createCourseDto)
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<ApiResponse>> CreateCourse([FromBody] CreateCourseDto createCourseDto)
         {
             if (ModelState.IsValid)
             {
                 var courseDto = await _courseServices.CreateCourseAsync(createCourseDto);
-                return Ok(courseDto);
+                if (courseDto is not null)
+                    return Ok(new ApiResponse(400));
+               return Ok(new ApiResponse(200,"Course Added successfully"));
             }
             return BadRequest(new ApiResponse(400));
         }

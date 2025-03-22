@@ -15,5 +15,9 @@ namespace EduCredit.Core.Specifications.SemesterSpecifications
         {
             Includes.Add(c => c.SemesterCourses);
         }
+        public SemesterWithCoursesSpecifications() : base()
+        {
+            Includes.Add(c => c.SemesterCourses);
+        }
     }
 }

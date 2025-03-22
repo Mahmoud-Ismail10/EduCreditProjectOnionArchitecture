@@ -25,7 +25,8 @@ namespace EduCredit.Service.Helper
                 .ForMember(d => d.DepartmentName, o => o.MapFrom(s => s.Department.Name)).ReverseMap();
             CreateMap<CreateCourseDto, Course>().ReverseMap();
             CreateMap<UpdateCourseDto, Course>().ReverseMap();
-            
+            CreateMap <Course,ReadCourseDto>().ReverseMap();
+           
             CreateMap<CreateSemesterDto, Semester>();
             CreateMap<UpdateSemesterDto, Semester>();
 
