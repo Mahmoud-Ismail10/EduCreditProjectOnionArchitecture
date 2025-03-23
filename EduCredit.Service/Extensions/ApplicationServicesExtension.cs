@@ -51,24 +51,25 @@ namespace EduCredit.Service.Extensions
                 options.TokenLifespan = TimeSpan.FromHours(1);
             });
             /// Add life time for Services
-            services.AddScoped<ICacheService,CacheService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped(typeof(IEnrollmentRepo), typeof(EnrollmentRepo));
+            services.AddScoped(typeof(IScheduleRepo), typeof(ScheduleRepo));
             services.AddScoped(typeof(ITeacherRepo), typeof(TeacherRepo));
             services.AddScoped(typeof(ICourseRepo), typeof(CourseRepo));
             services.AddScoped(typeof(ISemesterRepo), typeof(SemesterRepo));
+
             services.AddScoped(typeof(IEnrollmentServices), typeof(EnrollmentServices));
+            services.AddScoped(typeof(IScheduleServices), typeof(ScheduleServices));
             services.AddScoped(typeof(IEnrollmentTableServices), typeof(EnrollmentTableServices));
             services.AddScoped(typeof(ISemesterServices), typeof(SemesterServices));
             services.AddScoped(typeof(IDepartmentServices), typeof(DepartmentServices));
+            services.AddScoped(typeof(ICourseServices), typeof(CourseServices));
             services.AddScoped(typeof(ITeacherServices), typeof(TeacherServices));
             services.AddScoped(typeof(IAdminServices), typeof(AdminServices));
             services.AddScoped(typeof(IStudentServices), typeof(StudentServices));
             services.AddScoped(typeof(IUserService), typeof(UserService));
             
-
-            //services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-            services.AddScoped(typeof(ICourseServices), typeof(CourseServices));
+            services.AddScoped<ICacheService,CacheService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IEmailServices, EmailServices>();

@@ -33,22 +33,20 @@ namespace EduCredit.Repository.Data.Configurations
                 .IsRequired();
 
             builder.Property(s => s.LectureLocation)
-                .HasMaxLength(50);
+                .HasMaxLength(50)
+                .IsRequired();
 
             builder.Property(s => s.ExamDate)
-                .HasConversion(v => v.ToDateTime(TimeOnly.MinValue),
-                             v => DateOnly.FromDateTime(v))
-                .IsRequired();
+                .HasConversion(v => v.HasValue ? v.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null,
+                             v => v.HasValue ? DateOnly.FromDateTime(v.Value) : (DateOnly?)null);
 
             builder.Property(s => s.ExamStart)
-                .HasConversion(v => v.ToTimeSpan(),
-                             v => TimeOnly.FromTimeSpan(v))
-                .IsRequired();
+                .HasConversion(v => v.HasValue ? v.Value.ToTimeSpan() : (TimeSpan?)null,
+                             v => v.HasValue ? TimeOnly.FromTimeSpan(v.Value) : (TimeOnly?)null);
 
             builder.Property(s => s.ExamEnd)
-                .HasConversion(v => v.ToTimeSpan(),
-                             v => TimeOnly.FromTimeSpan(v))
-                .IsRequired();
+                .HasConversion(v => v.HasValue ? v.Value.ToTimeSpan() : (TimeSpan?)null,
+                             v => v.HasValue ? TimeOnly.FromTimeSpan(v.Value) : (TimeOnly?)null);
 
             builder.Property(s => s.ExamLocation)
                 .HasMaxLength(50);

@@ -29,12 +29,12 @@ namespace EduCredit.APIs.Controllers
         {
             if (ModelState.IsValid)
             {
-                var courseDto = await _courseServices.CreateCourseAsync(createCourseDto);
-                if (courseDto is not null)
-                    return Ok(new ApiResponse(400));
-               return Ok(new ApiResponse(200,"Course Added successfully"));
+                var response = await _courseServices.CreateCourseAsync(createCourseDto);
+                if (response.StatusCode == 200)
+                    return Ok(new ApiResponse(200, "Course created successfully"));
+                return BadRequest(new ApiResponse(400, "Failed to create course!"));
             }
-            return BadRequest(new ApiResponse(400));
+            return BadRequest(new ApiResponse(400, "Invalid data!"));
         }
 
         [HttpGet("{id}")]
@@ -65,15 +65,19 @@ namespace EduCredit.APIs.Controllers
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(ReadCourseDto), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<UpdateCourseDto>> UpdateCourse(Guid id, [FromBody] UpdateCourseDto updateCourseDto)
+        public async Task<ActionResult<ApiResponse>> UpdateCourse(Guid id, [FromBody] UpdateCourseDto updateCourseDto)
         {
             if (ModelState.IsValid)
             {
-                var courseDto = await _courseServices.UpdateCourseAsync(updateCourseDto, id);
-                if (courseDto is null) return NotFound(new ApiResponse(404));
-                return Ok(courseDto);
+                var response = await _courseServices.UpdateCourseAsync(updateCourseDto, id);
+                if (response.StatusCode == 200)
+                    return Ok(new ApiResponse(200, "Course updated successfully!"));
+                else if (response.StatusCode == 404)
+                    return NotFound(new ApiResponse(404, "Course not found!"));
+                else
+                    return BadRequest(new ApiResponse(400, "It is not suitable to update the course!"));
             }
-            return BadRequest(new ApiResponse(400));
+            return BadRequest(new ApiResponse(400, "Invalid data!"));
         }
 
         [HttpDelete("{id}")]

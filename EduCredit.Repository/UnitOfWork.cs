@@ -17,6 +17,7 @@ namespace EduCredit.Repository
         private readonly EduCreditContext _dbcontext;
         private readonly Hashtable _repo;
         public IEnrollmentRepo _enrollmentRepo { get; }
+        public IScheduleRepo _scheduleRepo { get; }
         public ISemesterRepo _semesterRepo { get; }
         public ICourseRepo _courseRepo { get; }
         public ITeacherRepo _teacherRepo { get; }
@@ -24,6 +25,7 @@ namespace EduCredit.Repository
         /// Ask CLR for creating object from DbContext and use it in service layer
         public UnitOfWork(EduCreditContext dbcontext,
             IEnrollmentRepo enrollmentRepo,
+            IScheduleRepo scheduleRepo,
             ISemesterRepo semesterRepo,
             ITeacherRepo teacherRepo,
             ICourseRepo courseRepo)
@@ -31,6 +33,7 @@ namespace EduCredit.Repository
             _dbcontext = dbcontext;
             _repo = new Hashtable();
             _enrollmentRepo = enrollmentRepo;
+            _scheduleRepo = scheduleRepo;
             _semesterRepo = semesterRepo;
             _teacherRepo = teacherRepo;
             _courseRepo = courseRepo;

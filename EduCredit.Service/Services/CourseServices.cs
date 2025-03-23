@@ -23,14 +23,15 @@ namespace EduCredit.Service.Services
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
-        public async Task<CreateCourseDto?> CreateCourseAsync(CreateCourseDto createCourseDto)
+
+        public async Task<ApiResponse> CreateCourseAsync(CreateCourseDto createCourseDto)
         {
             Course course = _mapper.Map<CreateCourseDto, Course>(createCourseDto);
             await _unitOfWork.Repository<Course>().CreateAsync(course);
             int result = await _unitOfWork.CompleteAsync();
 
-            if (result <= 0) return null;
-            return createCourseDto;
+            if (result <= 0) return new ApiResponse(400);
+            return new ApiResponse(200);
         }
 
         public async Task<ApiResponse> DeleteCourseAsync(Guid id)
@@ -60,18 +61,18 @@ namespace EduCredit.Service.Services
             return _mapper.Map<Course, ReadCourseDto>(course);
         }
         
-        public async Task<UpdateCourseDto?> UpdateCourseAsync(UpdateCourseDto updateCourseDto, Guid id)
+        public async Task<ApiResponse> UpdateCourseAsync(UpdateCourseDto updateCourseDto, Guid id)
         {
             var spec = new CourseWithDeptAndPrevCourseSpecification(id);
             var course = await _unitOfWork.Repository<Course>().GetByIdSpecificationAsync(spec);
 
-            if (course is null) return null;
+            if (course is null) return new ApiResponse(404);
             var newCourse = _mapper.Map(updateCourseDto, course);
             await _unitOfWork.Repository<Course>().Update(newCourse);
             int result = await _unitOfWork.CompleteAsync();
 
-            if (result <= 0) return null;
-            return updateCourseDto;
+            if (result <= 0) return new ApiResponse(400);
+            return new ApiResponse(200);
         }
     }
 }

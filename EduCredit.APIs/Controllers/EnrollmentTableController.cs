@@ -20,12 +20,13 @@ namespace EduCredit.APIs.Controllers
         {
             _enrollmentTableServices = enrollmentTableServices;
         }
+
         [HttpGet("GetEnrollOfCourse")]
-        [Authorize(Roles = AuthorizationConstants.StudentRole)]
+        [Authorize(Roles = $"{AuthorizationConstants.StudentRole}, {AuthorizationConstants.SuperAdminRole}")]
         public async Task<ActionResult<IReadOnlyList<ReadEnrollmentTableDto>>> GetStudentWithHisAvalaibleCourses()
         {
            
-            var userId =User.FindFirstValue("userId");
+            var userId = User.FindFirstValue("userId");
             var studentCourses = await _enrollmentTableServices.GetStudentAvailableCourses(userId);
             if (studentCourses is null) return NotFound(new ApiResponse(404));
             return Ok(studentCourses);

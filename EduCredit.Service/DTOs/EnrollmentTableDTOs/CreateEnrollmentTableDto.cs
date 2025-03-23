@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EduCredit.Service.DTOs.EnrollmentTableDTOs
 {
-    public class CreateEnrollmentTableDto : BaseEnrollmentDto
+    public class CreateEnrollmentTableDto : BaseEnrollmentTableDto
     {
     }
 }

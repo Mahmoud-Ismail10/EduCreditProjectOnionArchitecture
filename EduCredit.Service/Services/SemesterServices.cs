@@ -2,7 +2,6 @@
 using EduCredit.Core;
 using EduCredit.Core.Models;
 using EduCredit.Core.Relations;
-using EduCredit.Service.DTOs.SemesterCourseDTOs;
 using EduCredit.Service.DTOs.SemesterDTOs;
 using EduCredit.Service.Errors;
 using EduCredit.Service.Services.Contract;
@@ -26,14 +25,28 @@ namespace EduCredit.Service.Services
             _mapper = mapper;
         }
 
-        //public async Task<ApiResponse> CreateSemester(CreateSemesterDto createSemesterDto)
-        //{
-        //    var semester = _mapper.Map<CreateSemesterDto, Semester>(createSemesterDto);
-        //    await _unitOfWork.Repository<Semester>().CreateAsync(semester);
-        //    int result = await _unitOfWork.CompleteAsync();
-        //    if (result <= 0) return new ApiResponse(400);
-        //    return new ApiResponse(200);
-        //}
+        public async Task<ApiResponse> CreateSemester(CreateSemesterDto createSemesterDto)
+        {
+            //createSemesterDto.Year = DateTime.Now.Year.ToString();
+            createSemesterDto.Year = createSemesterDto.EndDate.Year.ToString();
+            var semester = _mapper.Map<CreateSemesterDto, Semester>(createSemesterDto);
+            // Fetch all valid course IDs from DB
+            var existingCourseIds = await _unitOfWork._courseRepo.GetValidCourseIds(createSemesterDto.CourseIds);
+            // Check if all requested courses exist
+            var missingCourses = createSemesterDto.CourseIds.Except(existingCourseIds).ToList();
+            if (missingCourses.Any())
+                return new ApiResponse(400, $"Courses not found: {string.Join(", ", missingCourses)}");
+
+            semester.SemesterCourses = createSemesterDto.CourseIds
+                .Select(courseId => new SemesterCourse { SemesterId = semester.Id, CourseId = courseId })
+                .ToList();
+
+            await _unitOfWork.Repository<Semester>().CreateAsync(semester);
+            int result = await _unitOfWork.CompleteAsync();
+
+            if (result <= 0) return new ApiResponse(400, "Failed to create the semester!");
+            return new ApiResponse(200, "Semester created successfully with assigned courses");
+        }
 
         public async Task<ApiResponse> UpdateSemester(UpdateSemesterDto updateSemesterDto, Guid semesterId)
         {
@@ -58,46 +71,6 @@ namespace EduCredit.Service.Services
 
             if (result <= 0) return new ApiResponse(400);
             return new ApiResponse(200);
-        }
-
-        public async Task<ApiResponse> AssignCoursesToSemester(SemesterCourseDto semesterCourseDto)
-        {
-            // Check if semester exist or no
-            var semesterExists = await _unitOfWork.Repository<Semester>().GetByIdAsync(semesterCourseDto.SemesterId);
-            if (semesterExists is null) return new ApiResponse(404, "Semester not found!");
-
-            // Fetch all valid course IDs from DB
-            var existingCourseIds = await _unitOfWork._courseRepo.GetValidCourseIds(semesterCourseDto.CourseIds);
-
-            // Check if all requested courses exist
-            var missingCourses = semesterCourseDto.CourseIds.Except(existingCourseIds).ToList();
-            if (missingCourses.Any())
-                return new ApiResponse(404, $"Courses not found: {string.Join(", ", missingCourses)}");
-
-            bool result = await _unitOfWork._semesterRepo.AssignCoursesToSemester(semesterCourseDto.SemesterId, semesterCourseDto.CourseIds);
-            if (!result)
-                return new ApiResponse(400, "Failed to assign courses to the semester!");
-            return new ApiResponse(200, "Courses successfully assigned to the semester!");
-        }
-        public async Task<ApiResponse> CreateSemester(CreateSemesterDto createSemesterDto)
-        {
-            var semester = _mapper.Map<CreateSemesterDto, Semester>(createSemesterDto);
-            // Fetch all valid course IDs from DB
-            var existingCourseIds = await _unitOfWork._courseRepo.GetValidCourseIds(createSemesterDto.CourseIds);
-            // Check if all requested courses exist
-            var missingCourses = createSemesterDto.CourseIds.Except(existingCourseIds).ToList();
-            if (missingCourses.Any())
-                return new ApiResponse(404, $"Courses not found: {string.Join(", ", missingCourses)}");
-
-            semester.SemesterCourses = createSemesterDto.CourseIds
-                .Select(courseId => new SemesterCourse { SemesterId = semester.Id, CourseId = courseId })
-                .ToList();
-
-            await _unitOfWork.Repository<Semester>().CreateAsync(semester);
-            int result = await _unitOfWork.CompleteAsync();
-
-            if (result <= 0) return new ApiResponse(400, "Failed to assign courses to the semester!");
-            return new ApiResponse(200, "Semester created successfully with assigned courses");
         }
     }
 }

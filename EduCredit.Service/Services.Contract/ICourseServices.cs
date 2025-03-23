@@ -11,10 +11,10 @@ namespace EduCredit.Service.Services.Contract
 {
     public interface ICourseServices
     {
-        Task<CreateCourseDto?> CreateCourseAsync(CreateCourseDto createCourseDto);
+        Task<ApiResponse> CreateCourseAsync(CreateCourseDto createCourseDto);
         Task<ReadCourseDto?> GetCourseByIdAsync(Guid id);
         IReadOnlyList<ReadCourseDto?> GetAllCourses(CourseSpecificationParams specParams, out int count);
-        Task<UpdateCourseDto?> UpdateCourseAsync(UpdateCourseDto updateCourseDto, Guid id);
+        Task<ApiResponse> UpdateCourseAsync(UpdateCourseDto updateCourseDto, Guid id);
         Task<ApiResponse> DeleteCourseAsync(Guid id);
     }
 }

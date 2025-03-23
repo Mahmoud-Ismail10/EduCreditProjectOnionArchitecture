@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EduCredit.Service.DTOs.EnrollmentTableDTOs
+namespace EduCredit.Service.DTOs.ScheduleDTOs
 {
-    public class ReadEnrollmentTableDto : BaseEnrollmentTableDto
+    public class CreateScheduleDto : BaseScheduleDto
     {
     }
 }

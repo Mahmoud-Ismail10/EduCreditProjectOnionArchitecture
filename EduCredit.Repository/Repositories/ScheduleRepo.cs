@@ -2,6 +2,7 @@
 using EduCredit.Core.Relations;
 using EduCredit.Core.Repositories.Contract;
 using EduCredit.Repository.Data;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,13 @@ namespace EduCredit.Repository.Repositories
         public ScheduleRepo(EduCreditContext dbcontext) : base(dbcontext)
         {
             _dbcontext = dbcontext;
+        }
+
+        public async Task<Schedule?> GetScheduleByIdsAsync(Guid courseId, Guid teacherId)
+        {
+            Schedule? schedule = await _dbcontext.Schedules
+                .FirstOrDefaultAsync(c => c.CourseId == courseId && c.TeacherId == teacherId);
+            return schedule;
         }
     }
 }

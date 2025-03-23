@@ -36,14 +36,14 @@ namespace EduCredit.Service.Services
             this.mapper = mapper;
         }
 
-        public async Task<IReadOnlyList<ReadEnrollmentTableDto>> GetStudentAvailableCourses(string studentId)
+        public async Task<IReadOnlyList<ReadEnrollmentTableDto>?> GetStudentAvailableCourses(string studentId)
         {
             //get student by id
             var stuId = Guid.Parse(studentId);
             var studentSpec = new StudentWithDepartmentAndGuideSpecification(stuId);
             var student = await _unitOfWork.Repository<Student>().GetByIdSpecificationAsync(studentSpec);
-
             if (student is null) return null;
+
             int count;
             var semesterSpec = new SemesterWithCoursesSpecifications();
             var semester = await _unitOfWork.Repository<Semester>().GetByIdSpecificationAsync(semesterSpec);
@@ -54,19 +54,16 @@ namespace EduCredit.Service.Services
 
             var CourseMapped = mapper.Map<IReadOnlyList<Course>, List<ReadCourseDto>>(courses.ToList());
 
-
-
             var StudentAndavailableCoursesDto = new ReadEnrollmentTableDto()
             {
-
-                Name = student.FullName,
+                StudentFullName = student.FullName,
                 Level = student.Level,
                 DepartmentName = student.Department.Name is null ? "" : student.Department.Name,
-                GBA = student.GPA,
+                GPA = student.GPA,
                 Obtainedhours = student.CreditHours,
                 AvailableHours = student.CreditHours <= 102 ? 18 : 21,
                 NameOfGuide = student.Teacher.FullName is null ? "" : student.Teacher.FullName,
-                semesterCourses = CourseMapped.ToList(),
+                //semesterCourses = CourseMapped.ToList(),
             };
             return new List<ReadEnrollmentTableDto> { StudentAndavailableCoursesDto };
 
@@ -77,6 +74,6 @@ namespace EduCredit.Service.Services
 
         //3-الطالب لا يسجل الماده في نفس الوقت
         //5-الطالب لا يسجل اكثر من 18 ساعه في الترم الحالي
-        //6-الطالب لا يسجل اكثر من 6 ساعات في الصيفي
+        //6-الطالب لا يسجل اكثر من 10 ساعات في الصيفي
     }
 }
