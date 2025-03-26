@@ -1,6 +1,7 @@
 ﻿using EduCredit.Core.Relations;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,10 +14,8 @@ namespace EduCredit.Core.Models
         public string Name { get; set; }
         public DateOnly StartDate { get; set; }
         public DateOnly EndDate { get; set; }
-        public bool IsCurrent => DateOnly.FromDateTime(DateTime.UtcNow) >= StartDate && DateOnly.FromDateTime(DateTime.UtcNow) <= EndDate;
         public DateTime EnrollmentOpen { get; set; }
         public DateTime EnrollmentClose { get; set; }
-        public bool IsEnrollmentOpen => DateTime.UtcNow >= EnrollmentOpen && DateTime.UtcNow <= EnrollmentClose;
 
         /// One-to-many: Between Semester and EnrollmentTanle
         public ICollection<EnrollmentTable> EnrollmentTables { get; set; } = new HashSet<EnrollmentTable>();

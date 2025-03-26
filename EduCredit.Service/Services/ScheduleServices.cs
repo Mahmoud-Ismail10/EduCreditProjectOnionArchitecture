@@ -32,6 +32,10 @@ namespace EduCredit.Service.Services
             var teacher = await _unitOfWork.Repository<Teacher>().GetByIdAsync(createScheduleDto.TeacherId);
             if (teacher is null) return new ApiResponse(400, "Teacher not found!");
 
+            /// Check if Schedule is exist or no
+            var existingSchedule = await _unitOfWork._scheduleRepo.GetScheduleByIdsAsync(createScheduleDto.CourseId, createScheduleDto.TeacherId);
+            if (existingSchedule is not null) return new ApiResponse(400, "Schedule already exists for this course!");
+
             /// Mapping data
             var newSchedule = _mapper.Map<CreateScheduleDto, Schedule>(createScheduleDto);
 

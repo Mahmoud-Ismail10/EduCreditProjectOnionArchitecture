@@ -8,13 +8,11 @@ using System.Threading.Tasks;
 
 namespace EduCredit.Service.DTOs.EnrollmentDTOs
 {
-    public class UpdateEnrollmentDto
+    public class ReadEnrollmentDto : BaseEnrollmentDto
     {
-        public Guid EnrollmentTableId { get; set; }
-        public Guid CourseId { get; set; }
         public float Grade { get; set; }
-        public float? Percentage { get; set; }
-        public Appreciation? Appreciation { get; set; }
-        public bool? IsPassAtCourse { get; set; }
+        public float Percentage { get; set; }
+        public Appreciation Appreciation { get; set; }
+        public bool IsPassAtCourse { get; set; }
     }
 }

@@ -1,5 +1,7 @@
-﻿using EduCredit.Core.Repositories.Contract;
+﻿using EduCredit.Core.Models;
+using EduCredit.Core.Repositories.Contract;
 using EduCredit.Repository.Data;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +17,13 @@ namespace EduCredit.Repository.Repositories
         public EnrollmentTableRepo(EduCreditContext dbcontext) : base(dbcontext)
         {
             _dbcontext = dbcontext;
+        }
+
+        public async Task<EnrollmentTable?> GetEnrollmentTableByStudentIdAndSemesterIdAsync(Guid studentId, Guid semesterId)
+        {
+            var enrollmentTable = await _dbcontext.EnrollmentTables
+                .FirstOrDefaultAsync(s => s.StudentId == studentId && s.SemesterId == semesterId);
+            return enrollmentTable;
         }
     }
 }

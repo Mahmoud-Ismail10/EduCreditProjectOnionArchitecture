@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using EduCredit.Core;
+using EduCredit.Core.Enums;
 using EduCredit.Core.Models;
 using EduCredit.Core.Relations;
 using EduCredit.Core.Specifications.CourseSpecifications;
@@ -10,6 +11,7 @@ using EduCredit.Service.DTOs.CourseDTOs;
 using EduCredit.Service.DTOs.EnrollmentTableDTOs;
 using EduCredit.Service.DTOs.SemesterDTOs;
 using EduCredit.Service.DTOs.StudentDTOs;
+using EduCredit.Service.Errors;
 using EduCredit.Service.Services.Contract;
 using System;
 using System.Collections.Generic;
@@ -22,7 +24,8 @@ namespace EduCredit.Service.Services
     public class EnrollmentTableServices : IEnrollmentTableServices
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper mapper;
+        private readonly ISemesterServices _semesterServices;
+        private readonly IMapper _mapper;
 
         //اظهر المواد المتاحه للتسجيل 
         //الشروط
@@ -30,10 +33,11 @@ namespace EduCredit.Service.Services
         //2-الطالب لا يسجل الماده من قبل
         //4-الماده متاحه للتسجيل في هذا الترم 
         //5-أن يكون الطالب قد رسب فيها من قب لإن كان قد سجلها سابقًا ولم ينجح 
-        public EnrollmentTableServices(IUnitOfWork unitOfWork, IMapper mapper)
+        public EnrollmentTableServices(IUnitOfWork unitOfWork, ISemesterServices semesterServices, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
-            this.mapper = mapper;
+            _semesterServices = semesterServices;
+            _mapper = mapper;
         }
 
         public async Task<IReadOnlyList<ReadEnrollmentTableDto>?> GetStudentAvailableCourses(string studentId)
@@ -52,7 +56,7 @@ namespace EduCredit.Service.Services
             var semesterCourses = new CourseWithDeptAndPrevCourseSpecification(semester.Id);
             var courses = _unitOfWork.Repository<Course>().GetAllSpecification(semesterCourses, out count);
 
-            var CourseMapped = mapper.Map<IReadOnlyList<Course>, List<ReadCourseDto>>(courses.ToList());
+            var CourseMapped = _mapper.Map<IReadOnlyList<Course>, List<ReadCourseDto>>(courses.ToList());
 
             var StudentAndavailableCoursesDto = new ReadEnrollmentTableDto()
             {
@@ -69,7 +73,41 @@ namespace EduCredit.Service.Services
 
         }
 
+        public async Task<ApiResponse> CreateOrUpdateEnrollmentTable(CreateOrUpdateEnrollmentTableDto createOrUpdateEnrollmentTableDto, string studentId)
+        {
+            if (await _semesterServices.IsEnrollmentOpenAsync())
+            {
+                createOrUpdateEnrollmentTableDto.Status = Status.Pending;
 
+                var currentSemester = await _unitOfWork._semesterRepo.GetCurrentSemester();
+                if (currentSemester is null) return new ApiResponse(404, "There is no current semester!");
+                createOrUpdateEnrollmentTableDto.SemesterId = currentSemester.Id;
+
+                var stuId = Guid.Parse(studentId);
+                var existEnrollmentTable = await _unitOfWork._enrollmentTableRepo.GetEnrollmentTableByStudentIdAndSemesterIdAsync(stuId, currentSemester.Id);
+                /// When the student enrolls the table for the first time in the current semester 
+                if (existEnrollmentTable is null)
+                {
+                    var createEnrollmentTable = _mapper.Map<CreateOrUpdateEnrollmentTableDto, EnrollmentTable>(createOrUpdateEnrollmentTableDto);
+                    await _unitOfWork.Repository<EnrollmentTable>().CreateAsync(createEnrollmentTable);
+
+                    int result = await _unitOfWork.CompleteAsync();
+                    if (result <= 0) return new ApiResponse(400, "Failed to create enrollment table!");
+                    return new ApiResponse(200, "Enrollment Table created successfully");
+                }
+                /// When the student has already enrolled the table and tries to update it
+                else
+                {
+                    var updateEnrollmentTable = _mapper.Map(createOrUpdateEnrollmentTableDto, existEnrollmentTable);
+                    await _unitOfWork.Repository<EnrollmentTable>().Update(updateEnrollmentTable);
+
+                    int result = await _unitOfWork.CompleteAsync();
+                    if (result <= 0) return new ApiResponse(400, "Failed to update enrollment table!");
+                    return new ApiResponse(200, "Enrollment Table updated successfully");
+                }
+            }
+            return new ApiResponse(400, "Failed to create enrollment table, Because the enrollment period ended!");
+        }
 
 
         //3-الطالب لا يسجل الماده في نفس الوقت

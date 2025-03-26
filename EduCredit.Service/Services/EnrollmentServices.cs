@@ -5,6 +5,7 @@ using EduCredit.Core.Models;
 using EduCredit.Core.Relations;
 using EduCredit.Service.DTOs.DepartmentDTOs;
 using EduCredit.Service.DTOs.EnrollmentDTOs;
+using EduCredit.Service.DTOs.ScheduleDTOs;
 using EduCredit.Service.Errors;
 using EduCredit.Service.Services.Contract;
 using Microsoft.AspNetCore.Mvc;
@@ -27,18 +28,18 @@ namespace EduCredit.Service.Services
             _mapper = mapper;
         }
 
-        public async Task<ApiResponse> AssignOrUpdateGrade(UpdateEnrollmentDto updateEnrollmentDto)
+        public async Task<ApiResponse> AssignOrUpdateGrade(Guid enrollmentTableId, Guid courseId, UpdateEnrollmentDto updateEnrollmentDto)
         {
-            var enrollment = await _unitOfWork._enrollmentRepo.GetEnrollmentByIdsAsync(updateEnrollmentDto.EnrollmentTableId, updateEnrollmentDto.CourseId);
+            var enrollment = await _unitOfWork._enrollmentRepo.GetEnrollmentByIdsAsync(enrollmentTableId, courseId);
             if (enrollment is null) return new ApiResponse(404);
 
             enrollment.Grade = updateEnrollmentDto.Grade;
-            var course = await _unitOfWork.Repository<Course>().GetByIdAsync(updateEnrollmentDto.CourseId);
+            var course = await _unitOfWork.Repository<Course>().GetByIdAsync(courseId);
             enrollment.Percentage = (enrollment.Grade / (course.CreditHours * 100)) * 100;
             if (enrollment.Grade >= course.MinimumDegree)
-                updateEnrollmentDto.IsPassAtCourse = true;
+                enrollment.IsPassAtCourse = true;
             else
-                updateEnrollmentDto.IsPassAtCourse = false;
+                enrollment.IsPassAtCourse = false;
             enrollment.Appreciation = enrollment.Percentage switch
             {
                 >= 90 => Appreciation.Aplus,
@@ -57,26 +58,29 @@ namespace EduCredit.Service.Services
             return new ApiResponse(200);
         }
 
-        //public async Task<ApiResponse> AssignEnrollment(EnrollmentDto enrollmentDto)
-        //{
-        //    // Check if EnrollmentTable exist or no
-        //    var enrollmentTable = await _unitOfWork.Repository<EnrollmentTable>().GetByIdAsync(enrollmentDto.EnrollmentTableId);
-        //    if (enrollmentTable is null) return new ApiResponse(400, "Invalid EnrollmentTable!");
+        public async Task<ApiResponse> AssignEnrollment(CreateEnrollmentDto createEnrollmentDto)
+        {
+            /// Check if EnrollmentTable and course are exist or no
+            var enrollmentTable = await _unitOfWork.Repository<EnrollmentTable>().GetByIdAsync(createEnrollmentDto.EnrollmentTableId);
+            if (enrollmentTable is null) return new ApiResponse(400, "EnrollmentTable not found!");
+            var course = await _unitOfWork.Repository<Course>().GetByIdAsync(createEnrollmentDto.CourseId);
+            if (course is null) return new ApiResponse(400, "Course not found!");
 
-        //    // Check if Course exist or no
-        //    var course = await _unitOfWork.Repository<Course>().GetByIdAsync(enrollmentDto.CourseId);
-        //    if (course is null) return new ApiResponse(400, "Invalid Course!");
+            /// Check if Enrollment is exist or no
+            var existingEnrollment = await _unitOfWork._enrollmentRepo.GetEnrollmentByIdsAsync(createEnrollmentDto.EnrollmentTableId, createEnrollmentDto.CourseId);
+            if (existingEnrollment is not null) return new ApiResponse(400, "Enrollment already exists for this course!");
 
-        //    // Check if Enrollment exist or no
-        //    var existingEnrollment = await _unitOfWork._enrollmentRepo.GetEnrollmentByIdsAsync(enrollmentDto.EnrollmentTableId, enrollmentDto.CourseId);
-        //    if (existingEnrollment is not null) return new ApiResponse(400, "Enrollment already exists for this course!");
+            /// Mapping data
+            Enrollment enrollment = _mapper.Map<CreateEnrollmentDto, Enrollment>(createEnrollmentDto);
 
-        //    Enrollment enrollment = _mapper.Map<EnrollmentDto, Enrollment>(enrollmentDto);
-        //    await _unitOfWork.Repository<Enrollment>().CreateAsync(enrollment);
-        //    int result = await _unitOfWork.CompleteAsync();
-        //    if (result <= 0) return new ApiResponse(400, "Failed to assign enrollment!");
-        //    return new ApiResponse(200);
-        //}
+            /// Create Enrollment
+            await _unitOfWork.Repository<Enrollment>().CreateAsync(enrollment);
+
+            /// Save in DB
+            int result = await _unitOfWork.CompleteAsync();
+            if (result <= 0) return new ApiResponse(400, "Failed to assign enrollment!");
+            return new ApiResponse(200, "The enrollment was successfully assigned");
+        }
 
         public async Task<ApiResponse> DeleteEnrollment(Guid enrollmentTableId, Guid courseId)
         {
@@ -87,6 +91,14 @@ namespace EduCredit.Service.Services
             int result = await _unitOfWork.CompleteAsync();
             if (result <= 0) return new ApiResponse(200);
             return new ApiResponse(400);
+        }
+
+        public async Task<ReadEnrollmentDto?> GetEnrollment(Guid enrollmentTableId, Guid courseId)
+        {
+            var enrollment = await _unitOfWork._enrollmentRepo.GetEnrollmentByIdsAsync(enrollmentTableId, courseId);
+            if (enrollment is null) return null;
+            var enrollmentDto = _mapper.Map<Enrollment, ReadEnrollmentDto>(enrollment);
+            return enrollmentDto;
         }
     }
 }

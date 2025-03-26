@@ -1,4 +1,5 @@
-﻿using EduCredit.Core.Relations;
+﻿using EduCredit.Core.Models;
+using EduCredit.Core.Relations;
 using EduCredit.Core.Repositories.Contract;
 using EduCredit.Repository.Data;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +30,13 @@ namespace EduCredit.Repository.Repositories
 
             await _dbcontext.SemesterCourses.AddRangeAsync(newSemesterCourses);
             return await _dbcontext.SaveChangesAsync() > 0;
+        }
+
+        public async Task<Semester?> GetCurrentSemester()
+        {
+            return await _dbcontext.Semesters
+                .SingleOrDefaultAsync(s => s.StartDate <= DateOnly.FromDateTime(DateTime.UtcNow)
+                                        && s.EndDate >= DateOnly.FromDateTime(DateTime.UtcNow));
         }
     }
 }

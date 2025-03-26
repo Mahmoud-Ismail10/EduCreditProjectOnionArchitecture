@@ -27,25 +27,29 @@ namespace EduCredit.Service.Services
 
         public async Task<ApiResponse> CreateSemester(CreateSemesterDto createSemesterDto)
         {
-            //createSemesterDto.Year = DateTime.Now.Year.ToString();
-            createSemesterDto.Year = createSemesterDto.EndDate.Year.ToString();
-            var semester = _mapper.Map<CreateSemesterDto, Semester>(createSemesterDto);
-            // Fetch all valid course IDs from DB
-            var existingCourseIds = await _unitOfWork._courseRepo.GetValidCourseIds(createSemesterDto.CourseIds);
-            // Check if all requested courses exist
-            var missingCourses = createSemesterDto.CourseIds.Except(existingCourseIds).ToList();
-            if (missingCourses.Any())
-                return new ApiResponse(400, $"Courses not found: {string.Join(", ", missingCourses)}");
+            if (await _unitOfWork._semesterRepo.GetCurrentSemester() is null)
+            {
+                createSemesterDto.Year = createSemesterDto.EndDate.Year.ToString();
 
-            semester.SemesterCourses = createSemesterDto.CourseIds
-                .Select(courseId => new SemesterCourse { SemesterId = semester.Id, CourseId = courseId })
-                .ToList();
+                var semester = _mapper.Map<CreateSemesterDto, Semester>(createSemesterDto);
+                // Fetch all valid course IDs from DB
+                var existingCourseIds = await _unitOfWork._courseRepo.GetValidCourseIds(createSemesterDto.CourseIds);
+                // Check if all requested courses exist
+                var missingCourses = createSemesterDto.CourseIds.Except(existingCourseIds).ToList();
+                if (missingCourses.Any())
+                    return new ApiResponse(400, $"Courses not found: {string.Join(", ", missingCourses)}");
 
-            await _unitOfWork.Repository<Semester>().CreateAsync(semester);
-            int result = await _unitOfWork.CompleteAsync();
+                semester.SemesterCourses = createSemesterDto.CourseIds
+                    .Select(courseId => new SemesterCourse { SemesterId = semester.Id, CourseId = courseId })
+                    .ToList();
 
-            if (result <= 0) return new ApiResponse(400, "Failed to create the semester!");
-            return new ApiResponse(200, "Semester created successfully with assigned courses");
+                await _unitOfWork.Repository<Semester>().CreateAsync(semester);
+                int result = await _unitOfWork.CompleteAsync();
+
+                if (result <= 0) return new ApiResponse(400, "Failed to create the semester!");
+                return new ApiResponse(200, "Semester created successfully with assigned courses");
+            }
+            return new ApiResponse(400, "Failed to create the semester, Because there is a current semester that has not ended!");
         }
 
         public async Task<ApiResponse> UpdateSemester(UpdateSemesterDto updateSemesterDto, Guid semesterId)
@@ -72,5 +76,24 @@ namespace EduCredit.Service.Services
             if (result <= 0) return new ApiResponse(400);
             return new ApiResponse(200);
         }
+
+        public async Task<ReadSemesterDto?> GetCurrentSemester()
+        {
+            var currentSemester = await _unitOfWork._semesterRepo.GetCurrentSemester();
+            return _mapper.Map<Semester, ReadSemesterDto?>(currentSemester);
+        }
+
+        public async Task<bool> IsEnrollmentOpenAsync()
+        {
+            var currentSemester = await _unitOfWork._semesterRepo.GetCurrentSemester();
+            if (currentSemester is not null)
+            {
+                bool result = DateTime.UtcNow >= currentSemester.EnrollmentOpen && DateTime.UtcNow <= currentSemester.EnrollmentClose;
+                return result;
+            }
+            return false;
+        }
+
+
     }
 }

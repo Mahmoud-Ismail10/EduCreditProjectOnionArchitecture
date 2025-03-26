@@ -5,11 +5,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EduCredit.Service.DTOs.EnrollmentDTOs
 {
-    public class EnrollmentDto
+    public class BaseEnrollmentDto
     {
         [Required]
         public Guid EnrollmentTableId { get; set; }
         [Required]
-        public List<Guid> CourseIds { get; set; } = new List<Guid>();
+        public Guid CourseId { get; set; }
     }
 }

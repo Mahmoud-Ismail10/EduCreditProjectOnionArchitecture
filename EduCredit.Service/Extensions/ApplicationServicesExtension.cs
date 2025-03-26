@@ -53,6 +53,7 @@ namespace EduCredit.Service.Extensions
             /// Add life time for Services
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped(typeof(IEnrollmentRepo), typeof(EnrollmentRepo));
+            services.AddScoped(typeof(IEnrollmentTableRepo), typeof(EnrollmentTableRepo));
             services.AddScoped(typeof(IScheduleRepo), typeof(ScheduleRepo));
             services.AddScoped(typeof(ITeacherRepo), typeof(TeacherRepo));
             services.AddScoped(typeof(ICourseRepo), typeof(CourseRepo));

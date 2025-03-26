@@ -13,5 +13,7 @@ namespace EduCredit.Service.Services.Contract
         Task<ApiResponse> CreateSemester(CreateSemesterDto createSemesterDto);
         Task<ApiResponse> UpdateSemester(UpdateSemesterDto updateSemesterDto, Guid semesterId);
         Task<ApiResponse> DeleteSemester(Guid semesterId);
+        Task<ReadSemesterDto?> GetCurrentSemester();
+        Task<bool> IsEnrollmentOpenAsync();
     }
 }

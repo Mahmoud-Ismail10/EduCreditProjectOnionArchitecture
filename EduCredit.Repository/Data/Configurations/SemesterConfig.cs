@@ -34,9 +34,6 @@ namespace EduCredit.Repository.Data.Configurations
             builder.Property(s => s.EnrollmentClose)
                 .HasColumnType("datetime2")
                 .IsRequired();
-
-            builder.Ignore(s => s.IsCurrent);
-            builder.Ignore(s => s.IsEnrollmentOpen);
         }
     }   
 }
