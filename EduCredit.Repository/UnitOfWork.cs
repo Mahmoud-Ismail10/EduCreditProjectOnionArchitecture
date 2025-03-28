@@ -20,8 +20,11 @@ namespace EduCredit.Repository
         public IEnrollmentRepo _enrollmentRepo { get; }
         public IScheduleRepo _scheduleRepo { get; }
         public ISemesterRepo _semesterRepo { get; }
+        public ISemeterCourseRepo _semesterCourseRepo { get; }
         public ICourseRepo _courseRepo { get; }
         public ITeacherRepo _teacherRepo { get; }
+
+        public IDepartmentRepo _departmentRepo { get; }
 
         /// Ask CLR for creating object from DbContext and use it in service layer
         public UnitOfWork(EduCreditContext dbcontext,
@@ -30,7 +33,9 @@ namespace EduCredit.Repository
             IScheduleRepo scheduleRepo,
             ISemesterRepo semesterRepo,
             ITeacherRepo teacherRepo,
-            ICourseRepo courseRepo)
+            ICourseRepo courseRepo,
+            IDepartmentRepo departmentRepo,
+            ISemeterCourseRepo semesterCourseRepo)
         {
             _dbcontext = dbcontext;
             _repo = new Hashtable();
@@ -40,6 +45,8 @@ namespace EduCredit.Repository
             _semesterRepo = semesterRepo;
             _teacherRepo = teacherRepo;
             _courseRepo = courseRepo;
+            _departmentRepo = departmentRepo;
+            _semesterCourseRepo = semesterCourseRepo;
         }
 
         public async Task<int> CompleteAsync()

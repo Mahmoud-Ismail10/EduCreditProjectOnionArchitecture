@@ -28,5 +28,14 @@ namespace EduCredit.Repository.Repositories
 
             return existingCourseIds;
         }
+        public async Task<IReadOnlyList<Guid>> GetCoursesByEnrollmentTableIdAsync(Guid enrollmentTableId)
+        {
+            var CoursesIds = await _dbcontext.Enrollments
+                .Where(e => e.EnrollmentTableId == enrollmentTableId)
+                .Select(e => e.CourseId)
+                .ToListAsync();
+            return CoursesIds;
+        }
+
     }
 }

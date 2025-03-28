@@ -16,7 +16,10 @@ namespace EduCredit.Core
         IEnrollmentRepo _enrollmentRepo { get; }
         IScheduleRepo _scheduleRepo { get; }
         ISemesterRepo _semesterRepo { get; }
+        ISemeterCourseRepo _semesterCourseRepo { get; }
         ICourseRepo _courseRepo { get; }
         ITeacherRepo _teacherRepo { get; }
+        
+        IDepartmentRepo _departmentRepo { get; }
     }
 }

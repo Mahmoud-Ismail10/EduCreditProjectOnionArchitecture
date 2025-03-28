@@ -23,5 +23,9 @@ namespace EduCredit.Service.DTOs.ScheduleDTOs
         public TimeOnly LectureEnd { get; set; }
         [Required(ErrorMessage = "Lecture Location is required")]
         public string LectureLocation { get; set; }
+        public string TeacherName { get; set; }
+        public string CourseName { get; set; }
+        public float Duration { get; set; }
+        public float Hours { get; set; }
     }
 }

@@ -4,14 +4,13 @@ namespace EduCredit.Service.Errors
 {
     public class ApiResponse
     {
-        [JsonIgnore]
         public int StatusCode { get; set; }
-        public string? ErrorMessage { get; set; }
+        public string? Message { get; set; }
 
         public ApiResponse(int _StatusCode, string? _ErrorMessage = null)
         {
             StatusCode = _StatusCode;
-            ErrorMessage = _ErrorMessage ?? GetErrorMessage(StatusCode);
+           Message = _ErrorMessage ?? GetErrorMessage(StatusCode);
         }
 
         private string? GetErrorMessage(int statusCode)
@@ -28,12 +27,12 @@ namespace EduCredit.Service.Errors
     }
     public class ApiResponse<T> : ApiResponse
     {
-        public T? Data { get; set; }
+        public T? Result { get; set; }
 
-        public ApiResponse(int statusCode, string message, T? data = default)
+        public ApiResponse(int statusCode, string message, T? result = default)
             : base(statusCode, message)
         {
-            Data = data;
+            Result = result;
         }
     }
 }

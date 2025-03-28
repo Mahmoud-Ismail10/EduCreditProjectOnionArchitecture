@@ -19,12 +19,14 @@ namespace EduCredit.Core.Specifications.SemesterCoursesSpecifications
             Includes.Add(s => s.Semester);
             Includes.Add(s => s.Course);
         }
-        public SemesterCourseswithStudentSpecifications(): base()
+        public SemesterCourseswithStudentSpecifications
+            ()
 
         {
             Includes.Add(s => s.Semester);
             Includes.Add(s => s.Course);
 
         }
+
     }
 }

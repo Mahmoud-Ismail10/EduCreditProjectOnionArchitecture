@@ -37,6 +37,7 @@ namespace EduCredit.Repository.Repositories
             return Task.CompletedTask;
         }
 
+
         public IReadOnlyList<T?> GetAllSpecification(ISpecification<T> spec, out int count)
         {
             return ApplyQuery(spec, out count).AsNoTracking().ToList();
@@ -52,7 +53,6 @@ namespace EduCredit.Repository.Repositories
         {
             return SpecificationEvaluator<T>.GetQuery(_dbcontext.Set<T>(), spec, out count);
         }
-
         public async Task<T?> GetByIdAsync(Guid id)
         {
             return await _dbcontext.Set<T>().FindAsync(id);
@@ -62,5 +62,18 @@ namespace EduCredit.Repository.Repositories
         {
             return await _dbcontext.Set<T>().AsNoTracking().ToListAsync();
         }
+
+        public async Task<int> CountAsync(ISpecification<T>? spec = null)
+        {
+            IQueryable<T> query = _dbcontext.Set<T>();
+
+            if (spec != null)
+            {
+                query = SpecificationEvaluator<T>.GetQuery(query, spec,out int count);
+            }
+
+            return await query.CountAsync();
+        }
+
     }
 }

@@ -31,8 +31,8 @@ namespace EduCredit.APIs.Controllers
             {
                 var response = await _semesterServices.CreateSemester(createSemesterDto);
                 if (response.StatusCode == 200)
-                    return Ok(new ApiResponse(200, response.ErrorMessage));
-                return BadRequest(new ApiResponse(400, response.ErrorMessage));
+                    return Ok(new ApiResponse(200, response.Message));
+                return BadRequest(new ApiResponse(400, response.Message));
             }
             return BadRequest(new ApiResponse(400, "Invalid input data!"));
         }

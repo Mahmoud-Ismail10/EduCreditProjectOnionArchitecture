@@ -10,9 +10,9 @@ namespace EduCredit.Core.Specifications
     {
         public string? Sort { get; set; }
 
-        private const int MaxPageSize = 10;
+        private const int MaxPageSize = 50;
 
-        private int pageSize = 10;
+        private int pageSize=50;
 
         public int PageSize
         {
@@ -20,7 +20,7 @@ namespace EduCredit.Core.Specifications
             set { pageSize = value > MaxPageSize ? MaxPageSize : value; }
         }
 
-        public int PageIndex { get; set; } = 1; // make defualt value is 1
+        public int PageIndex { get; set; } = 1;   // make defualt value is 1
         public string? Search { get; set; }
     }
 }

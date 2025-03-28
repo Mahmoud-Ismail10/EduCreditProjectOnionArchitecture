@@ -24,14 +24,14 @@ namespace EduCredit.Service.Services
             _mapper = mapper;
         }
 
-        public async Task<ApiResponse> CreateCourseAsync(CreateCourseDto createCourseDto)
+        public async Task<CreateCourseDto> CreateCourseAsync(CreateCourseDto createCourseDto)
         {
             Course course = _mapper.Map<CreateCourseDto, Course>(createCourseDto);
             await _unitOfWork.Repository<Course>().CreateAsync(course);
             int result = await _unitOfWork.CompleteAsync();
 
-            if (result <= 0) return new ApiResponse(400);
-            return new ApiResponse(200);
+            if (result <= 0) return null;
+            return createCourseDto;
         }
 
         public async Task<ApiResponse> DeleteCourseAsync(Guid id)

@@ -11,7 +11,7 @@ namespace EduCredit.Service.Services.Contract
 {
     public interface ICourseServices
     {
-        Task<ApiResponse> CreateCourseAsync(CreateCourseDto createCourseDto);
+        Task<CreateCourseDto> CreateCourseAsync(CreateCourseDto createCourseDto);
         Task<ReadCourseDto?> GetCourseByIdAsync(Guid id);
         IReadOnlyList<ReadCourseDto?> GetAllCourses(CourseSpecificationParams specParams, out int count);
         Task<ApiResponse> UpdateCourseAsync(UpdateCourseDto updateCourseDto, Guid id);

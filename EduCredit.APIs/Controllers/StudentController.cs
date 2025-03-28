@@ -25,26 +25,26 @@ namespace EduCredit.APIs.Controllers
         /// GET: api/Students
         [HttpGet]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]
-        [ProducesResponseType(typeof(Pagination<ReadTeacherDto>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse<Pagination<ReadStudentDto>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-        public ActionResult<IReadOnlyList<ReadStudentDto>> GetAllStudents([FromQuery] StudentSpecificationParams specParams)
+        public ActionResult<ApiResponse<IReadOnlyList<ReadStudentDto>>> GetAllStudents([FromQuery] StudentSpecificationParams specParams)
         {
             int count;
             var students = _studentServices.GetAllStudents(specParams, out count);
             if (students is null) return NotFound(new ApiResponse(404));
-            return Ok(new Pagination<ReadStudentDto>(specParams.PageSize, specParams.PageIndex, count, students));
+            return Ok(new ApiResponse<Pagination<ReadStudentDto>>(200,"Success",new  Pagination<ReadStudentDto>(specParams.PageSize, specParams.PageIndex, count, students)));
         }
 
         /// GET: api/Students/{id}
         [HttpGet("{id}")]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]
-        [ProducesResponseType(typeof(ReadTeacherDto), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse<ReadStudentDto>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-        public async Task<ActionResult<ReadStudentDto>> GetStudent(Guid id)
+        public async Task<ActionResult<ApiResponse<ReadStudentDto>>> GetStudent(Guid id)
         {
             var student = await _studentServices.GetStudentByIdAsync(id);
             if (student is null) return NotFound(new ApiResponse(404));
-            return Ok(student);
+            return Ok(new ApiResponse<ReadStudentDto>(200,"Success",student));
         }
 
         /// PUT: api/Students/{id}

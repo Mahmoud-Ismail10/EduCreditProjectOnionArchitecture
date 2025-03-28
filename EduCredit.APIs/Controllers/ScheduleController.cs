@@ -6,6 +6,7 @@ using EduCredit.Service.Services.Contract;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Net;
 
 namespace EduCredit.APIs.Controllers
@@ -27,20 +28,42 @@ namespace EduCredit.APIs.Controllers
         {
             var response = await _scheduleServices.AssignSchedule(createScheduleDto);
             if (response.StatusCode == 200)
-                return Ok(new ApiResponse(200, response.ErrorMessage));
-            return BadRequest(new ApiResponse(400, response.ErrorMessage));
+                return Ok(new ApiResponse(200, response.Message));
+            return BadRequest(new ApiResponse(400, response.Message));
         }
 
         [HttpGet("{courseId}/{teacherId}")]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
-        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse<ReadScheduleDto>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<ReadScheduleDto>> GetSchedule(Guid courseId, Guid teacherId)
+        public async Task<ActionResult<ApiResponse<ReadScheduleDto>>> GetSchedule(Guid courseId, Guid teacherId)
         {
             var scheduleDto = await _scheduleServices.GetSchedule(courseId, teacherId);
             if (scheduleDto is null)
                 return NotFound(new ApiResponse(404, "Schedule not found!"));
-            return Ok(scheduleDto);
+            return Ok(new ApiResponse<ReadScheduleDto>(200,"Success",scheduleDto));
+        }   
+        [HttpGet("Study-Schedule/{StudentId}")]
+        //[Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
+        [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<ReadScheduleEnrollCourseDto>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
+        public async Task<ActionResult<ApiResponse<IReadOnlyList<ReadScheduleEnrollCourseDto>>>> GetSchedule(Guid StudentId)
+        {
+            var scheduleDto = await _scheduleServices.GetScheduleById(StudentId);
+            if (scheduleDto is null)
+                return NotFound(new ApiResponse(404, "Schedule not found!"));
+            return Ok(new ApiResponse<IReadOnlyList< ReadScheduleEnrollCourseDto >>(200,"Success", scheduleDto));
+        }
+
+        [HttpGet("Get-EnrollmentOfCourseScheduale")]
+        [Authorize(Roles = $"{AuthorizationConstants.StudentRole}, {AuthorizationConstants.SuperAdminRole}")]
+        public async Task<ActionResult<ApiResponse<IReadOnlyList<ReadScheduleEnrollCourseDto>>>> GetStudentWithHisAvalaibleCourses(Guid StudentId)
+        {
+
+            //var userId = User.FindFirstValue("userId");
+            var studentCourses = await _scheduleServices.GetStudentAvailableCourses(StudentId);
+            if (studentCourses is null) return NotFound(new ApiResponse(404));
+            return Ok(new ApiResponse<IReadOnlyList<ReadScheduleEnrollCourseDto>>(200,"Success",studentCourses));
         }
 
         [HttpPut("{courseId}/{teacherId}")]
@@ -72,6 +95,5 @@ namespace EduCredit.APIs.Controllers
             else
                 return BadRequest(new ApiResponse(400, "It is not suitable to delete the schedule!"));
         }
-
-    } 
+    }
 }

@@ -26,6 +26,7 @@ namespace EduCredit.Service.Helper
                 .ForMember(d => d.PreviousCourseName, o => o.MapFrom(s => s.PreviousCourse.Name))
                 .ForMember(d => d.DepartmentName, o => o.MapFrom(s => s.Department.Name)).ReverseMap();
             CreateMap<CreateCourseDto, Course>().ReverseMap();
+
             CreateMap<UpdateCourseDto, Course>().ReverseMap();
             CreateMap <Course,ReadCourseDto>().ReverseMap();
            
@@ -36,6 +37,7 @@ namespace EduCredit.Service.Helper
             CreateMap<CreateOrUpdateEnrollmentTableDto, EnrollmentTable>();
 
             CreateMap<Schedule, ReadScheduleDto>();
+            //CreateMap<Schedule, ReadScheduleEnrollCourseDto>();
             CreateMap<CreateScheduleDto, Schedule>();
             CreateMap<UpdateScheduleDto, Schedule>();
 
@@ -43,6 +45,12 @@ namespace EduCredit.Service.Helper
             CreateMap<CreateEnrollmentDto, Enrollment>();
             CreateMap<UpdateEnrollmentDto, Enrollment>();
 
+            CreateMap<Schedule, ReadScheduleDto>()
+                .ForMember(d => d.TeacherName, o => o.MapFrom(s => s.Teacher.FullName))
+                .ForMember(d => d.CourseName, o => o.MapFrom(s => s.Course.Name))
+                .ForMember(d => d.Duration, o => o.MapFrom(s => s.Course.Duration))
+                .ForMember(d => d.Hours, o => o.MapFrom(s => s.Course.CreditHours))
+                ;
             CreateMap<Teacher, ReadTeacherDto>()
                 .ForMember(d => d.Id, o => o.MapFrom(s => s.Id))
                 .ForMember(d => d.FullName, o => o.MapFrom(s => s.FullName))

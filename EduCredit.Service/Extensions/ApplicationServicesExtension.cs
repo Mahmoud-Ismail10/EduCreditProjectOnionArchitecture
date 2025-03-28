@@ -58,10 +58,13 @@ namespace EduCredit.Service.Extensions
             services.AddScoped(typeof(ITeacherRepo), typeof(TeacherRepo));
             services.AddScoped(typeof(ICourseRepo), typeof(CourseRepo));
             services.AddScoped(typeof(ISemesterRepo), typeof(SemesterRepo));
+            services.AddScoped(typeof(IDepartmentRepo), typeof(DepartmentRepo));
+            services.AddScoped(typeof(ISemeterCourseRepo), typeof(SemeterCourseRepo));
 
             services.AddScoped(typeof(IEnrollmentServices), typeof(EnrollmentServices));
             services.AddScoped(typeof(IScheduleServices), typeof(ScheduleServices));
             services.AddScoped(typeof(IEnrollmentTableServices), typeof(EnrollmentTableServices));
+            services.AddScoped(typeof(IScheduleServices), typeof(ScheduleServices));
             services.AddScoped(typeof(ISemesterServices), typeof(SemesterServices));
             services.AddScoped(typeof(IDepartmentServices), typeof(DepartmentServices));
             services.AddScoped(typeof(ICourseServices), typeof(CourseServices));
@@ -215,6 +218,22 @@ namespace EduCredit.Service.Extensions
                                 claimsIdentity.AddClaim(new Claim("role", roleClaim));
                         }
                         return Task.CompletedTask;
+                    },
+                    OnAuthenticationFailed = context =>
+                    {
+                        if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
+                        {
+                            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                            context.Response.ContentType = "application/json";
+                            return context.Response.WriteAsync("message: Token has expired. Please login again.");
+                        }
+                        return Task.CompletedTask;
+                    },
+
+                    OnForbidden = context =>
+                    {
+                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                        return context.Response.WriteAsync("message : You do not have permission to access this resource.");
                     }
                 };
             });

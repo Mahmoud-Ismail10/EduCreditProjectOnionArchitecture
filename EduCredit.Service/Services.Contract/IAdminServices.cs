@@ -1,4 +1,5 @@
-﻿using EduCredit.Core.Specifications.AdminSpecifications;
+﻿using EduCredit.Core.Enums;
+using EduCredit.Core.Specifications.AdminSpecifications;
 using EduCredit.Core.Specifications.TeacherSpecefications;
 using EduCredit.Service.DTOs.AdminDTOs;
 using EduCredit.Service.DTOs.TeacherDTOs;
@@ -17,5 +18,6 @@ namespace EduCredit.Service.Services.Contract
         Task<ReadAdminDto?> GetAdminByIdAsync(Guid id);
         Task<UpdateAdminDto?> UpdateAdminAsync(UpdateAdminDto updateadminDto, Guid id);
         Task<ApiResponse> DeleteAdminAsync(Guid id);
+        Task<StatisticsDto> GetStatistics(Statistics statistics);
     }
 }

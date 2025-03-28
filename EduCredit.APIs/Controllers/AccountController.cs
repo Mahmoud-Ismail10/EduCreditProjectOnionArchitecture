@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Azure;
 using EduCredit.Core.Enums;
 using EduCredit.Core.Models;
 using EduCredit.Core.Security;
@@ -54,23 +55,23 @@ namespace EduCredit.APIs.Controllers
         //    var Mappedadmin = _mapper.Map<RegisterAdminDto, Person>(registerDto);
         //    var result = await _auth.RegisterAsync(Mappedadmin,role,RedirectUrl);
         //    if (result.StatusCode != 200)
-        //        return BadRequest(new ApiResponse(400, result.ErrorMessage));
+        //        return BadRequest(new ApiResponse(400, result.Message));
 
         //    return Created();
         //}
 
         [HttpPost("UserRegistration")]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse),StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult> Register([FromBody] BaseUserDto registerDto,Roles role, string RedirectUrl)
+        public async Task<ActionResult<ApiResponse>> Register([FromBody] BaseUserDto registerDto,Roles role, string RedirectUrl)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new ApiResponse(400, "Invalid Data!"));
             var result = await _auth.RegisterAsync(registerDto, role, RedirectUrl);
             if (result.StatusCode != 200)
-                return BadRequest(new ApiResponse(400, result.ErrorMessage));
-            return Created();
+                return BadRequest(new ApiResponse(400, result.Message));
+            return Ok(new ApiResponse(201,"Success"));
         }
         #endregion
 
@@ -88,7 +89,7 @@ namespace EduCredit.APIs.Controllers
             // If the confirmation fails, return a bad request
             if (result.StatusCode!=200)
             {
-                return BadRequest(new ApiResponse(400,result.ErrorMessage));
+                return BadRequest(new ApiResponse(400,result.Message));
             }
             // Redirect the user to the frontend after successful confirmation
             return Redirect($"{redirectUrl}?status=success");
@@ -98,10 +99,10 @@ namespace EduCredit.APIs.Controllers
 
         #region Login
         [HttpPost("login")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<TokenResponseDto>),StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
     
-        public async Task<ActionResult<TokenResponseDto>> Login([FromBody] LoginDto loginDto)
+        public async Task<ActionResult<ApiResponse<TokenResponseDto>>> Login([FromBody] LoginDto loginDto)
         {
             
             if (!ModelState.IsValid)
@@ -110,25 +111,25 @@ namespace EduCredit.APIs.Controllers
             var (tokens, errors) = await _auth.LoginAsync(loginDto);
 
             if (errors.StatusCode != 200)
-                return Unauthorized(new ApiResponse(401, errors.ErrorMessage));
+                return Unauthorized(new ApiResponse(401, errors.Message));
 
-            return Ok(tokens);
+            return new ApiResponse<TokenResponseDto>(200, "Success",tokens);
         }
         #endregion
 
         #region RefreshToken
 
         [HttpPost("refresh-token")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<TokenResponseDto>),StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<TokenResponseDto>> RefreshToken([FromBody] RefreshTokenRequestDto request)
+        public async Task<ActionResult<ApiResponse<TokenResponseDto>>> RefreshToken([FromBody] RefreshTokenRequestDto request)
         {
             var response = await _auth.RefreshTokenAsync(request.RefreshToken);
 
             if (response.StatusCode!=200)
-                return Unauthorized(new ApiResponse(401, response.ErrorMessage));
+                return Unauthorized(new ApiResponse(401, response.Message));
 
-            return Ok(response.Data);
+            return Ok(new ApiResponse<TokenResponseDto>(200,"Success",response.Result));
         }
         #endregion
 
@@ -159,7 +160,7 @@ namespace EduCredit.APIs.Controllers
                 return BadRequest(new ApiResponse(400, "Invalid Data!"));
             var response = await _auth.ForgotPasswordAsync(forgotPasswordDto, RedirectUrl);
             if (response.StatusCode != 200)
-                return BadRequest(new ApiResponse(400, response.ErrorMessage));
+                return BadRequest(new ApiResponse(400, response.Message));
             return Ok(new ApiResponse(200, "Password reset link sent successfully"));
         }
         #endregion
@@ -174,7 +175,7 @@ namespace EduCredit.APIs.Controllers
                 return BadRequest(new ApiResponse(400, "Invalid Data!"));
             var response = await _auth.ResetPasswordAsync(resetPasswordDto);
             if (response.StatusCode != 200)
-                return BadRequest(new ApiResponse(400, response.ErrorMessage));
+                return BadRequest(new ApiResponse(400, response.Message));
             return Ok(new ApiResponse(200, "Password reset successfully"));
         }
         #endregion
@@ -200,7 +201,7 @@ namespace EduCredit.APIs.Controllers
             var response = await _auth.ChangePasswordAsync(userId, changePasswordDto);
 
             if (response.StatusCode != 200)
-                return BadRequest(new ApiResponse(400, response.ErrorMessage));
+                return BadRequest(new ApiResponse(400, response.Message));
 
             return Ok(new ApiResponse(200, "Password changed successfully"));
         }

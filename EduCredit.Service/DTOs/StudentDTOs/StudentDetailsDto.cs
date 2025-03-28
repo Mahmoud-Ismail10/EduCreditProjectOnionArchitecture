@@ -1,17 +1,16 @@
 ﻿using EduCredit.Core.Enums;
-using EduCredit.Core.Relations;
 using EduCredit.Service.DTOs.CourseDTOs;
-using EduCredit.Service.DTOs.ScheduleDTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EduCredit.Service.DTOs.EnrollmentTableDTOs
+namespace EduCredit.Service.DTOs.StudentDTOs
 {
-    public class BaseEnrollmentTableDto
+    public class StudentDetailsDto
     {
+        public Guid Id { get; set; }
         public string StudentFullName { get; set; }
         public string DepartmentName { get; set; }
         public string NameOfGuide { get; set; }
@@ -20,6 +19,5 @@ namespace EduCredit.Service.DTOs.EnrollmentTableDTOs
         public float AvailableHours { get; set; }
         public float GPA { get; set; }
 
-        public List<ReadScheduleDto> semesterCourses { get; set; } = new List<ReadScheduleDto>();
     }
 }

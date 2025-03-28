@@ -18,5 +18,6 @@ namespace EduCredit.Core.Repositories.Contract
         Task CreateAsync(T entity);
         Task Update(T entity);
         Task Delete(T entity);
+        Task<int> CountAsync(ISpecification<T>? spec = null);
     }
 }

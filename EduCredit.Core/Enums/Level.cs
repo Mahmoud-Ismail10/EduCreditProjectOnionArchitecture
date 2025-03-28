@@ -10,12 +10,12 @@ namespace EduCredit.Core.Enums
     public enum Level
     {
         [EnumMember(Value = "First")]
-        First,
+        First=1,
         [EnumMember(Value = "Second")]
-        Second,
+        Second=2,
         [EnumMember(Value = "Third")]
-        Third,
+        Third=3,
         [EnumMember(Value = "Fourth")]
-        Fourth
+        Fourth=4
     }
 }

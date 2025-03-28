@@ -23,15 +23,16 @@ namespace EduCredit.APIs.Controllers
 
         [HttpPost]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
-        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<CreateCourseDto>), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<ApiResponse>> CreateCourse([FromBody] CreateCourseDto createCourseDto)
+        public async Task<ActionResult<ApiResponse<CreateCourseDto>>> CreateCourse([FromBody] CreateCourseDto createCourseDto)
         {
             if (ModelState.IsValid)
             {
                 var response = await _courseServices.CreateCourseAsync(createCourseDto);
-                if (response.StatusCode == 200)
-                    return Ok(new ApiResponse(200, "Course created successfully"));
+                if (response != null)
+                      return Ok(new ApiResponse<CreateCourseDto>(201, "Course Created Successfully", response));
+             
                 return BadRequest(new ApiResponse(400, "Failed to create course!"));
             }
             return BadRequest(new ApiResponse(400, "Invalid data!"));
@@ -41,17 +42,17 @@ namespace EduCredit.APIs.Controllers
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ReadCourseDto), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<ReadCourseDto>> GetCourse(Guid id)
+        public async Task<ActionResult<ApiResponse<ReadCourseDto>>> GetCourse(Guid id)
         {
             var courseDto = await _courseServices.GetCourseByIdAsync(id);
             if (courseDto is null) return NotFound(new ApiResponse(404));
-            return Ok(courseDto);
+            return Ok(new ApiResponse<ReadCourseDto>(200,"Success", courseDto));
         }
 
         [HttpGet]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-        [ProducesResponseType(typeof(ReadCourseDto), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(Pagination<ReadCourseDto>), (int)HttpStatusCode.OK)]
         public ActionResult<IReadOnlyList<ReadCourseDto>> GetCourses([FromQuery] CourseSpecificationParams specParams)
         {
             int count;

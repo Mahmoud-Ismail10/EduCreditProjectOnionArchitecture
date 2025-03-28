@@ -1,4 +1,6 @@
-﻿using System;
+﻿using EduCredit.Core.Models;
+using EduCredit.Core.Relations;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,5 +11,6 @@ namespace EduCredit.Core.Repositories.Contract
     public interface ICourseRepo
     {
         Task<IReadOnlyList<Guid>> GetValidCourseIds(List<Guid> courseIds);
+        Task<IReadOnlyList<Guid>> GetCoursesByEnrollmentTableIdAsync(Guid enrollmentTableId);
     }
 }

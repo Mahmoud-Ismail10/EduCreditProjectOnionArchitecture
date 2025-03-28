@@ -35,6 +35,17 @@ namespace EduCredit.APIs.Controllers
                 return BadRequest(new ApiResponse(400, "Failure to assign the grade!"));
         }
 
+        //[HttpPost]
+        //[Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}, {AuthorizationConstants.StudentRole}")]
+        //[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
+        //public async Task<ActionResult<ApiResponse>> AssignCourseToEnrollmentTable([FromBody] EnrollmentDto enrollmentDto)
+        //{
+        //    var response = await _enrollmentServices.AssignEnrollment(enrollmentDto);
+        //    if (response.StatusCode == 200)
+        //        return NoContent();
+        //    return BadRequest(new ApiResponse(400, response.Message));
+        //}
+        
         [HttpPost]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}, {AuthorizationConstants.StudentRole}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
@@ -43,7 +54,7 @@ namespace EduCredit.APIs.Controllers
             var response = await _enrollmentServices.AssignEnrollment(createEnrollmentDto);
             if (response.StatusCode == 200)
                 return NoContent();
-            return BadRequest(new ApiResponse(400, response.ErrorMessage));
+            return BadRequest(new ApiResponse(400, response.Message));
         }
 
         [HttpDelete("{enrollmentTableId}/{courseId}")]
@@ -64,14 +75,14 @@ namespace EduCredit.APIs.Controllers
 
         [HttpGet("{enrollmentTableId}/{courseId}")]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
-        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse<ReadEnrollmentDto>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-        public async Task<ActionResult<ReadEnrollmentDto>> GetEnrollment(Guid enrollmentTableId, Guid courseId)
+        public async Task<ActionResult<ApiResponse<ReadEnrollmentDto>>> GetEnrollment(Guid enrollmentTableId, Guid courseId)
         {
             var enrollmentDto = await _enrollmentServices.GetEnrollment(enrollmentTableId, courseId);
             if (enrollmentDto is null)
                 return NotFound(new ApiResponse(404, "Enrollment not found!"));
-            return Ok(enrollmentDto);
+            return Ok(new ApiResponse<ReadEnrollmentDto>(200,"Success",enrollmentDto));
         }
     }
 }

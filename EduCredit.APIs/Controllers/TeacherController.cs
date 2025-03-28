@@ -24,38 +24,38 @@ namespace EduCredit.APIs.Controllers
         /// GET: api/Teachers
         [HttpGet]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
-        [ProducesResponseType(typeof(Pagination<ReadTeacherDto>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse<Pagination<ReadTeacherDto>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-        public ActionResult<IReadOnlyList<ReadTeacherDto>> GetAllTeachers([FromQuery] TeacherSpecificationParams specParams) // Create class contains all of params (refactor)
+        public ActionResult<IReadOnlyList<ApiResponse<Pagination<ReadTeacherDto>>>> GetAllTeachers([FromQuery] TeacherSpecificationParams specParams) // Create class contains all of params (refactor)
         {
             int count;
             var teachersDto = _teacherServices.GetAllTeachers(specParams, out count);
             if (teachersDto is null) return NotFound(new ApiResponse(404));
-            return Ok(new Pagination<ReadTeacherDto>(specParams.PageSize, specParams.PageIndex, count, teachersDto)); // Status code = 200
+            return Ok(new ApiResponse<Pagination<ReadTeacherDto>>(200,"Success",new Pagination<ReadTeacherDto>(specParams.PageSize, specParams.PageIndex, count, teachersDto))); // Status code = 200
         }
 
         /// GET: api/Teacher/{id}
         [HttpGet("{id}")]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
-        [ProducesResponseType(typeof(ReadTeacherDto), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse<ReadTeacherDto>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-        public async Task<ActionResult<ReadTeacherDto>> GetTeacher(Guid id)
+        public async Task<ActionResult<ApiResponse<ReadTeacherDto>>> GetTeacher(Guid id)
         {
             var teacherDto = await _teacherServices.GetTeacherByIdAsync(id);
             if (teacherDto is null) return NotFound(new ApiResponse(404));
-            return Ok(teacherDto);
+            return Ok(new ApiResponse<ReadTeacherDto>(200,"Success",teacherDto));
         }
 
         /// PUT: api/Teacher/{id}
         [HttpPut("{id}")]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
-        [ProducesResponseType(typeof(UpdateTeacherDto), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-        public async Task<ActionResult<UpdateTeacherDto>> UpdateTeacher([FromBody] UpdateTeacherDto updateteachertDto, Guid id)
+        public async Task<ActionResult<ApiResponse>> UpdateTeacher([FromBody] UpdateTeacherDto updateteachertDto, Guid id)
         {
             var teacherDto = await _teacherServices.UpdateTeacherAsync(updateteachertDto, id);
             if (teacherDto is null) return NotFound(new ApiResponse(404));
-            return Ok(teacherDto);
+            return Ok(new ApiResponse(200,"Success"));
         }
 
         /// DELETE: api/Teacher/{id}

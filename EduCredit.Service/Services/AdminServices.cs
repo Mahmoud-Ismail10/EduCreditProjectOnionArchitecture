@@ -1,7 +1,11 @@
 ﻿using AutoMapper;
 using EduCredit.Core;
+using EduCredit.Core.Enums;
 using EduCredit.Core.Models;
+using EduCredit.Core.Relations;
 using EduCredit.Core.Specifications.AdminSpecifications;
+using EduCredit.Core.Specifications.EnrollmentsSpecifications;
+using EduCredit.Core.Specifications.EnrollmentTableSpecifications;
 using EduCredit.Service.DTOs.AdminDTOs;
 using EduCredit.Service.Errors;
 using EduCredit.Service.Services.Contract;
@@ -60,6 +64,35 @@ namespace EduCredit.Service.Services
             int result = await _unitOfWork.CompleteAsync();
             if (result <= 0) return new ApiResponse(400);
             return new ApiResponse(200);
+        }
+
+        public async Task<StatisticsDto> GetStatistics(Statistics statistics)
+        {
+          
+           var statistic= statistics switch
+            {
+                Statistics.Students => await _unitOfWork.Repository<Student>().CountAsync(),
+                Statistics.Teachers => await _unitOfWork.Repository<Teacher>().CountAsync(),
+                Statistics.Courses => await _unitOfWork.Repository<Course>().CountAsync(),
+                Statistics.Departments => await _unitOfWork.Repository<Department>().CountAsync(),
+                Statistics.SuccessRate => await GetSuccessRateAsync(),
+                _ => throw new ArgumentException("Invalid Statistics Type")
+            };
+            return new StatisticsDto
+            {
+                Type = statistics.ToString(),
+                Total = statistic
+            };
+        }
+        private async Task<double> GetSuccessRateAsync()
+        {
+            int totalEnrolled = await _unitOfWork.Repository<Enrollment>().CountAsync();
+            if (totalEnrolled == 0) return 0;
+
+            int totalPassed = await _unitOfWork.Repository<Enrollment>()
+                .CountAsync(new EnrollmentsWithCoursesSpecification());
+
+            return Math.Round((double)totalPassed / totalEnrolled * 100, 2);
         }
 
     }

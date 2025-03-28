@@ -15,9 +15,12 @@ namespace EduCredit.Core.Specifications.StudentSpecifications
             (string.IsNullOrEmpty(spec.Search) || d.FullName.ToLower().Contains(spec.Search.ToLower())) &&
             (!spec.DepartmentId.HasValue || d.DepartmentId == spec.DepartmentId.Value) &&
             (!spec.AcademicGuideId.HasValue || d.DepartmentId == spec.AcademicGuideId.Value))
+
         {
             Includes.Add(d => d.Department);
             Includes.Add(t => t.Teacher); // Academic Guide
+            Includes.Add(t => t.EnrollmentTables);
+
             if (!string.IsNullOrEmpty(spec.Sort))
             {
                 switch (spec.Sort.ToLower())
@@ -33,7 +36,9 @@ namespace EduCredit.Core.Specifications.StudentSpecifications
             ApplyPagination((spec.PageIndex - 1) * spec.PageSize, spec.PageSize);
         }
         /// for get one student (with Criteria)
-        public StudentWithDepartmentAndGuideSpecification(Guid id) : base(d => d.Id == id)
+        public StudentWithDepartmentAndGuideSpecification(Guid id) 
+            : base(d => d.Id == id)
+            
         {
             Includes.Add(d => d.Department);
             Includes.Add(t => t.Teacher); // Academic Guide

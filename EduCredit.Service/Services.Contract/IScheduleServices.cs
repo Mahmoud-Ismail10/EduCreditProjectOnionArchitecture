@@ -12,7 +12,9 @@ namespace EduCredit.Service.Services.Contract
     {
         Task<ApiResponse> AssignSchedule(CreateScheduleDto createScheduleDto);
         Task<ReadScheduleDto?> GetSchedule(Guid courseId, Guid teacherId);
+        Task<IReadOnlyList<ReadScheduleEnrollCourseDto>?> GetStudentAvailableCourses(Guid studentId);
         Task<ApiResponse> UpdateSchedule(Guid courseId, Guid teacherId, UpdateScheduleDto updateScheduleDto);
         Task<ApiResponse> DeleteSchedule(Guid courseId, Guid teacherId);
+        Task<IReadOnlyList<ReadScheduleEnrollCourseDto>?> GetScheduleById(Guid stuId);
     }
 }

@@ -31,7 +31,11 @@ namespace EduCredit.Service.Services
         {
             /// Map the incoming DTO to the Department entity
             Department department = _mapper.Map<CreateDepartmentDto, Department>(createDeptDto);
-
+            var checkdept =await _unitOfWork._departmentRepo.CheckDepartmentExistingAsync(createDeptDto.Name);
+            if(checkdept)
+            {
+                return null;
+            }
             /// Create the department in the database
             await _unitOfWork.Repository<Department>().CreateAsync(department);
 
@@ -40,7 +44,10 @@ namespace EduCredit.Service.Services
 
             /// If no changes were saved, return null else return Dto
             if (result <= 0) return null;
-            return createDeptDto;
+            return new CreateDepartmentDto
+            {
+                Name=department.Name
+            };
         }
 
         public IReadOnlyList<ReadDepartmentDto?> GetAllDepartments(DepartmentSpecificationParams specParams, out int count)

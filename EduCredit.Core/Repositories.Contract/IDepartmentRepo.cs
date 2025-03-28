@@ -8,5 +8,6 @@ namespace EduCredit.Core.Repositories.Contract
 {
     public interface IDepartmentRepo
     {
+        Task<bool> CheckDepartmentExistingAsync(string name);
     }
 }
