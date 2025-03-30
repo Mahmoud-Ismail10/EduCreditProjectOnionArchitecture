@@ -20,10 +20,10 @@ namespace EduCredit.Repository.Repositories
             _dbcontext = dbcontext;
         }
 
-        public async Task<Schedule?> GetScheduleByIdsAsync(Guid courseId, Guid teacherId)
+        public async Task<Schedule?> GetScheduleByCourseIdAsync(Guid courseId)
         {
             Schedule? schedule = await _dbcontext.Schedules
-                .FirstOrDefaultAsync(c => c.CourseId == courseId && c.TeacherId == teacherId);
+                .FirstOrDefaultAsync(c => c.CourseId == courseId);
             return schedule;
         }
     }

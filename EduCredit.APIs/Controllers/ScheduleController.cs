@@ -32,27 +32,28 @@ namespace EduCredit.APIs.Controllers
             return BadRequest(new ApiResponse(400, response.Message));
         }
 
-        [HttpGet("{courseId}/{teacherId}")]
+        [HttpGet("{courseId}")]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ApiResponse<ReadScheduleDto>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<ApiResponse<ReadScheduleDto>>> GetSchedule(Guid courseId, Guid teacherId)
+        public async Task<ActionResult<ApiResponse<ReadScheduleDto>>> GetSchedule(Guid courseId)
         {
-            var scheduleDto = await _scheduleServices.GetSchedule(courseId, teacherId);
+            var scheduleDto = await _scheduleServices.GetSchedule(courseId);
             if (scheduleDto is null)
                 return NotFound(new ApiResponse(404, "Schedule not found!"));
-            return Ok(new ApiResponse<ReadScheduleDto>(200,"Success",scheduleDto));
+            return Ok(new ApiResponse<ReadScheduleDto>(200, "Success", scheduleDto));
         }   
+
         [HttpGet("Study-Schedule/{StudentId}")]
-        //[Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<ReadScheduleEnrollCourseDto>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<ApiResponse<IReadOnlyList<ReadScheduleEnrollCourseDto>>>> GetSchedule(Guid StudentId)
+        public async Task<ActionResult<ApiResponse<IReadOnlyList<ReadScheduleEnrollCourseDto>>>> GetSchedulesByStudentId(Guid StudentId)
         {
-            var scheduleDto = await _scheduleServices.GetScheduleById(StudentId);
-            if (scheduleDto is null)
+            var schedulesDto = await _scheduleServices.GetSchedulesByStudentId(StudentId);
+            if (schedulesDto is null)
                 return NotFound(new ApiResponse(404, "Schedule not found!"));
-            return Ok(new ApiResponse<IReadOnlyList< ReadScheduleEnrollCourseDto >>(200,"Success", scheduleDto));
+            return Ok(new ApiResponse<IReadOnlyList<ReadScheduleEnrollCourseDto>>(200, "Success", schedulesDto));
         }
 
         [HttpGet("Get-EnrollmentOfCourseScheduale")]
@@ -63,16 +64,16 @@ namespace EduCredit.APIs.Controllers
             //var userId = User.FindFirstValue("userId");
             var studentCourses = await _scheduleServices.GetStudentAvailableCourses(StudentId);
             if (studentCourses is null) return NotFound(new ApiResponse(404));
-            return Ok(new ApiResponse<IReadOnlyList<ReadScheduleEnrollCourseDto>>(200,"Success",studentCourses));
+            return Ok(new ApiResponse<IReadOnlyList<ReadScheduleEnrollCourseDto>>(200, "Success", studentCourses));
         }
 
-        [HttpPut("{courseId}/{teacherId}")]
+        [HttpPut("{courseId}")]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<ApiResponse>> UpdateSchedule(Guid courseId, Guid teacherId, [FromBody] UpdateScheduleDto updateScheduleDto)
+        public async Task<ActionResult<ApiResponse>> UpdateSchedule(Guid courseId, [FromBody] UpdateScheduleDto updateScheduleDto)
         {
-            var response = await _scheduleServices.UpdateSchedule(courseId, teacherId, updateScheduleDto);
+            var response = await _scheduleServices.UpdateSchedule(courseId, updateScheduleDto);
             if (response.StatusCode == 200)
                 return Ok(new ApiResponse(200, "Schedule updated successfully!"));
             else if (response.StatusCode == 404)
@@ -81,13 +82,13 @@ namespace EduCredit.APIs.Controllers
                 return BadRequest(new ApiResponse(400, "It is not suitable to update the schedule!"));
         }
         
-        [HttpDelete("{courseId}/{teacherId}")]
+        [HttpDelete("{courseId}")]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<ApiResponse>> DeleteSchedule(Guid courseId, Guid teacherId)
+        public async Task<ActionResult<ApiResponse>> DeleteSchedule(Guid courseId)
         {
-            var response = await _scheduleServices.DeleteSchedule(courseId, teacherId);
+            var response = await _scheduleServices.DeleteSchedule(courseId);
             if (response.StatusCode == 200)
                 return Ok(new ApiResponse(200, "Schedule deleted successfully!"));
             else if (response.StatusCode == 404)

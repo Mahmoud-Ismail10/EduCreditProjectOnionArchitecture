@@ -21,7 +21,7 @@ namespace EduCredit.Core.Models
         /// Optional navigation property for one-to-one relationship (if the teacher became head)
         public Department? HeadofDepartment { get; set; }
 
-        /// Many-to-many: Between Teacher and Course (JoinTable)
-        public ICollection<Schedule> Schedules { get; set; } = new HashSet<Schedule>();
+        /// Many-to-many: Between Teacher and Schedule (JoinTable)
+        public ICollection<TeacherSchedule> TeacherSchedules { get; set; } = new HashSet<TeacherSchedule>();
     }
 }

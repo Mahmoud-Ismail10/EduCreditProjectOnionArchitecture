@@ -19,7 +19,7 @@ namespace EduCredit.Repository.Repositories
             _dbcontext = dbcontext;
         }
 
-        public async Task<EnrollmentTable?> GetEnrollmentTableByStudentIdAndSemesterIdAsync(Guid studentId, Guid semesterId)
+        public async Task<EnrollmentTable?> GetEnrollmentTableByStudentIdAndSemesterIdAsync(Guid? studentId, Guid semesterId)
         {
             var enrollmentTable = await _dbcontext.EnrollmentTables
                 .FirstOrDefaultAsync(s => s.StudentId == studentId && s.SemesterId == semesterId);

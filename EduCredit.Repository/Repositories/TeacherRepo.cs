@@ -30,5 +30,15 @@ namespace EduCredit.Repository.Repositories
 
             return teachers;
         }
+
+        public async Task<IReadOnlyList<Guid>> GetValidTeacherIds(List<Guid> teacherIds)
+        {
+            var existingTeacherIds = await _dbcontext.Teachers
+                .Where(c => teacherIds.Contains(c.Id))
+                .Select(c => c.Id)
+                .ToListAsync();
+
+            return existingTeacherIds;
+        }
     }
 }

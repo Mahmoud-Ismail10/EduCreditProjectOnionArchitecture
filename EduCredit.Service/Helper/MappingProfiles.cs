@@ -46,11 +46,11 @@ namespace EduCredit.Service.Helper
             CreateMap<UpdateEnrollmentDto, Enrollment>();
 
             CreateMap<Schedule, ReadScheduleDto>()
-                .ForMember(d => d.TeacherName, o => o.MapFrom(s => s.Teacher.FullName))
+                .ForMember(d => d.TeachersName, o => o.MapFrom(s => string.Join(", ", s.TeacherSchedules.Select(st => st.Teacher.FullName))))
                 .ForMember(d => d.CourseName, o => o.MapFrom(s => s.Course.Name))
                 .ForMember(d => d.Duration, o => o.MapFrom(s => s.Course.Duration))
-                .ForMember(d => d.Hours, o => o.MapFrom(s => s.Course.CreditHours))
-                ;
+                .ForMember(d => d.Hours, o => o.MapFrom(s => s.Course.CreditHours));
+
             CreateMap<Teacher, ReadTeacherDto>()
                 .ForMember(d => d.Id, o => o.MapFrom(s => s.Id))
                 .ForMember(d => d.FullName, o => o.MapFrom(s => s.FullName))

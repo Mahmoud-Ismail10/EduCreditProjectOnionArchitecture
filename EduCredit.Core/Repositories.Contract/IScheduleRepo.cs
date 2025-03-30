@@ -10,6 +10,6 @@ namespace EduCredit.Core.Repositories.Contract
 {
     public interface IScheduleRepo
     {
-        Task<Schedule?> GetScheduleByIdsAsync(Guid courseId, Guid teacherId);
+        Task<Schedule?> GetScheduleByCourseIdAsync(Guid courseId);
     }
 }

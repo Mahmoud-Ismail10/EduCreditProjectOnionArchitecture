@@ -8,8 +8,7 @@ using System.Threading.Tasks;
 
 namespace EduCredit.Core.Specifications.EnrollmentTableSpecifications
 {
-    public class EnrollmentTableWithSemesterAndStudentSpecification:BaseSpecifications<EnrollmentTable>
-
+    public class EnrollmentTableWithSemesterAndStudentSpecification : BaseSpecifications<EnrollmentTable>
     {
         public EnrollmentTableWithSemesterAndStudentSpecification(Guid studentId)
             : base()
@@ -18,8 +17,8 @@ namespace EduCredit.Core.Specifications.EnrollmentTableSpecifications
             Includes.Add(e => e.Semester);
             Includes.Add(e => e.Enrollments);
         }
-        public EnrollmentTableWithSemesterAndStudentSpecification(Guid studentId,Guid semesterID)
-            : base(e => e.StudentId == studentId&&semesterID==e.SemesterId)
+        public EnrollmentTableWithSemesterAndStudentSpecification(Guid studentId, Guid semesterID)
+            : base(e => e.StudentId == studentId && semesterID == e.SemesterId)
         {
             Includes.Add(e => e.Student);
             Includes.Add(e => e.Semester);

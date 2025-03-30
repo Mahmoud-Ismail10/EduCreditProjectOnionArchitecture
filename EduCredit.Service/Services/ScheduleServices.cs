@@ -8,6 +8,7 @@ using EduCredit.Core.Specifications.ScheduleSpecifications;
 using EduCredit.Core.Specifications.SemesterCoursesSpecifications;
 using EduCredit.Core.Specifications.StudentSpecifications;
 using EduCredit.Service.DTOs.ScheduleDTOs;
+using EduCredit.Service.DTOs.SemesterDTOs;
 using EduCredit.Service.Errors;
 using EduCredit.Service.Services.Contract;
 using System;
@@ -35,15 +36,23 @@ namespace EduCredit.Service.Services
             /// Check if course and teacher are exist or no
             var course = await _unitOfWork.Repository<Course>().GetByIdAsync(createScheduleDto.CourseId);
             if (course is null) return new ApiResponse(400, "Course not found!");
-            var teacher = await _unitOfWork.Repository<Teacher>().GetByIdAsync(createScheduleDto.TeacherId);
-            if (teacher is null) return new ApiResponse(400, "Teacher not found!");
+
+            /// Check if all requested teachers exist
+            var existingTeacherIds = await _unitOfWork._teacherRepo.GetValidTeacherIds(createScheduleDto.TeacherIds);
+            var missingTeachers = createScheduleDto.TeacherIds.Except(existingTeacherIds).ToList();
+            if (missingTeachers.Any())
+                return new ApiResponse(400, $"Teachers not found: {string.Join(", ", missingTeachers)}");
 
             /// Check if Schedule is exist or no
-            var existingSchedule = await _unitOfWork._scheduleRepo.GetScheduleByIdsAsync(createScheduleDto.CourseId, createScheduleDto.TeacherId);
+            var existingSchedule = await _unitOfWork._scheduleRepo.GetScheduleByCourseIdAsync(createScheduleDto.CourseId);
             if (existingSchedule is not null) return new ApiResponse(400, "Schedule already exists for this course!");
 
             /// Mapping data
             var newSchedule = _mapper.Map<CreateScheduleDto, Schedule>(createScheduleDto);
+
+            newSchedule.TeacherSchedules = createScheduleDto.TeacherIds
+                    .Select(teacherId => new TeacherSchedule {ScheduleId = course.Id, TeacherId = teacherId })
+                    .ToList();
 
             /// Create Schedule
             await _unitOfWork.Repository<Schedule>().CreateAsync(newSchedule);
@@ -54,18 +63,18 @@ namespace EduCredit.Service.Services
             return new ApiResponse(200, "The schedule was successfully assigned");
         }
 
-        public async Task<ReadScheduleDto?> GetSchedule(Guid courseId, Guid teacherId)
+        public async Task<ReadScheduleDto?> GetSchedule(Guid courseId)
         {
-            var schedule = await _unitOfWork._scheduleRepo.GetScheduleByIdsAsync(courseId, teacherId);
+            var schedule = await _unitOfWork._scheduleRepo.GetScheduleByCourseIdAsync(courseId);
             if (schedule is null) return null;
             var scheduleDto = _mapper.Map<Schedule, ReadScheduleDto>(schedule);
             return scheduleDto;
         }
 
-        public async Task<ApiResponse> UpdateSchedule(Guid courseId, Guid teacherId, UpdateScheduleDto updateScheduleDto)
+        public async Task<ApiResponse> UpdateSchedule(Guid courseId, UpdateScheduleDto updateScheduleDto)
         {
             /// Check if schedule is exist or no
-            var schedule = await _unitOfWork._scheduleRepo.GetScheduleByIdsAsync(courseId, teacherId);
+            var schedule = await _unitOfWork._scheduleRepo.GetScheduleByCourseIdAsync(courseId);
             if (schedule is null) return new ApiResponse(404);
 
             /// Mapping data
@@ -79,11 +88,11 @@ namespace EduCredit.Service.Services
             if (result <= 0) return new ApiResponse(400);
             return new ApiResponse(200);
         }
-        
-        public async Task<ApiResponse> DeleteSchedule(Guid courseId, Guid teacherId)
+
+        public async Task<ApiResponse> DeleteSchedule(Guid courseId)
         {
             /// Check if schedule is exist or no
-            var schedule = await _unitOfWork._scheduleRepo.GetScheduleByIdsAsync(courseId, teacherId);
+            var schedule = await _unitOfWork._scheduleRepo.GetScheduleByCourseIdAsync(courseId);
             if (schedule is null) return new ApiResponse(404);
 
             /// Delete Schedule
@@ -94,6 +103,7 @@ namespace EduCredit.Service.Services
             if (result <= 0) return new ApiResponse(400);
             return new ApiResponse(200);
         }
+
         public async Task<IReadOnlyList<ReadScheduleEnrollCourseDto>?> GetStudentAvailableCourses(Guid stuId)
         {
             // Retrieve student data
@@ -158,7 +168,8 @@ namespace EduCredit.Service.Services
 
             return new List<ReadScheduleEnrollCourseDto> { studentWithAvailableCourses };
         }
-        public async Task<IReadOnlyList<ReadScheduleEnrollCourseDto>?> GetScheduleById(Guid stuId)
+
+        public async Task<IReadOnlyList<ReadScheduleEnrollCourseDto>?> GetSchedulesByStudentId(Guid stuId)
         {
             var EnrollmentTableSpec = new EnrollmentTableWithSemesterAndStudentSpecification(stuId);
             var EnrollmentTable = await _unitOfWork.Repository<EnrollmentTable>().GetByIdSpecificationAsync(EnrollmentTableSpec);
@@ -167,31 +178,29 @@ namespace EduCredit.Service.Services
             var studentSpec = new StudentWithDepartmentAndGuideSpecification(EnrollmentTable.StudentId);
             var student = await _unitOfWork.Repository<Student>().GetByIdSpecificationAsync(studentSpec);
             if (student is null) return null;
-            //EnrollmentTableId+CourseId =>get as schedule By CourseId
-            var EnrollmentCourses =await _unitOfWork._courseRepo.GetCoursesByEnrollmentTableIdAsync(EnrollmentTable.Id);
+            //EnrollmentTableId + CourseId => get as schedule By CourseId
+            var EnrollmentCourses = await _unitOfWork._courseRepo.GetCoursesByEnrollmentTableIdAsync(EnrollmentTable.Id);
             if (EnrollmentCourses is null) return null;
             int count;
             var schedulespec = new ScheduleSpecification(EnrollmentCourses);
-            var schedule =  _unitOfWork.Repository<Schedule>().GetAllSpecification(schedulespec,out count);
-            
+            var schedule = _unitOfWork.Repository<Schedule>().GetAllSpecification(schedulespec, out count);
 
             var scheduleMapped = _mapper.Map<IReadOnlyList<Schedule>, List<ReadScheduleDto>>(schedule);
-          
 
-               if (scheduleMapped is null) return null;
-               var studentWithSchedule = new ReadScheduleEnrollCourseDto
-               {
-                   Id = EnrollmentTable.StudentId,
-                   StudentFullName = student.FullName,
-                   Level = student.Level,
-                   DepartmentName = student.Department.Name ?? "",
-                   GPA = student.GPA,
-                   Obtainedhours = student.CreditHours,
-                   AvailableHours = student.CreditHours <= 102 ? 18 : 21,
-                   NameOfGuide =student.Teacher?.FullName ?? "",
-                   semesterCourses = scheduleMapped,
-               };
-               return new List<ReadScheduleEnrollCourseDto> { studentWithSchedule };
+            if (scheduleMapped is null) return null;
+            var studentWithSchedule = new ReadScheduleEnrollCourseDto
+            {
+                Id = EnrollmentTable.StudentId,
+                StudentFullName = student.FullName,
+                Level = student.Level,
+                DepartmentName = student.Department.Name ?? "",
+                GPA = student.GPA,
+                Obtainedhours = student.CreditHours,
+                AvailableHours = student.CreditHours <= 102 ? 18 : 21,
+                NameOfGuide = student.Teacher?.FullName ?? "",
+                semesterCourses = scheduleMapped,
+            };
+            return new List<ReadScheduleEnrollCourseDto> { studentWithSchedule };
         }
     }
 }

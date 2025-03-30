@@ -12,5 +12,10 @@ namespace EduCredit.Service.DTOs.ScheduleDTOs
         public TimeOnly ExamStart { get; set; }
         public TimeOnly ExamEnd { get; set; }
         public string ExamLocation { get; set; }
+
+        public string TeachersName { get; set; }
+        public string CourseName { get; set; }
+        public float Duration { get; set; }
+        public float Hours { get; set; }
     }
 }

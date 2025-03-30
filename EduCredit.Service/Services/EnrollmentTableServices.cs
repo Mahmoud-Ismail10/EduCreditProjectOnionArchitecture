@@ -36,7 +36,7 @@ namespace EduCredit.Service.Services
             _mapper = mapper;
         }
 
-        public async Task<ApiResponse> CreateOrUpdateEnrollmentTable(CreateOrUpdateEnrollmentTableDto createOrUpdateEnrollmentTableDto, string studentId)
+        public async Task<ApiResponse> CreateOrUpdateEnrollmentTable(CreateOrUpdateEnrollmentTableDto createOrUpdateEnrollmentTableDto)
         {
             if (await _semesterServices.IsEnrollmentOpenAsync())
             {
@@ -46,8 +46,7 @@ namespace EduCredit.Service.Services
                 if (currentSemester is null) return new ApiResponse(404, "There is no current semester!");
                 createOrUpdateEnrollmentTableDto.SemesterId = currentSemester.Id;
 
-                var stuId = Guid.Parse(studentId);
-                var existEnrollmentTable = await _unitOfWork._enrollmentTableRepo.GetEnrollmentTableByStudentIdAndSemesterIdAsync(stuId, currentSemester.Id);
+                var existEnrollmentTable = await _unitOfWork._enrollmentTableRepo.GetEnrollmentTableByStudentIdAndSemesterIdAsync(createOrUpdateEnrollmentTableDto.StudentId, currentSemester.Id);
                 /// When the student enrolls the table for the first time in the current semester 
                 if (existEnrollmentTable is null)
                 {

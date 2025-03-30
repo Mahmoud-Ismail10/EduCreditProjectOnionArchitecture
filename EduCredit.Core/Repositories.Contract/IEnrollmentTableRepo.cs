@@ -9,6 +9,6 @@ namespace EduCredit.Core.Repositories.Contract
 {
     public interface IEnrollmentTableRepo
     {
-        Task<EnrollmentTable?> GetEnrollmentTableByStudentIdAndSemesterIdAsync(Guid studentId, Guid semesterId);
+        Task<EnrollmentTable?> GetEnrollmentTableByStudentIdAndSemesterIdAsync(Guid? studentId, Guid semesterId);
     }
 }

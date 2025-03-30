@@ -11,10 +11,11 @@ namespace EduCredit.Service.DTOs.EnrollmentTableDTOs
 {
     public class CreateOrUpdateEnrollmentTableDto
     {
+        public List<Guid?> CourseIds { get; set; } = new List<Guid?>();
         public Status? Status { get; set; }
         public string? StudentNotes { get; set; }
         public string? GuideNotes { get; set; }
         public Guid? SemesterId { get; set; } // Foreign Key
-        public Guid StudentId { get; set; } // Foreign Key
+        public Guid? StudentId { get; set; } // Foreign Key
     }
 }

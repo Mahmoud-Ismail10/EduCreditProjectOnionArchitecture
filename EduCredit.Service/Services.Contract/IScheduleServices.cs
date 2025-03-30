@@ -11,10 +11,10 @@ namespace EduCredit.Service.Services.Contract
     public interface IScheduleServices
     {
         Task<ApiResponse> AssignSchedule(CreateScheduleDto createScheduleDto);
-        Task<ReadScheduleDto?> GetSchedule(Guid courseId, Guid teacherId);
+        Task<ReadScheduleDto?> GetSchedule(Guid courseId);
+        Task<ApiResponse> UpdateSchedule(Guid courseId, UpdateScheduleDto updateScheduleDto);
+        Task<ApiResponse> DeleteSchedule(Guid courseId);
         Task<IReadOnlyList<ReadScheduleEnrollCourseDto>?> GetStudentAvailableCourses(Guid studentId);
-        Task<ApiResponse> UpdateSchedule(Guid courseId, Guid teacherId, UpdateScheduleDto updateScheduleDto);
-        Task<ApiResponse> DeleteSchedule(Guid courseId, Guid teacherId);
-        Task<IReadOnlyList<ReadScheduleEnrollCourseDto>?> GetScheduleById(Guid stuId);
+        Task<IReadOnlyList<ReadScheduleEnrollCourseDto>?> GetSchedulesByStudentId(Guid stuId);
     }
 }

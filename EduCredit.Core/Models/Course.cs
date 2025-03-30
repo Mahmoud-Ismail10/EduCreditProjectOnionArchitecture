@@ -23,8 +23,8 @@ namespace EduCredit.Core.Models
         public Guid DepartmentId { get; set; } // Foreign Key
         public Department Department { get; set; }
 
-        /// Many-to-many: Between Course and Teacher (JoinTable)
-        public ICollection<Schedule> Schedules { get; set; } = new HashSet<Schedule>();
+        /// One-to-One: Between Course and Schedule
+        public Schedule Schedule { get; set; }
 
         /// Many-to-many: Between Course and EnrollmentTable (JoinTable)
         public ICollection<Enrollment> Enrollments { get; set; } = new HashSet<Enrollment>();
