@@ -269,7 +269,7 @@ namespace EduCredit.Service.Services
         public async Task<ApiResponse> ResetPasswordAsync(ResetPasswordDto resetPasswordDto)
         {
             // Find the user
-            var user = await _userManager.FindByEmailAsync(resetPasswordDto.Email);
+            var user = await _userManager.FindByIdAsync(resetPasswordDto.userId);
             if (user == null)
                 return new ApiResponse(404, "User not found!");
             // Decode the token

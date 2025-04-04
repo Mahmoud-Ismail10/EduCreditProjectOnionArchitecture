@@ -57,6 +57,15 @@ namespace EduCredit.Service.Services
             if (departments is null) return null;
             return _mapper.Map<IReadOnlyList<Department>, IReadOnlyList<ReadDepartmentDto>>(departments);
         }
+        public IReadOnlyList<ReadDepartmentCoursesDto?> GetAllDepartmentsCourses()
+        {
+            var spec = new DepartmentWithTeacherSpecifications();
+            var departments = _unitOfWork.Repository<Department>().GetAllSpecification(spec,out int count);
+            
+            //GET ALL DEPARTMENTS WITH COURSES
+            if (departments is null) return null;
+            return _mapper.Map<IReadOnlyList<Department>, IReadOnlyList<ReadDepartmentCoursesDto>>(departments);
+        }
 
         public async Task<ReadDepartmentDto?> GetDepartmentByIdAsync(Guid id)
         {

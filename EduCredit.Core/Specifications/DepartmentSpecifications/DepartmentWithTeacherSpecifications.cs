@@ -41,6 +41,13 @@ namespace EduCredit.Core.Specifications.DepartmentSpecifications
             Includes.Add(d => d.DepartmentHead);
 
             Includes.Add(c => c.Courses);
+        } 
+        public DepartmentWithTeacherSpecifications()
+            : base()
+        {
+
+            Includes.Add(c => c.Courses);
         }
+
     }
 }

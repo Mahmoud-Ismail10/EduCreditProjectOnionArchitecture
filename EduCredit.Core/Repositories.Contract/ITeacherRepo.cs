@@ -9,6 +9,7 @@ namespace EduCredit.Core.Repositories.Contract
 {
     public interface ITeacherRepo
     {
+       Task< List<string>> GetSchedlesTeachers(List<Guid> teachers);
         IReadOnlyList<Teacher?> GetTeachersAreNotReachMaximumOfStudentsByDepartmentId(Guid? departmentId);
         Task<IReadOnlyList<Guid>> GetValidTeacherIds(List<Guid> teacherIds);
     }

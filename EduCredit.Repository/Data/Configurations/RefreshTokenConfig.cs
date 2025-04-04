@@ -26,9 +26,10 @@ namespace EduCredit.Repository.Data.Configurations
                 .IsUnique();
 
             builder.HasOne(rt => rt.Person)
-                .WithMany(p => p.RefreshTokens)
-                .HasForeignKey(rt => rt.UserId)
-                .OnDelete(DeleteBehavior.NoAction); 
+           .WithMany(p => p.RefreshTokens)
+           .HasForeignKey(rt => rt.UserId)
+           .OnDelete(DeleteBehavior.Cascade);
+
         }
     }
 

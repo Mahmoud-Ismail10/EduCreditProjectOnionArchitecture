@@ -12,5 +12,6 @@ namespace EduCredit.Core.Repositories.Contract
     {
         Task<IReadOnlyList<Guid>> GetValidCourseIds(List<Guid> courseIds);
         Task<IReadOnlyList<Guid>> GetCoursesByEnrollmentTableIdAsync(Guid enrollmentTableId);
+        //Task<IReadOnlyList<Course>> GetCoursesByTeacherIdAsync(Guid teacherId);
     }
 }

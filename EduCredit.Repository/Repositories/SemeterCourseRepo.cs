@@ -1,4 +1,5 @@
-﻿using EduCredit.Core.Relations;
+﻿using EduCredit.Core.Models;
+using EduCredit.Core.Relations;
 using EduCredit.Core.Repositories.Contract;
 using EduCredit.Core.Specifications;
 using EduCredit.Repository.Data;
@@ -19,12 +20,21 @@ namespace EduCredit.Repository.Repositories
         {
             _dbcontext = dbcontext;
         }
-        public async Task<IReadOnlyList<Guid>> GetSemesterCoursesBySemesterIdAsync(Guid semesterId)
+
+        public async Task<IReadOnlyList<Guid>> GetSemesterCoursesBySemesterIdAndDepartmentIdAsync(Guid semesterId, Guid? departmentId)
         {
             return await _dbcontext.SemesterCourses
-              .Where(sc => sc.SemesterId == semesterId)
-              .Select(s=>s.CourseId).ToListAsync();
-                
+             .Where(sc => sc.SemesterId == semesterId&&sc.Course.DepartmentId == departmentId)
+             .Select(s => s.CourseId).ToListAsync();
+
         }
+
+        //public async Task<IReadOnlyList<Guid>> GetSemesterCoursesBySemesterIdAsync(Guid semesterId)
+        //{
+        //    return await _dbcontext.SemesterCourses
+        //      .Where(sc => sc.SemesterId == semesterId)
+        //      .Select(s=>s.CourseId).ToListAsync();
+                
+        //}
     }
 }

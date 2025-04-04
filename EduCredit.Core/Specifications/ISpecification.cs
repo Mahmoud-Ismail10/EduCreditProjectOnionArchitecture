@@ -11,6 +11,7 @@ namespace EduCredit.Core.Specifications
     {
         public Expression<Func<T, bool>>? Criteria { get; set; } /// x => x.id == id (Where)
         public List<Expression<Func<T, object>>> Includes { get; set; } /// {x => x.Courses, x => x.Students} (Include)
+        public List<string> ThenIncludes { get; set; } /// {x => x.Courses, x => x.Students} (Include)
         public Expression<Func<T, object>> OrderBy { get; set; } /// x => x.Name (OrderByAsc) 
         public Expression<Func<T, object>> OrderByDesc { get; set; } /// x => x.Name (OrderByDesc) 
         public Expression<Func<T, object>> ThenBy { get; set; } /// x => x.Name (ThenByAsc)

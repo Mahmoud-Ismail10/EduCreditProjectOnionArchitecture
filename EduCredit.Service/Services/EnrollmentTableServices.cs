@@ -9,7 +9,6 @@ using EduCredit.Service.DTOs.CourseDTOs;
 using EduCredit.Service.DTOs.EnrollmentTableDTOs;
 using EduCredit.Service.DTOs.SemesterDTOs;
 using EduCredit.Service.DTOs.StudentDTOs;
-using EduCredit.Service.Errors;
 using EduCredit.Service.Services.Contract;
 
 namespace EduCredit.Service.Services

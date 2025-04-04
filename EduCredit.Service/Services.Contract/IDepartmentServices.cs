@@ -14,6 +14,7 @@ namespace EduCredit.Service.Services.Contract
         Task<CreateDepartmentDto?> CreateDepartmentAsync(CreateDepartmentDto createDeptDto);
         Task<ReadDepartmentDto?> GetDepartmentByIdAsync(Guid id);
         IReadOnlyList<ReadDepartmentDto?> GetAllDepartments(DepartmentSpecificationParams specParams, out int count);
+        IReadOnlyList<ReadDepartmentCoursesDto?> GetAllDepartmentsCourses();
         Task<UpdateDepartmentDto?> UpdateDepertmentAsync(UpdateDepartmentDto updateDeptDto, Guid id);
         Task<ApiResponse> DeleteDepartmentAsync(Guid id);
     }

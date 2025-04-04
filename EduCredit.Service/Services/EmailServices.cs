@@ -43,21 +43,51 @@ namespace EduCredit.Service.Services
                         _ => "Email Confirmation"
                     };
 
+                    //var bodyBuilder = new BodyBuilder
+                    //{
+                    //    HtmlBody = emailType switch
+                    //    {
+                    //        EmailType.ConfirmEmail => $"<p>Please confirm your email by clicking the link below:</p> <br> <a href=\"{ConfirmEmailUrl}\" style=\"color:blue; text-decoration:underline;\">Confirm Email</a>",
+                    //        EmailType.ForgotPassword => $"<p>Please reset your password by clicking the link below:</p> <br> <a href=\"{ConfirmEmailUrl}\" style=\"color:blue; text-decoration:underline;\">Reset Password</a>",
+                    //        _ => "<p>Please confirm your email using the provided link.</p>"
+                    //    },
+                    //    TextBody = emailType switch
+                    //    {
+                    //        EmailType.ConfirmEmail => $"Please confirm your email using the provided link: {ConfirmEmailUrl}",
+                    //        EmailType.ForgotPassword => $"Please reset your password using the provided link: {ConfirmEmailUrl}",
+                    //        _ => "Please confirm your email using the provided link."
+                    //    }
+                    //};
+                    //new BodyBuilder
                     var bodyBuilder = new BodyBuilder
                     {
-                        HtmlBody = emailType switch
-                        {
-                            EmailType.ConfirmEmail => $"<p>Please confirm your email by clicking the link below:</p> <br> <a href=\"{ConfirmEmailUrl}\" style=\"color:blue; text-decoration:underline;\">Confirm Email</a>",
-                            EmailType.ForgotPassword => $"<p>Please reset your password by clicking the link below:</p> <br> <a href=\"{ConfirmEmailUrl}\" style=\"color:blue; text-decoration:underline;\">Reset Password</a>",
-                            _ => "<p>Please confirm your email using the provided link.</p>"
-                        },
+                        HtmlBody = $@"
+                           <div style='font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; text-align: center;'>
+                               <div style='max-width: 600px; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin: auto;'>
+                                   <h2 style='color: #333;'>{(emailType == EmailType.ConfirmEmail ? "Confirm Your Email" : "Reset Your Password")}</h2>
+                                   <p style='color: #555; font-size: 16px;'>
+                                       {(emailType == EmailType.ConfirmEmail
+                                           ? "Thank you for signing up! Please confirm your email by clicking the button below."
+                                           : "We received a request to reset your password. Click the button below to proceed.")}
+                                   </p>
+                                   <a href='{ConfirmEmailUrl}' style='display: inline-block; background-color: #007bff; color: white; text-decoration: none; padding: 12px 20px; border-radius: 5px; font-size: 16px; margin-top: 20px;'>
+                                       {(emailType == EmailType.ConfirmEmail ? "Confirm Email" : "Reset Password")}
+                                   </a>
+                                   <p style='color: #999; font-size: 14px; margin-top: 20px;'>
+                                       If you didn't request this, you can safely ignore this email.
+                                   </p>
+                               </div>
+                           </div>",
+
                         TextBody = emailType switch
                         {
-                            EmailType.ConfirmEmail => $"Please confirm your email using the provided link: {ConfirmEmailUrl}",
-                            EmailType.ForgotPassword => $"Please reset your password using the provided link: {ConfirmEmailUrl}",
+                            EmailType.ConfirmEmail => $"Thank you for signing up! Please confirm your email using this link: {ConfirmEmailUrl}",
+                            EmailType.ForgotPassword => $"We received a request to reset your password. Use this link to proceed: {ConfirmEmailUrl}",
                             _ => "Please confirm your email using the provided link."
                         }
                     };
+
+
                     emailMessage.Body = bodyBuilder.ToMessageBody(); // Body of message
 
                     /// (3) Send content of message

@@ -23,7 +23,7 @@ namespace EduCredit.Repository
         public ISemeterCourseRepo _semesterCourseRepo { get; }
         public ICourseRepo _courseRepo { get; }
         public ITeacherRepo _teacherRepo { get; }
-
+        public IStudentRepo _studentRepo { get; }
         public IDepartmentRepo _departmentRepo { get; }
 
         /// Ask CLR for creating object from DbContext and use it in service layer
@@ -35,7 +35,9 @@ namespace EduCredit.Repository
             ITeacherRepo teacherRepo,
             ICourseRepo courseRepo,
             IDepartmentRepo departmentRepo,
-            ISemeterCourseRepo semesterCourseRepo)
+            ISemeterCourseRepo semesterCourseRepo
+            //,IStudentRepo studentRepo
+            )
         {
             _dbcontext = dbcontext;
             _repo = new Hashtable();
@@ -47,6 +49,7 @@ namespace EduCredit.Repository
             _courseRepo = courseRepo;
             _departmentRepo = departmentRepo;
             _semesterCourseRepo = semesterCourseRepo;
+            //_studentRepo = studentRepo;
         }
 
         public async Task<int> CompleteAsync()

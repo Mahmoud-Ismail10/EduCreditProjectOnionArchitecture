@@ -20,6 +20,15 @@ namespace EduCredit.Repository.Repositories
             _dbcontext = dbcontext;
         }
 
+        public async Task<List<string>> GetSchedlesTeachers(List<Guid> teachers )
+        {
+            var Teachers = await _dbcontext.Teachers
+                .Where(c => teachers.Contains(c.Id))
+                .Select(t => t.FullName)
+                .ToListAsync();
+            return Teachers;
+        }
+
         public IReadOnlyList<Teacher?> GetTeachersAreNotReachMaximumOfStudentsByDepartmentId(Guid? departmentId)
         {
             var teachers = _dbcontext.Teachers

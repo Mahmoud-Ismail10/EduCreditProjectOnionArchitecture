@@ -60,7 +60,16 @@ namespace EduCredit.Service.Services
             if (course is null) return null;
             return _mapper.Map<Course, ReadCourseDto>(course);
         }
-        
+        //Return Courses with it`s Count of Students witch are taught by a teacher 
+        //public async Task<ReadTeacherCourseDto> GetCoursesByTeacherIdAsync(Guid teacherId)
+        //{
+        //    var courses = await _unitOfWork._courseRepo.GetCoursesByTeacherIdAsync(teacherId);
+            
+        //    if (courses is null) return null;
+        //    var mappedCourses = _mapper.Map<IReadOnlyList<departmentcourseDto>>(courses);
+
+        //}
+
         public async Task<ApiResponse> UpdateCourseAsync(UpdateCourseDto updateCourseDto, Guid id)
         {
             var spec = new CourseWithDeptAndPrevCourseSpecification(id);

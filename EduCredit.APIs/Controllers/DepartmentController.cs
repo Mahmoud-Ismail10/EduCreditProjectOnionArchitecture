@@ -55,6 +55,19 @@ namespace EduCredit.APIs.Controllers
             return Ok(new Pagination<ReadDepartmentDto>(specParams.PageSize, specParams.PageIndex, count, departmentsDto)); // Status code = 200
         }
 
+        [HttpGet("departments-with-courses")]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]
+        [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<ReadDepartmentCoursesDto>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        public ActionResult<ApiResponse<IReadOnlyList<ReadDepartmentCoursesDto>>> Getdepartmentswithcourses() // Create class contains all of params (refactor)
+        {
+            var departmentsDto = _departmentServices.GetAllDepartmentsCourses();
+            if (departmentsDto is null) return NotFound(new ApiResponse(404));
+            return Ok(new ApiResponse<IReadOnlyList<ReadDepartmentCoursesDto>>(200, "Success", departmentsDto));
+
+            // Status code = 200
+        }
+
         /// GET: api/Department/{id}
         [HttpGet("{id}")]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]

@@ -15,5 +15,6 @@ namespace EduCredit.Service.Services.Contract
         Task<ReadStudentDto?> GetStudentByIdAsync(Guid id);
         Task<ApiResponse> UpdateStudentAsync(UpdateStudentDto updateStudentDto, Guid id);
         Task<ApiResponse> DeleteStudnetAsync(Guid id);
+        //Task<IReadOnlyList<ReadStudentDto>>? GetstudentsByTeacherIdAsync(Guid teacherId);
     }
 }

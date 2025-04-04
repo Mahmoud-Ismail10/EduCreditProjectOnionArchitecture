@@ -5,8 +5,7 @@ namespace EduCredit.Service.DTOs.AuthDTOs
     public class ResetPasswordDto
     {
         [Required]
-        [EmailAddress]
-        public string Email { get; set; }
+        public string userId { get; set; }
 
         [Required]
         public string Token { get; set; }

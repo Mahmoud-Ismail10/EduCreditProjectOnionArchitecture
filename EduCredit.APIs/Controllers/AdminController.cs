@@ -75,6 +75,7 @@ namespace EduCredit.APIs.Controllers
                 return BadRequest(new ApiResponse(400, "It is not suitable to delete the Admin!"));
         }
         [HttpGet("statistics/{type}")]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole},{AuthorizationConstants.TeacherRole}")]
         public async Task<ActionResult<ApiResponse<StatisticsDto>>> GetStatistics(Statistics type)
         {
             var result = await _adminServices.GetStatistics(type);

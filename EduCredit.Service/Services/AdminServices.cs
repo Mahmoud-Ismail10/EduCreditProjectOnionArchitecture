@@ -59,7 +59,7 @@ namespace EduCredit.Service.Services
         {
             var admin = await _unitOfWork.Repository<Admin>().GetByIdAsync(id);
             if (admin is null) return new ApiResponse(404);
-
+            
             await _unitOfWork.Repository<Admin>().Delete(admin);
             int result = await _unitOfWork.CompleteAsync();
             if (result <= 0) return new ApiResponse(400);
@@ -68,8 +68,7 @@ namespace EduCredit.Service.Services
 
         public async Task<StatisticsDto> GetStatistics(Statistics statistics)
         {
-          
-           var statistic= statistics switch
+                     var statistic= statistics switch
             {
                 Statistics.Students => await _unitOfWork.Repository<Student>().CountAsync(),
                 Statistics.Teachers => await _unitOfWork.Repository<Teacher>().CountAsync(),

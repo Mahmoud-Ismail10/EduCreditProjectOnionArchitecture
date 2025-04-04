@@ -16,5 +16,6 @@ namespace EduCredit.Service.Services.Contract
         IReadOnlyList<ReadCourseDto?> GetAllCourses(CourseSpecificationParams specParams, out int count);
         Task<ApiResponse> UpdateCourseAsync(UpdateCourseDto updateCourseDto, Guid id);
         Task<ApiResponse> DeleteCourseAsync(Guid id);
+        //Task<IReadOnlyList<ReadTeacherCourseDto>> GetCoursesByTeacherIdAsync(Guid teacherId);
     }
 }

@@ -12,8 +12,6 @@ namespace EduCredit.Service.DTOs.ScheduleDTOs
     public class BaseScheduleDto
     {
         [Required]
-        public List<Guid> TeacherIds { get; set; } = new List<Guid>();
-        [Required]
         public Guid CourseId { get; set; }
         [Required(ErrorMessage ="Day is required")]
         public Day Day { get; set; } // enum

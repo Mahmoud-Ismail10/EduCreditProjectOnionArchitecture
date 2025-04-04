@@ -15,8 +15,6 @@ namespace EduCredit.APIs.Controllers
     public class EnrollmentTableController : BaseApiController
     {
         private readonly IEnrollmentTableServices _enrollmentTableServices;
-        private readonly ISemesterServices _semesterServices;
-
         public EnrollmentTableController(IEnrollmentTableServices enrollmentTableServices)
         {
             _enrollmentTableServices = enrollmentTableServices;

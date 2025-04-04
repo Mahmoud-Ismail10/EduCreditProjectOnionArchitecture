@@ -41,13 +41,23 @@ namespace EduCredit.APIs.Controllers
         [HttpGet("{id}")]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-        [ProducesResponseType(typeof(ReadCourseDto), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse<ReadCourseDto>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<ApiResponse<ReadCourseDto>>> GetCourse(Guid id)
         {
             var courseDto = await _courseServices.GetCourseByIdAsync(id);
             if (courseDto is null) return NotFound(new ApiResponse(404));
             return Ok(new ApiResponse<ReadCourseDto>(200,"Success", courseDto));
         }
+        //[HttpGet("{teacherId}/courses")]
+        ////[Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
+        //[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        //[ProducesResponseType(typeof(ApiResponse<IReadOnlyList<ReadTeacherCourseDto>>), (int)HttpStatusCode.OK)]
+        //public async Task<ActionResult<ApiResponse<IReadOnlyList<ReadTeacherCourseDto>>>> GetCoursesByTeacherId(Guid teacherId)
+        //{
+        //    var courses = await _courseServices.GetCoursesByTeacherIdAsync(teacherId);
+        //    if (courses is null) return NotFound(new ApiResponse(404));
+        //    return Ok(new ApiResponse<IReadOnlyList<ReadTeacherCourseDto>>(200, "Success", courses));
+        //}
 
         [HttpGet]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]

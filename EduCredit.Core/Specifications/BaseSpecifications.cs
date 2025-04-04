@@ -13,6 +13,8 @@ namespace EduCredit.Core.Specifications
         
         public List<Expression<Func<T, object>>> Includes { get; set; } // Can't equal null, and must initialize it in constructor
             = new List<Expression<Func<T, object>>>();
+        public List<string> ThenIncludes { get; set; } // Can't equal null, and must initialize it in constructor
+            = new List<string>();
         public Expression<Func<T, object>> OrderBy { get; set; } // null
         public Expression<Func<T, object>> OrderByDesc { get; set; } // null
         public Expression<Func<T, object>> ThenBy { get; set; } // null

@@ -36,6 +36,14 @@ namespace EduCredit.Repository.Repositories
                 .ToListAsync();
             return CoursesIds;
         }
+        //public async Task<IReadOnlyList<Course>> GetCoursesByTeacherIdAsync(Guid teacherId)
+        //{
+        //    var courses = await _dbcontext.TeacherSchedules
+        //        .Where(ts => ts.TeacherId == teacherId)
+        //        .Select(ts => ts.Schedule.Course)
+        //        .ToListAsync();
+        //    return courses;
+        //}
 
     }
 }

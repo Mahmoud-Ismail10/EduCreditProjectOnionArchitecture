@@ -61,6 +61,7 @@ namespace EduCredit.Repository.Specifications.Repo
             }
 
             query = spec.Includes.Aggregate(query, (currentQuery, includesExpressions) => currentQuery.Include(includesExpressions));
+            query = spec.ThenIncludes.Aggregate(query, (currentQuery, includesExpressions) => currentQuery.Include(includesExpressions));
             // _dbcontext.Set<className>().Where(x => x.id == id).Include(x => x.className).Include(x => x.className)...
             return query;
         }

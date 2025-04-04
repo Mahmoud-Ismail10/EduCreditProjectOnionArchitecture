@@ -1,5 +1,6 @@
 ﻿using EduCredit.Core.Models;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace EduCredit.Service.DTOs.DepartmentDTOs
 {

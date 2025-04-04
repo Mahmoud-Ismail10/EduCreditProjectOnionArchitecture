@@ -14,7 +14,7 @@ namespace EduCredit.Core.Specifications.StudentSpecifications
         public StudentWithDepartmentAndGuideSpecification(StudentSpecificationParams spec) : base(d =>
             (string.IsNullOrEmpty(spec.Search) || d.FullName.ToLower().Contains(spec.Search.ToLower())) &&
             (!spec.DepartmentId.HasValue || d.DepartmentId == spec.DepartmentId.Value) &&
-            (!spec.AcademicGuideId.HasValue || d.DepartmentId == spec.AcademicGuideId.Value))
+            (!spec.AcademicGuideId.HasValue || d.TeacherId == spec.AcademicGuideId.Value))
 
         {
             Includes.Add(d => d.Department);

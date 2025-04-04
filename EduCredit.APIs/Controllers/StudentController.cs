@@ -46,6 +46,17 @@ namespace EduCredit.APIs.Controllers
             if (student is null) return NotFound(new ApiResponse(404));
             return Ok(new ApiResponse<ReadStudentDto>(200,"Success",student));
         }
+        //[HttpGet("{teacherId}/students")]
+        //[Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]
+        //[ProducesResponseType(typeof(ApiResponse<IReadOnlyList<ReadStudentDto>>), (int)HttpStatusCode.OK)]
+        //[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        //public async Task<ActionResult<ApiResponse<IReadOnlyList<ReadStudentDto>>>> GetStudentsByTeacher(Guid teacherId)
+        //{
+        //    var students = await _studentServices.GetstudentsByTeacherIdAsync(teacherId);
+        //    if (students is null) return NotFound(new ApiResponse(404));
+        //    return Ok(new ApiResponse<IReadOnlyList<ReadStudentDto>>(200, "Success", students));
+        //}
+
 
         /// PUT: api/Students/{id}
         [HttpPut("{id}")]

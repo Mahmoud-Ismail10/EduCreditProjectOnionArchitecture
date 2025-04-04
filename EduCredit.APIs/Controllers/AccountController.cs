@@ -154,6 +154,7 @@ namespace EduCredit.APIs.Controllers
         [HttpPost("forgot-password")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<ActionResult> ForgotPassword([FromBody] ForgotPasswordDto forgotPasswordDto, string RedirectUrl)
         {
             if (!ModelState.IsValid)
@@ -167,7 +168,7 @@ namespace EduCredit.APIs.Controllers
 
         #region ResetPassword
         [HttpPost("reset-password")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse),StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
         {

@@ -16,5 +16,6 @@ namespace EduCredit.Service.DTOs.StudentDTOs
         public Level Level { get; set; }
         public string DepartmentName { get; set; }
         public string AcademicGuide { get; set; }
+        public float AvailableHours { get; set; }
     }
 }

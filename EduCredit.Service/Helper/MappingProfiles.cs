@@ -21,10 +21,18 @@ namespace EduCredit.Service.Helper
                 .ForMember(d => d.DepartmentHeadFullName, o => o.MapFrom(s => s.DepartmentHead.FullName)).ReverseMap();
             CreateMap<CreateDepartmentDto, Department>().ReverseMap();
             CreateMap<UpdateDepartmentDto, Department>().ReverseMap();
-
+            CreateMap<Department, ReadDepartmentCoursesDto>()
+                .ForMember(d => d.Courses, o => o.MapFrom(s => s.Courses))
+                .ForMember(d => d.DepartmentName, o => o.MapFrom(s => s.Name))
+                .ReverseMap();
             CreateMap<Course, ReadCourseDto>()
                 .ForMember(d => d.PreviousCourseName, o => o.MapFrom(s => s.PreviousCourse.Name))
                 .ForMember(d => d.DepartmentName, o => o.MapFrom(s => s.Department.Name)).ReverseMap();
+            CreateMap<Course, departmentcourseDto>()
+                .ForMember(d => d.Name, o => o.MapFrom(s => s.Name))
+                .ForMember(d => d.Id, o => o.MapFrom(s => s.Id))
+                .ReverseMap();
+
             CreateMap<CreateCourseDto, Course>().ReverseMap();
 
             CreateMap<UpdateCourseDto, Course>().ReverseMap();
@@ -51,6 +59,11 @@ namespace EduCredit.Service.Helper
                 .ForMember(d => d.Duration, o => o.MapFrom(s => s.Course.Duration))
                 .ForMember(d => d.Hours, o => o.MapFrom(s => s.Course.CreditHours));
 
+            //CreateMap<Teacher, TeacherDropDownListDto>()
+            //    .ForMember(d => d.Id, o => o.MapFrom(s => s.Id))
+            //    .ForMember(d => d.Name, o => o.MapFrom(s => s.FullName));
+
+
             CreateMap<Teacher, ReadTeacherDto>()
                 .ForMember(d => d.Id, o => o.MapFrom(s => s.Id))
                 .ForMember(d => d.FullName, o => o.MapFrom(s => s.FullName))
@@ -58,7 +71,8 @@ namespace EduCredit.Service.Helper
                .ReverseMap();
             CreateMap<UpdateTeacherDto, Teacher>().ReverseMap();
 
-            CreateMap<Student, ReadStudentDto>();
+            CreateMap<Student, ReadStudentDto>()
+                .ForMember(d=>d.AcademicGuide,o=>o.MapFrom(s=>s.Teacher.FullName));
             CreateMap<Student, UpdateStudentDto>();
 
             CreateMap<BaseRegisterDto, Person>().ReverseMap();

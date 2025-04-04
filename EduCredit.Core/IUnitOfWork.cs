@@ -19,7 +19,8 @@ namespace EduCredit.Core
         ISemeterCourseRepo _semesterCourseRepo { get; }
         ICourseRepo _courseRepo { get; }
         ITeacherRepo _teacherRepo { get; }
-        
+        IStudentRepo _studentRepo { get; }
+
         IDepartmentRepo _departmentRepo { get; }
     }
 }

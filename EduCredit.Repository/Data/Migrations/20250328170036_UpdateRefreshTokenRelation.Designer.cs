@@ -4,6 +4,7 @@ using EduCredit.Repository.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EduCredit.Repository.Data.Migrations
 {
     [DbContext(typeof(EduCreditContext))]
-    partial class EduCreditContextModelSnapshot : ModelSnapshot
+    [Migration("20250328170036_UpdateRefreshTokenRelation")]
+    partial class UpdateRefreshTokenRelation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -298,6 +301,9 @@ namespace EduCredit.Repository.Data.Migrations
 
             modelBuilder.Entity("EduCredit.Core.Relations.Schedule", b =>
                 {
+                    b.Property<Guid>("TeacherId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("CourseId")
                         .HasColumnType("uniqueidentifier");
 
@@ -329,7 +335,9 @@ namespace EduCredit.Repository.Data.Migrations
                     b.Property<TimeSpan>("LectureStart")
                         .HasColumnType("time");
 
-                    b.HasKey("CourseId");
+                    b.HasKey("TeacherId", "CourseId");
+
+                    b.HasIndex("CourseId");
 
                     b.ToTable("Schedules");
                 });
@@ -347,21 +355,6 @@ namespace EduCredit.Repository.Data.Migrations
                     b.HasIndex("CourseId");
 
                     b.ToTable("SemesterCourses");
-                });
-
-            modelBuilder.Entity("EduCredit.Core.Relations.TeacherSchedule", b =>
-                {
-                    b.Property<Guid>("TeacherId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ScheduleId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("TeacherId", "ScheduleId");
-
-                    b.HasIndex("ScheduleId");
-
-                    b.ToTable("TeacherSchedules");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
@@ -626,12 +619,20 @@ namespace EduCredit.Repository.Data.Migrations
             modelBuilder.Entity("EduCredit.Core.Relations.Schedule", b =>
                 {
                     b.HasOne("EduCredit.Core.Models.Course", "Course")
-                        .WithOne("Schedule")
-                        .HasForeignKey("EduCredit.Core.Relations.Schedule", "CourseId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .WithMany("Schedules")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EduCredit.Core.Models.Teacher", "Teacher")
+                        .WithMany("Schedules")
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Course");
+
+                    b.Navigation("Teacher");
                 });
 
             modelBuilder.Entity("EduCredit.Core.Relations.SemesterCourse", b =>
@@ -651,25 +652,6 @@ namespace EduCredit.Repository.Data.Migrations
                     b.Navigation("Course");
 
                     b.Navigation("Semester");
-                });
-
-            modelBuilder.Entity("EduCredit.Core.Relations.TeacherSchedule", b =>
-                {
-                    b.HasOne("EduCredit.Core.Relations.Schedule", "Schedule")
-                        .WithMany("TeacherSchedules")
-                        .HasForeignKey("ScheduleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EduCredit.Core.Models.Teacher", "Teacher")
-                        .WithMany("TeacherSchedules")
-                        .HasForeignKey("TeacherId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Schedule");
-
-                    b.Navigation("Teacher");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -775,8 +757,7 @@ namespace EduCredit.Repository.Data.Migrations
                 {
                     b.Navigation("Enrollments");
 
-                    b.Navigation("Schedule")
-                        .IsRequired();
+                    b.Navigation("Schedules");
 
                     b.Navigation("SemesterCourses");
                 });
@@ -807,11 +788,6 @@ namespace EduCredit.Repository.Data.Migrations
                     b.Navigation("SemesterCourses");
                 });
 
-            modelBuilder.Entity("EduCredit.Core.Relations.Schedule", b =>
-                {
-                    b.Navigation("TeacherSchedules");
-                });
-
             modelBuilder.Entity("EduCredit.Core.Models.Student", b =>
                 {
                     b.Navigation("EnrollmentTables");
@@ -821,9 +797,9 @@ namespace EduCredit.Repository.Data.Migrations
                 {
                     b.Navigation("HeadofDepartment");
 
-                    b.Navigation("Students");
+                    b.Navigation("Schedules");
 
-                    b.Navigation("TeacherSchedules");
+                    b.Navigation("Students");
                 });
 #pragma warning restore 612, 618
         }

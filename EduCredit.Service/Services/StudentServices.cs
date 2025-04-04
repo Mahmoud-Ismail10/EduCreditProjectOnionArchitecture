@@ -53,6 +53,14 @@ namespace EduCredit.Service.Services
             return _mapper.Map<Student, ReadStudentDto>(student);
         }
 
+        //public async Task<IReadOnlyList<ReadStudentDto>>? GetstudentsByTeacherIdAsync(Guid teacherId)
+        //{
+        //    var students = await _unitOfWork._studentRepo.GetStudentsByTeacherIdAsync(teacherId);
+        //    if (students is null) return null;
+        //    return _mapper.Map<IReadOnlyList<Student>, IReadOnlyList<ReadStudentDto>>(students);
+
+        //}
+
         public async Task<ApiResponse> UpdateStudentAsync(UpdateStudentDto updateStudentDto, Guid id)
         {
             var spec = new StudentWithDepartmentAndGuideSpecification(id);

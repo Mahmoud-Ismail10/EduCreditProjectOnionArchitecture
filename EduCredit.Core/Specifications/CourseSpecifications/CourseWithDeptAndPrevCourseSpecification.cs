@@ -34,8 +34,8 @@ namespace EduCredit.Core.Specifications.CourseSpecifications
             ApplyPagination((spec.PageIndex - 1) * spec.PageSize, spec.PageSize);
         }
         /// for get all course in the same semester (with Criteria)
-        public CourseWithDeptAndPrevCourseSpecification(Guid semesterId)
-        : base(c => c.SemesterCourses.Any(sc => sc.SemesterId == semesterId))
+        public CourseWithDeptAndPrevCourseSpecification(Guid id)
+            : base(d => d.Id == id)
         {
             Includes.Add(d => d.Department);
             Includes.Add(d => d.PreviousCourse);

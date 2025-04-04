@@ -9,6 +9,7 @@ namespace EduCredit.Core.Repositories.Contract
 {
     public interface ISemeterCourseRepo
     {
-        Task<IReadOnlyList<Guid>> GetSemesterCoursesBySemesterIdAsync(Guid semesterId);
+        Task<IReadOnlyList<Guid>> GetSemesterCoursesBySemesterIdAndDepartmentIdAsync(Guid semesterId, Guid? departmentId);
+        //Task<IReadOnlyList<Guid>> GetSemesterCoursesBySemesterIdAsync(Guid semesterId);
     }
 }

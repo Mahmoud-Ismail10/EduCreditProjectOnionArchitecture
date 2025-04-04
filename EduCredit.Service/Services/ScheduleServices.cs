@@ -7,6 +7,7 @@ using EduCredit.Core.Specifications.EnrollmentTableSpecifications;
 using EduCredit.Core.Specifications.ScheduleSpecifications;
 using EduCredit.Core.Specifications.SemesterCoursesSpecifications;
 using EduCredit.Core.Specifications.StudentSpecifications;
+using EduCredit.Core.Specifications.TeacherSchedualeSpecifications;
 using EduCredit.Service.DTOs.ScheduleDTOs;
 using EduCredit.Service.DTOs.SemesterDTOs;
 using EduCredit.Service.Errors;
@@ -118,11 +119,10 @@ namespace EduCredit.Service.Services
             // Retrieve student's enrollment table
             var enrollmentTableSpec = new EnrollmentTableWithSemesterAndStudentSpecification(stuId, semester.Id);
             var enrollmentTable = await _unitOfWork.Repository<EnrollmentTable>().GetByIdSpecificationAsync(enrollmentTableSpec);
-            if (enrollmentTable is null) return null;
 
-            // Get available courses for the semester
-            var semesterCoursesList = await _unitOfWork._semesterCourseRepo.GetSemesterCoursesBySemesterIdAsync(semester.Id);
-            if (semesterCoursesList is null) return null;
+            //// Get available courses for the semester
+            //var semesterCoursesList = await _unitOfWork._semesterCourseRepo.GetSemesterCoursesBySemesterIdAndDepartmentIdAsync(semester.Id,student.DepartmentId);
+            //if (semesterCoursesList is null) return null;
 
             int count;
             // Retrieve enrolled courses
@@ -130,56 +130,86 @@ namespace EduCredit.Service.Services
             var enrolledCourses = _unitOfWork.Repository<Enrollment>().GetAllSpecification(enrollmentsSpec, out count);
 
             // Retrieve the schedule courses
-            var scheduleSpec = new ScheduleSpecification();
-            var schedules = _unitOfWork.Repository<Schedule>().GetAllSpecification(scheduleSpec, out count).ToList();
-            if (schedules is null) return null;
+            //var scheduleSpec = new ScheduleSpecification();
+            //var schedules = _unitOfWork.Repository<Schedule>().GetAllSpecification(scheduleSpec, out count).ToList();
+
+
+            //if (schedules is null) return null;
+            var TeacherSchedulesSpec = new TeacherScheduleSpecification(student.DepartmentId);
+            var teacherSchedules = _unitOfWork.Repository<TeacherSchedule>().GetAllSpecification(TeacherSchedulesSpec, out count).ToList();
 
             // Extract enrolled course IDs
             var enrolledCourseIds = enrolledCourses.Select(e => e.CourseId).ToList();
-
+            var schedules = teacherSchedules.Select(s => s.Schedule).ToList();
             // Filter out courses that do not meet the PreviousCourseNotTaken or have already been passed
-            foreach (var course in schedules.ToList())
+            foreach (var schedule in schedules)
             {
-                bool isPreviousCourseNotTaken = course.Course.PreviousCourseId.HasValue && !enrolledCourseIds.Contains(course.Course.PreviousCourseId.Value);
-                bool isAlreadyPassed = enrolledCourses.Any(e => e.CourseId == course.CourseId && (e.IsPassAtCourse ?? false));
+                bool isPreviousCourseNotTaken = schedule.Course.PreviousCourseId.HasValue && !enrolledCourseIds.Contains(schedule.Course.PreviousCourseId.Value);
+                bool isAlreadyPassed = enrolledCourses.Any(e => e.CourseId == schedule.CourseId && (e.IsPassAtCourse ?? false));
 
                 if (isPreviousCourseNotTaken || isAlreadyPassed)
                 {
-                    schedules.Remove(course);
+                    schedules.Remove(schedule);
+
                 }
             }
+            //var Teachers = schedules.SelectMany(s => s.TeacherSchedules.Select(s => s.TeacherId)).ToList();
+            //var TeacherNames = await _unitOfWork._teacherRepo.GetSchedlesTeachers(Teachers);
+            var availableHours = (student.GPA >= 2 ||enrolledCourses.Count()==0)  && student.CreditHours <= 108 ? 18 :student.GPA < 2 ? 12:21;
+            //// Map data to DTO
+            //var scheduleMapped = _mapper.Map<IReadOnlyList<Schedule>, List<ReadScheduleDto>>(schedules);
+            var scheduleMapped =
+                 schedules.Select(s => new ReadScheduleDto
+                 {
+                     CourseId = s.CourseId,
+                     CourseName = s.Course.Name,
+                     TeachersName = s.TeacherSchedules.Select(s=>s.Teacher.FullName).ToList(),
+                     Duration = s.Course.Duration,
+                     Hours = s.Course.CreditHours,
+                     Day = s.Day,
+                     ExamDate = s.ExamDate,
+                     ExamEnd = s.ExamEnd,
+                     ExamLocation = s.ExamLocation,
+                     ExamStart = s.ExamStart,
+                     LectureEnd = s.LectureEnd,
+                     LectureLocation = s.LectureLocation,
+                     LectureStart = s.LectureStart,
+                     //TeacherIds = s.TeacherSchedules.Select(ts => ts.TeacherId).ToList(),
+                 }).ToList();
 
-            // Map data to DTO
-            var scheduleMapped = _mapper.Map<IReadOnlyList<Schedule>, List<ReadScheduleDto>>(schedules);
             if (scheduleMapped is null) return null;
 
             var studentWithAvailableCourses = new ReadScheduleEnrollCourseDto
             {
                 Id = enrollmentTable.StudentId,
-                StudentFullName = student.FullName,
+                FullName = student.FullName,
                 Level = student.Level,
                 DepartmentName = student.Department.Name ?? "",
                 GPA = student.GPA,
-                Obtainedhours = student.CreditHours,
-                AvailableHours = student.CreditHours <= 102 ? 18 : 21,
-                NameOfGuide = student.Teacher?.FullName ?? "",
-                semesterCourses = scheduleMapped,
+                CreditHours = student.CreditHours,
+                AvailableHours = availableHours,
+                AcademicGuide = student.Teacher?.FullName ?? "",
+                SchedualeCourses = scheduleMapped,
             };
 
             return new List<ReadScheduleEnrollCourseDto> { studentWithAvailableCourses };
         }
 
         public async Task<IReadOnlyList<ReadScheduleEnrollCourseDto>?> GetSchedulesByStudentId(Guid stuId)
-        {
-            var EnrollmentTableSpec = new EnrollmentTableWithSemesterAndStudentSpecification(stuId);
-            var EnrollmentTable = await _unitOfWork.Repository<EnrollmentTable>().GetByIdSpecificationAsync(EnrollmentTableSpec);
-            if (EnrollmentTable is null) return null;
+        {  
+            //هرجع ال semester الحالي
+            var semester = await _unitOfWork._semesterRepo.GetCurrentSemester();
+            if (semester is null) return null;
+            // Retrieve student's enrollment table in this semester
+            var enrollmentTableSpec = new EnrollmentTableWithSemesterAndStudentSpecification(stuId, semester.Id);
+            var enrollmentTable = await _unitOfWork.Repository<EnrollmentTable>().GetByIdSpecificationAsync(enrollmentTableSpec);
+            if (enrollmentTable is null) return null;
             //هرجع ال student ب ال Id 
-            var studentSpec = new StudentWithDepartmentAndGuideSpecification(EnrollmentTable.StudentId);
+            var studentSpec = new StudentWithDepartmentAndGuideSpecification(enrollmentTable.StudentId);
             var student = await _unitOfWork.Repository<Student>().GetByIdSpecificationAsync(studentSpec);
             if (student is null) return null;
             //EnrollmentTableId + CourseId => get as schedule By CourseId
-            var EnrollmentCourses = await _unitOfWork._courseRepo.GetCoursesByEnrollmentTableIdAsync(EnrollmentTable.Id);
+            var EnrollmentCourses = await _unitOfWork._courseRepo.GetCoursesByEnrollmentTableIdAsync(enrollmentTable.Id);
             if (EnrollmentCourses is null) return null;
             int count;
             var schedulespec = new ScheduleSpecification(EnrollmentCourses);
@@ -190,15 +220,15 @@ namespace EduCredit.Service.Services
             if (scheduleMapped is null) return null;
             var studentWithSchedule = new ReadScheduleEnrollCourseDto
             {
-                Id = EnrollmentTable.StudentId,
-                StudentFullName = student.FullName,
+                Id = enrollmentTable.StudentId,
+                FullName = student.FullName,
                 Level = student.Level,
                 DepartmentName = student.Department.Name ?? "",
                 GPA = student.GPA,
-                Obtainedhours = student.CreditHours,
+                CreditHours = student.CreditHours,
                 AvailableHours = student.CreditHours <= 102 ? 18 : 21,
-                NameOfGuide = student.Teacher?.FullName ?? "",
-                semesterCourses = scheduleMapped,
+                AcademicGuide = student.Teacher?.FullName ?? "",
+                SchedualeCourses = scheduleMapped,
             };
             return new List<ReadScheduleEnrollCourseDto> { studentWithSchedule };
         }
