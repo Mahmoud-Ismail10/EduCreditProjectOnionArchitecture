@@ -11,11 +11,11 @@ namespace EduCredit.Service.DTOs.StudentDTOs
     public class ReadStudentDto : BaseRegisterDto
     {
         public Guid Id { get; set; }
-        public float CreditHours { get; set; }
+        public float Obtainedhours { get; set; } // Credit Hours
+        public float AvailableHours { get; set; }
         public float GPA { get; set; }
         public Level Level { get; set; }
         public string DepartmentName { get; set; }
         public string AcademicGuide { get; set; }
-        public float AvailableHours { get; set; }
     }
 }

@@ -63,6 +63,17 @@ namespace EduCredit.Repository.Repositories
             return await _dbcontext.Set<T>().AsNoTracking().ToListAsync();
         }
 
+        public async Task CreateRangeAsync(IReadOnlyList<T> entities)
+        {
+            await _dbcontext.Set<T>().AddRangeAsync(entities);
+        }
+
+        public Task DeleteRange(IReadOnlyList<T> entities)
+        {
+            _dbcontext.Set<T>().RemoveRange(entities);
+            return Task.CompletedTask;
+        }
+
         public async Task<int> CountAsync(ISpecification<T>? spec = null)
         {
             IQueryable<T> query = _dbcontext.Set<T>();

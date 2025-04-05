@@ -20,6 +20,6 @@ namespace EduCredit.Service.DTOs.EnrollmentTableDTOs
         public float AvailableHours { get; set; }
         public float GPA { get; set; }
 
-        public List<ReadScheduleDto> semesterCourses { get; set; } = new List<ReadScheduleDto>();
+        public List<ReadScheduleDto> AvailableCourses { get; set; } = new List<ReadScheduleDto>();
     }
 }

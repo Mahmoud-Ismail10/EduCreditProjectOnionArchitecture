@@ -1,4 +1,5 @@
 ﻿using Azure;
+using EduCredit.Core.Models;
 using EduCredit.Core.Security;
 using EduCredit.Service.DTOs.ScheduleDTOs;
 using EduCredit.Service.Errors;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Net;
+using System.Security.Claims;
 
 namespace EduCredit.APIs.Controllers
 {
@@ -24,7 +26,7 @@ namespace EduCredit.APIs.Controllers
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<ApiResponse>> AssignTeacherToCourse([FromBody] CreateScheduleDto createScheduleDto)
+        public async Task<ActionResult<ApiResponse>> AssignTeachersToCourse([FromBody] CreateScheduleDto createScheduleDto)
         {
             var response = await _scheduleServices.AssignSchedule(createScheduleDto);
             if (response.StatusCode == 200)
@@ -56,12 +58,15 @@ namespace EduCredit.APIs.Controllers
             return Ok(new ApiResponse<IReadOnlyList<ReadScheduleEnrollCourseDto>>(200, "Success", schedulesDto));
         }
 
-        [HttpGet("Get-EnrollmentOfCourseScheduale")]
+        [HttpGet("Get-EnrollmentOfCourseScheduale/{StudentId}")]
         [Authorize(Roles = $"{AuthorizationConstants.StudentRole}, {AuthorizationConstants.SuperAdminRole}")]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<ReadScheduleEnrollCourseDto>>>> GetStudentWithHisAvalaibleCourses(Guid StudentId)
         {
-
-            //var userId = User.FindFirstValue("userId");
+            var currentUserIdAsString = User.FindFirstValue("userId");
+            var currentUserIdAsGuid = Guid.Parse(currentUserIdAsString);
+            var userRole = User.FindFirstValue(ClaimTypes.Role);
+            if (userRole == AuthorizationConstants.StudentRole)
+                StudentId = currentUserIdAsGuid;
             var studentCourses = await _scheduleServices.GetStudentAvailableCourses(StudentId);
             if (studentCourses is null) return NotFound(new ApiResponse(404));
             return Ok(new ApiResponse<IReadOnlyList<ReadScheduleEnrollCourseDto>>(200, "Success", studentCourses));

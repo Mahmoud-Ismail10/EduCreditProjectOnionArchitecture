@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace EduCredit.Service.DTOs.ScheduleDTOs
 {
-    public class ReadScheduleEnrollCourseDto: ReadStudentDto
+    public class ReadScheduleEnrollCourseDto : ReadStudentDto
     {
         public List<ReadScheduleDto> SchedualeCourses { get; set; } = new List<ReadScheduleDto>();
     }

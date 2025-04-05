@@ -34,55 +34,44 @@ namespace EduCredit.APIs.Controllers
             else
                 return BadRequest(new ApiResponse(400, "Failure to assign the grade!"));
         }
-
+        
         //[HttpPost]
         //[Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}, {AuthorizationConstants.StudentRole}")]
         //[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
-        //public async Task<ActionResult<ApiResponse>> AssignCourseToEnrollmentTable([FromBody] EnrollmentDto enrollmentDto)
+        //public async Task<ActionResult<ApiResponse>> AssignCourseToEnrollmentTable([FromBody] CreateEnrollmentDto createEnrollmentDto)
         //{
-        //    var response = await _enrollmentServices.AssignEnrollment(enrollmentDto);
+        //    var response = await _enrollmentServices.AssignEnrollment(createEnrollmentDto);
         //    if (response.StatusCode == 200)
         //        return NoContent();
         //    return BadRequest(new ApiResponse(400, response.Message));
         //}
-        
-        [HttpPost]
-        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}, {AuthorizationConstants.StudentRole}")]
-        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<ApiResponse>> AssignCourseToEnrollmentTable([FromBody] CreateEnrollmentDto createEnrollmentDto)
-        {
-            var response = await _enrollmentServices.AssignEnrollment(createEnrollmentDto);
-            if (response.StatusCode == 200)
-                return NoContent();
-            return BadRequest(new ApiResponse(400, response.Message));
-        }
 
-        [HttpDelete("{enrollmentTableId}/{courseId}")]
-        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}, {AuthorizationConstants.StudentRole}")]
-        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<ApiResponse>> DeleteEnrollment(Guid enrollmentTableId, Guid courseId)
-        {
-            var response = await _enrollmentServices.DeleteEnrollment(enrollmentTableId, courseId);
-            if (response.StatusCode == 200)
-                return Ok(new ApiResponse(200, "Enrollment deleted successfully!"));
-            else if (response.StatusCode == 404)
-                return NotFound(new ApiResponse(404, "Enrollment not found!"));
-            else
-                return BadRequest(new ApiResponse(400, "It is not suitable to delete the enrollmet!"));
-        }
+        //[HttpDelete("{enrollmentTableId}/{courseId}")]
+        //[Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}, {AuthorizationConstants.StudentRole}")]
+        //[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
+        //[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        //[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
+        //public async Task<ActionResult<ApiResponse>> DeleteEnrollment(Guid enrollmentTableId, Guid courseId)
+        //{
+        //    var response = await _enrollmentServices.DeleteEnrollment(enrollmentTableId, courseId);
+        //    if (response.StatusCode == 200)
+        //        return Ok(new ApiResponse(200, "Enrollment deleted successfully!"));
+        //    else if (response.StatusCode == 404)
+        //        return NotFound(new ApiResponse(404, "Enrollment not found!"));
+        //    else
+        //        return BadRequest(new ApiResponse(400, "It is not suitable to delete the enrollmet!"));
+        //}
 
-        [HttpGet("{enrollmentTableId}/{courseId}")]
-        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
-        [ProducesResponseType(typeof(ApiResponse<ReadEnrollmentDto>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-        public async Task<ActionResult<ApiResponse<ReadEnrollmentDto>>> GetEnrollment(Guid enrollmentTableId, Guid courseId)
-        {
-            var enrollmentDto = await _enrollmentServices.GetEnrollment(enrollmentTableId, courseId);
-            if (enrollmentDto is null)
-                return NotFound(new ApiResponse(404, "Enrollment not found!"));
-            return Ok(new ApiResponse<ReadEnrollmentDto>(200,"Success",enrollmentDto));
-        }
+        //[HttpGet("{enrollmentTableId}/{courseId}")]
+        //[Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
+        //[ProducesResponseType(typeof(ApiResponse<ReadEnrollmentDto>), (int)HttpStatusCode.OK)]
+        //[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        //public async Task<ActionResult<ApiResponse<ReadEnrollmentDto>>> GetEnrollment(Guid enrollmentTableId, Guid courseId)
+        //{
+        //    var enrollmentDto = await _enrollmentServices.GetEnrollment(enrollmentTableId, courseId);
+        //    if (enrollmentDto is null)
+        //        return NotFound(new ApiResponse(404, "Enrollment not found!"));
+        //    return Ok(new ApiResponse<ReadEnrollmentDto>(200,"Success",enrollmentDto));
+        //}
     }
 }

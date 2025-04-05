@@ -99,7 +99,7 @@ namespace EduCredit.APIs.Controllers
 
         /// DELETE: api/Department/{id}
         [HttpDelete("{id}")]
-       [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]

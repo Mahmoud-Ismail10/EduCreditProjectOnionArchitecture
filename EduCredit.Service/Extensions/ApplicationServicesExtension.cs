@@ -45,6 +45,7 @@ namespace EduCredit.Service.Extensions
                 options.Password.RequireUppercase = false;
                 options.Password.RequireLowercase = false;
                 options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredLength = 8; // Set minimum length to 8 characters
             }).AddEntityFrameworkStores<EduCreditContext>().AddDefaultTokenProviders();
                 services.Configure<DataProtectionTokenProviderOptions>(options =>
             {

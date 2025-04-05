@@ -10,6 +10,7 @@ using EduCredit.Service.DTOs.EnrollmentTableDTOs;
 using EduCredit.Service.DTOs.SemesterDTOs;
 using EduCredit.Service.DTOs.StudentDTOs;
 using EduCredit.Service.Services.Contract;
+using EduCredit.Core.Specifications.EnrollmentTableSpecifications;
 
 namespace EduCredit.Service.Services
 {
@@ -45,13 +46,25 @@ namespace EduCredit.Service.Services
                 if (currentSemester is null) return new ApiResponse(404, "There is no current semester!");
                 createOrUpdateEnrollmentTableDto.SemesterId = currentSemester.Id;
 
-                var existEnrollmentTable = await _unitOfWork._enrollmentTableRepo.GetEnrollmentTableByStudentIdAndSemesterIdAsync(createOrUpdateEnrollmentTableDto.StudentId, currentSemester.Id);
+                var spec = new EnrollmentTableWithSemesterAndStudentSpecification((Guid)createOrUpdateEnrollmentTableDto.StudentId, currentSemester.Id);
+                var existEnrollmentTable = await _unitOfWork.Repository<EnrollmentTable>().GetByIdSpecificationAsync(spec);
                 /// When the student enrolls the table for the first time in the current semester 
                 if (existEnrollmentTable is null)
                 {
                     var createEnrollmentTable = _mapper.Map<CreateOrUpdateEnrollmentTableDto, EnrollmentTable>(createOrUpdateEnrollmentTableDto);
-                    await _unitOfWork.Repository<EnrollmentTable>().CreateAsync(createEnrollmentTable);
 
+                    // Fetch all valid course IDs from DB
+                    var existingScheduleIds = await _unitOfWork._scheduleRepo.GetValidScheduleIds(createOrUpdateEnrollmentTableDto.ScheduleIds);
+                    // Check if all requested courses exist
+                    var missingSchedules = createOrUpdateEnrollmentTableDto.ScheduleIds.Except(existingScheduleIds).ToList();
+                    if (missingSchedules.Any())
+                        return new ApiResponse(400, $"Schedules not found: {string.Join(", ", missingSchedules)}");
+
+                    createEnrollmentTable.Enrollments = createOrUpdateEnrollmentTableDto.ScheduleIds
+                        .Select(scheduleId => new Enrollment { EnrollmentTableId = createEnrollmentTable.Id, CourseId = scheduleId })
+                        .ToList();
+
+                    await _unitOfWork.Repository<EnrollmentTable>().CreateAsync(createEnrollmentTable);
                     int result = await _unitOfWork.CompleteAsync();
                     if (result <= 0) return new ApiResponse(400, "Failed to create enrollment table!");
                     return new ApiResponse(200, "Enrollment Table created successfully");
@@ -60,8 +73,24 @@ namespace EduCredit.Service.Services
                 else
                 {
                     var updateEnrollmentTable = _mapper.Map(createOrUpdateEnrollmentTableDto, existEnrollmentTable);
-                    await _unitOfWork.Repository<EnrollmentTable>().Update(updateEnrollmentTable);
 
+                    // Fetch current enrollments in this enrollment table
+                    var currentEnrollments = existEnrollmentTable.Enrollments.Select(e => e.CourseId).ToList();
+                    // Fetch the enrollments that must be deleted from enrollment table if exist
+                    var enrollmentsToRemove = existEnrollmentTable.Enrollments
+                        .Where(enrollment => !createOrUpdateEnrollmentTableDto.ScheduleIds.Contains(enrollment.CourseId))
+                        .ToList();
+                    if (enrollmentsToRemove.Any())
+                        await _unitOfWork.Repository<Enrollment>().DeleteRange(enrollmentsToRemove);
+                    // Add new enrollments to enrollment table if exist
+                    var newEnrollments = createOrUpdateEnrollmentTableDto.ScheduleIds
+                        .Where(scheduleId => !currentEnrollments.Contains(scheduleId))
+                        .Select(scheduleId => new Enrollment { EnrollmentTableId = updateEnrollmentTable.Id, CourseId = scheduleId })
+                        .ToList();
+                    if (newEnrollments.Any())
+                        await _unitOfWork.Repository<Enrollment>().CreateRangeAsync(newEnrollments);
+
+                    await _unitOfWork.Repository<EnrollmentTable>().Update(updateEnrollmentTable);
                     int result = await _unitOfWork.CompleteAsync();
                     if (result <= 0) return new ApiResponse(400, "Failed to update enrollment table!");
                     return new ApiResponse(200, "Enrollment Table updated successfully");
@@ -70,10 +99,10 @@ namespace EduCredit.Service.Services
             return new ApiResponse(400, "Failed to create enrollment table, Because the enrollment period ended!");
         }
 
-        public Task<IReadOnlyList<ReadEnrollmentTableDto>?> GetStudentAvailableCourses(string studentId)
-        {
-            throw new NotImplementedException();
-        }
+        //public Task<IReadOnlyList<ReadEnrollmentTableDto>?> GetStudentAvailableCourses(string studentId)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         //        //3-الطالب لا يسجل الماده في نفس الوقت
         //        //5-الطالب لا يسجل اكثر من 18 ساعه في الترم الحالي

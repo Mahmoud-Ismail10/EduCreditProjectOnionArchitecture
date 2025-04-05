@@ -35,6 +35,7 @@ namespace EduCredit.Repository.Repositories
         public async Task<Semester?> GetCurrentSemester()
         {
             return await _dbcontext.Semesters
+                .AsNoTracking()
                 .SingleOrDefaultAsync(s => s.StartDate <= DateOnly.FromDateTime(DateTime.UtcNow)
                                         && s.EndDate >= DateOnly.FromDateTime(DateTime.UtcNow));
         }

@@ -20,21 +20,21 @@ namespace EduCredit.APIs.Controllers
             _enrollmentTableServices = enrollmentTableServices;
         }
 
-        [HttpGet("GetEnrollOfCourse")]
-        [Authorize(Roles = $"{AuthorizationConstants.StudentRole}, {AuthorizationConstants.SuperAdminRole}")]
-        public async Task<ActionResult<IReadOnlyList<ReadEnrollmentTableDto>>> GetStudentWithHisAvalaibleCourses([FromQuery] string studentId)
-        {
-            var currentUserId = User.FindFirstValue("userId");
-            var userRole = User.FindFirstValue(ClaimTypes.Role);
-            if (userRole == AuthorizationConstants.StudentRole)
-                studentId = currentUserId;
-            var studentCourses = await _enrollmentTableServices.GetStudentAvailableCourses(studentId);
-            if (studentCourses is null) return NotFound(new ApiResponse(404));
-            return Ok(studentCourses);
-        }
+        //[HttpGet("GetEnrollOfCourse")]
+        //[Authorize(Roles = $"{AuthorizationConstants.StudentRole}, {AuthorizationConstants.SuperAdminRole}, {AuthorizationConstants.AdminRole}")]
+        //public async Task<ActionResult<IReadOnlyList<ReadEnrollmentTableDto>>> GetStudentWithHisAvalaibleCourses([FromQuery] string studentId)
+        //{
+        //    var currentUserId = User.FindFirstValue("userId");
+        //    var userRole = User.FindFirstValue(ClaimTypes.Role);
+        //    if (userRole == AuthorizationConstants.StudentRole)
+        //        studentId = currentUserId;
+        //    var studentCourses = await _enrollmentTableServices.GetStudentAvailableCourses(studentId);
+        //    if (studentCourses is null) return NotFound(new ApiResponse(404));
+        //    return Ok(studentCourses);
+        //}
 
         [HttpPost]
-        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}, {AuthorizationConstants.StudentRole}")]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}, {AuthorizationConstants.AdminRole}, {AuthorizationConstants.StudentRole}")]
         public async Task<ActionResult> CreateEnrollmentTable(CreateOrUpdateEnrollmentTableDto createOrUpdateEnrollmentTableDto)
         {
             var currentUserIdAsString = User.FindFirstValue("userId");

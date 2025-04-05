@@ -11,5 +11,6 @@ namespace EduCredit.Core.Repositories.Contract
     public interface IScheduleRepo
     {
         Task<Schedule?> GetScheduleByCourseIdAsync(Guid courseId);
+        Task<IReadOnlyList<Guid>> GetValidScheduleIds(List<Guid> scheduleIds);
     }
 }

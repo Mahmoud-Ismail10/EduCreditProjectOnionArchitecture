@@ -24,7 +24,7 @@ namespace EduCredit.Repository.Data.Configurations
                 .HasColumnType("float");
 
             builder.Property(e => e.Appreciation)
-                .HasMaxLength(2)
+                .HasMaxLength(5)
                 .HasConversion(
                 App => App.ToString(),
                 App => (Appreciation)Enum.Parse(typeof(Appreciation), App));

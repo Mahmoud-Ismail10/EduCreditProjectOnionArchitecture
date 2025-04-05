@@ -26,5 +26,15 @@ namespace EduCredit.Repository.Repositories
                 .FirstOrDefaultAsync(c => c.CourseId == courseId);
             return schedule;
         }
+
+        public async Task<IReadOnlyList<Guid>> GetValidScheduleIds(List<Guid> scheduleIds)
+        {
+            var existingScheduleIds = await _dbcontext.Schedules
+                .Where(c => scheduleIds.Contains(c.CourseId))
+                .Select(c => c.CourseId)
+                .ToListAsync();
+
+            return existingScheduleIds;
+        }
     }
 }
