@@ -2,6 +2,7 @@
 using EduCredit.Core;
 using EduCredit.Core.Models;
 using EduCredit.Core.Relations;
+using EduCredit.Core.Specifications.SemesterSpecifications;
 using EduCredit.Service.DTOs.SemesterDTOs;
 using EduCredit.Service.Errors;
 using EduCredit.Service.Services.Contract;
@@ -42,8 +43,13 @@ namespace EduCredit.Service.Services
                 semester.SemesterCourses = createSemesterDto.CourseIds
                     .Select(courseId => new SemesterCourse { SemesterId = semester.Id, CourseId = courseId })
                     .ToList();
+               
+                var schedules = createSemesterDto.CourseIds
+                    .Select(courseId => new Schedule { CourseId = courseId })
+                    .ToList(); 
 
                 await _unitOfWork.Repository<Semester>().CreateAsync(semester);
+                await _unitOfWork.Repository<Schedule>().CreateRangeAsync(schedules);
                 int result = await _unitOfWork.CompleteAsync();
 
                 if (result <= 0) return new ApiResponse(400, "Failed to create the semester!");
@@ -80,7 +86,9 @@ namespace EduCredit.Service.Services
         public async Task<ReadSemesterDto?> GetCurrentSemester()
         {
             var currentSemester = await _unitOfWork._semesterRepo.GetCurrentSemester();
-            return _mapper.Map<Semester, ReadSemesterDto?>(currentSemester);
+            if (currentSemester is null)
+                return null;
+            return _mapper.Map<Semester, ReadSemesterDto>(currentSemester);
         }
 
         public async Task<bool> IsEnrollmentOpenAsync()
@@ -94,6 +102,40 @@ namespace EduCredit.Service.Services
             return false;
         }
 
+        public IReadOnlyList<ReadSemesterDto>? GetAllSemesters(SemesterSpecificationParams spec, out int count)
+        {
+            var specparams = new SemesterWithCoursesSpecifications(spec);
+            var semesters =  _unitOfWork.Repository<Semester>().GetAllSpecification(specparams, out count);
+            if (semesters is not null)
+            {
+                // var result = _mapper.Map<IReadOnlyList<Semester>, IReadOnlyList<ReadSemesterDto>>(semesters);
+                var result =
+                    semesters.Select(s => new ReadSemesterDto
+                    {
+                        Id=s.Id,
+                        EndDate=s.EndDate,
+                        StartDate=s.StartDate,
+                        EnrollmentClose=s.EnrollmentClose,
+                        EnrollmentOpen=s.EnrollmentOpen,
+                        Name=s.Name,
+                        Year=s.EndDate.Year.ToString()
+                    }).ToList();
+                return result;
+            }
+            return null;
 
+        }
+
+        public async Task<ReadSemesterDto?> GetSemesterByIdAsync(Guid id)
+        {
+            var spec = new SemesterWithCoursesSpecifications(id);
+            var semester = await _unitOfWork.Repository<Semester>().GetByIdSpecificationAsync(spec);
+            if (semester is not null)
+            {
+                var result = _mapper.Map<Semester, ReadSemesterDto>(semester);
+                return result;
+            }
+            return null;
+        }
     }
 }

@@ -37,8 +37,11 @@ namespace EduCredit.Service.Services
         public async Task<ApiResponse> DeleteCourseAsync(Guid id)
         {
             var course = await _unitOfWork.Repository<Course>().GetByIdAsync(id);
-            if (course == null) return new ApiResponse(404);
-
+            if (course == null) return new ApiResponse(404,"This course does`t exist!");
+            // Check if the course is used in any schedule
+             var schedule = await _unitOfWork._scheduleRepo.CheckIfCourseExistsInScheduleAsync(id);
+            if (schedule)
+                return new ApiResponse(404,"This course used in schedule please delete schedule first !");
             await _unitOfWork.Repository<Course>().Delete(course);
             int result = await _unitOfWork.CompleteAsync();
             if (result <= 0) return new ApiResponse(400);
@@ -60,15 +63,35 @@ namespace EduCredit.Service.Services
             if (course is null) return null;
             return _mapper.Map<Course, ReadCourseDto>(course);
         }
-        //Return Courses with it`s Count of Students witch are taught by a teacher 
-        //public async Task<ReadTeacherCourseDto> GetCoursesByTeacherIdAsync(Guid teacherId)
-        //{
-        //    var courses = await _unitOfWork._courseRepo.GetCoursesByTeacherIdAsync(teacherId);
-            
-        //    if (courses is null) return null;
-        //    var mappedCourses = _mapper.Map<IReadOnlyList<departmentcourseDto>>(courses);
 
+        //public async Task<IReadOnlyList<ReadCourseDto?>> GetCoursesByCurrentSemesterId(Guid? departmentId)
+        //{
+        //    var currentSemester = await _unitOfWork._semesterRepo.GetCurrentSemester();
+        //    if (currentSemester is null) return null;
+        //    var courses = await _unitOfWork._courseRepo.GetCoursesInCurrentsemester(departmentId, currentSemester.Id);
+        //    if (courses is null) return null;
+        //    var coursesdto = _mapper.Map<IReadOnlyList<Course>, IReadOnlyList<ReadCourseDto>>(courses);
+        //    return coursesdto;
         //}
+
+        // Return Courses with it`s Count of Students witch are taught by a teacher
+        public async Task<IReadOnlyList<ReadTeacherCourseDto>> GetCoursesByTeacherIdAsync(Guid teacherId)
+        {
+            //Get the semesterId current Semester
+            var semester = await _unitOfWork._semesterRepo.GetCurrentSemester();
+
+            //Returning Courses of each teacher with the count of student
+            var courses = await _unitOfWork._semesterCourseRepo.GetCoursesByTeacherIdAsync(teacherId,semester.Id);
+            if (courses is null) return null;
+            
+            var coursemapped = courses.Select(s => new ReadTeacherCourseDto
+            {
+                Count=s.Enrollments.Select(s=>s.EnrollmentTableId).Count(),
+                Id=s.Id,
+                Name=s.Name
+            }).ToList();
+            return coursemapped;
+        }
 
         public async Task<ApiResponse> UpdateCourseAsync(UpdateCourseDto updateCourseDto, Guid id)
         {

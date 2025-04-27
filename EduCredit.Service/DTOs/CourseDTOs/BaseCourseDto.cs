@@ -8,7 +8,7 @@ namespace EduCredit.Service.DTOs.CourseDTOs
         [Required(ErrorMessage = "Course Name is required")]
         [MinLength(3, ErrorMessage = "Name must be at least 3 characters")]
         [MaxLength(50, ErrorMessage = "Name cannot exceed 50 characters")]
-        [RegularExpression(pattern: "^[A-Za-z\\s]{3,}$", ErrorMessage = "Name must contain only letters and spaces")]
+        [RegularExpression(@"^[A-Za-z\s]+[1-9]?$", ErrorMessage = "Name must contain only letters and spaces, and optionally a digit 1-9 at the end.")]
         public string Name { get; set; }
 
         [Required(ErrorMessage = "Credit Hours is required")]

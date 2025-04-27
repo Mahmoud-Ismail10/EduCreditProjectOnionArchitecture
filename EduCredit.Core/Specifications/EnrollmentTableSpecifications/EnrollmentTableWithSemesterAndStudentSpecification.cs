@@ -23,6 +23,7 @@ namespace EduCredit.Core.Specifications.EnrollmentTableSpecifications
             Includes.Add(e => e.Student);
             Includes.Add(e => e.Semester);
             Includes.Add(e => e.Enrollments);
+            ThenIncludes.Add("Student.Department");
         }
       
     }

@@ -28,8 +28,8 @@ namespace EduCredit.Repository.Data.Configurations
 
             /// Self-reference to represent the previous course
             builder.HasOne(c => c.PreviousCourse)
-                .WithOne()
-                .HasForeignKey<Course>(c => c.PreviousCourseId)
+                .WithMany()
+                .HasForeignKey(c => c.PreviousCourseId)
                 .OnDelete(DeleteBehavior.ClientSetNull);
 
             /// One-to-many: Between Course and Department

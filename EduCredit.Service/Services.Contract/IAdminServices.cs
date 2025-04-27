@@ -18,6 +18,6 @@ namespace EduCredit.Service.Services.Contract
         Task<ReadAdminDto?> GetAdminByIdAsync(Guid id);
         Task<UpdateAdminDto?> UpdateAdminAsync(UpdateAdminDto updateadminDto, Guid id);
         Task<ApiResponse> DeleteAdminAsync(Guid id);
-        Task<StatisticsDto> GetStatistics(Statistics statistics);
+        Task<StatisticsDto> GetStatistics(Statistics statistics, Guid? DepartmentId);
     }
 }

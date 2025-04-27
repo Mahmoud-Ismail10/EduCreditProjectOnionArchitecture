@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace EduCredit.APIs.Controllers
 {
@@ -48,19 +49,20 @@ namespace EduCredit.APIs.Controllers
             if (courseDto is null) return NotFound(new ApiResponse(404));
             return Ok(new ApiResponse<ReadCourseDto>(200,"Success", courseDto));
         }
-        //[HttpGet("{teacherId}/courses")]
-        ////[Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
-        //[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-        //[ProducesResponseType(typeof(ApiResponse<IReadOnlyList<ReadTeacherCourseDto>>), (int)HttpStatusCode.OK)]
-        //public async Task<ActionResult<ApiResponse<IReadOnlyList<ReadTeacherCourseDto>>>> GetCoursesByTeacherId(Guid teacherId)
-        //{
-        //    var courses = await _courseServices.GetCoursesByTeacherIdAsync(teacherId);
-        //    if (courses is null) return NotFound(new ApiResponse(404));
-        //    return Ok(new ApiResponse<IReadOnlyList<ReadTeacherCourseDto>>(200, "Success", courses));
-        //}
+        [HttpGet("{teacherId}/courses")]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<ReadTeacherCourseDto>>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<ApiResponse<IReadOnlyList<ReadTeacherCourseDto>>>> GetCoursesByTeacherId(Guid teacherId)
+        {
+
+            var courses = await _courseServices.GetCoursesByTeacherIdAsync(teacherId);
+            if (courses is null) return NotFound(new ApiResponse(404));
+            return Ok(new ApiResponse<IReadOnlyList<ReadTeacherCourseDto>>(200, "Success", courses));
+        }
 
         [HttpGet]
-        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(Pagination<ReadCourseDto>), (int)HttpStatusCode.OK)]
         public ActionResult<IReadOnlyList<ReadCourseDto>> GetCourses([FromQuery] CourseSpecificationParams specParams)
@@ -70,6 +72,17 @@ namespace EduCredit.APIs.Controllers
             if (coursesDto is null) return NotFound(new ApiResponse(404));
             return Ok(new Pagination<ReadCourseDto>(specParams.PageSize, specParams.PageIndex, count, coursesDto));
         }
+       // [HttpGet("GetCoursesInCurrentSemester")]
+       //// [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
+       // [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+       // [ProducesResponseType(typeof(Pagination<ReadCourseDto>), (int)HttpStatusCode.OK)]
+       // public async Task<ActionResult<IReadOnlyList<ReadCourseDto>>> GetCoursesInCurrentSemester([FromQuery] CourseSpecificationParams specParams)
+       // {
+       //     var coursesDto =await _courseServices.GetCoursesByCurrentSemesterId(specParams.DepartmentId);
+       //     if (coursesDto is null) return NotFound(new ApiResponse(404));
+       //     return Ok(new Pagination<ReadCourseDto>(specParams.PageSize, specParams.PageIndex,coursesDto.Count, coursesDto));
+       // }
+
 
         [HttpPut("{id}")]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]

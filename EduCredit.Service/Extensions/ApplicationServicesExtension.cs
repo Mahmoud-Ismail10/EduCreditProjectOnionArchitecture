@@ -28,6 +28,7 @@ using EduCredit.Core.Repositories.Contract;
 using EduCredit.Repository.Repositories;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.OpenApi.Any;
 
 
 namespace EduCredit.Service.Extensions
@@ -143,6 +144,7 @@ namespace EduCredit.Service.Extensions
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(op =>
             {
+
                 op.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Title = "EduCredit",
@@ -159,7 +161,20 @@ namespace EduCredit.Service.Extensions
                     Description = "Please enter a valid token"
                 });
                 op.OperationFilter<SecurityRequirementsOperationFilter>();
+                op.MapType<TimeOnly>(() => new OpenApiSchema
+                {
+                    Type = "string",
+                    Format = "time", // دي بتقول للـ Swagger إنه نوع وقت
+                    Example = new OpenApiString("14:30:00")
+                });
 
+                op.MapType<TimeOnly?>(() => new OpenApiSchema
+                {
+                    Type = "string",
+                    Format = "time",
+                    Nullable = true,
+                    Example = new OpenApiString("14:30:00")
+                });
 
             });
             return services;
@@ -235,6 +250,7 @@ namespace EduCredit.Service.Extensions
                     OnForbidden = context =>
                     {
                         context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                        context.Response.ContentType = "application/json";
                         return context.Response.WriteAsync("message : You do not have permission to access this resource.");
                     }
                 };

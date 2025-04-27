@@ -32,7 +32,7 @@ namespace EduCredit.Service.Helper
                 .ForMember(d => d.Name, o => o.MapFrom(s => s.Name))
                 .ForMember(d => d.Id, o => o.MapFrom(s => s.Id))
                 .ReverseMap();
-
+           
             CreateMap<CreateCourseDto, Course>().ReverseMap();
 
             CreateMap<UpdateCourseDto, Course>().ReverseMap();
@@ -41,10 +41,15 @@ namespace EduCredit.Service.Helper
             CreateMap<CreateSemesterDto, Semester>()
                 .ForMember(d => d.Name, o => o.MapFrom(s => $"{s.SemesterType}-{s.Year}"));
             CreateMap<UpdateSemesterDto, Semester>();
+            CreateMap<Semester, ReadSemesterDto>()
+                .ForMember(d => d.Year, o => o.MapFrom(s => s.EndDate.Year))
+               
+                .ReverseMap();
 
             CreateMap<CreateOrUpdateEnrollmentTableDto, EnrollmentTable>();
 
-            CreateMap<Schedule, ReadScheduleDto>();
+            CreateMap<Schedule, ReadScheduleDto>()
+                .ForMember(d=>d.TeachersName,o=>o.MapFrom(s=>s.TeacherSchedules.Select(s=>s.Teacher.FullName)));
             //CreateMap<Schedule, ReadScheduleEnrollCourseDto>();
             CreateMap<CreateScheduleDto, Schedule>();
             CreateMap<UpdateScheduleDto, Schedule>();
@@ -72,8 +77,9 @@ namespace EduCredit.Service.Helper
             CreateMap<UpdateTeacherDto, Teacher>().ReverseMap();
 
             CreateMap<Student, ReadStudentDto>()
-                .ForMember(d=>d.AcademicGuide,o=>o.MapFrom(s=>s.Teacher.FullName));
-            CreateMap<Student, UpdateStudentDto>();
+                .ForMember(d => d.AcademicGuide, o => o.MapFrom(s => s.Teacher.FullName));
+            CreateMap<UpdateStudentDto,Student>()
+                .ReverseMap();
 
             CreateMap<BaseRegisterDto, Person>().ReverseMap();
             CreateMap<Admin, ReadAdminDto>()

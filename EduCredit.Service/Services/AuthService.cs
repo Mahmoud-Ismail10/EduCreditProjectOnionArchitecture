@@ -54,19 +54,19 @@ namespace EduCredit.Service.Services
                 return new ApiResponse(400, "This email is already registered!");
 
             var user = CreateUser(person, role);
-            if (user is null)
-                return new ApiResponse(400, "Invalid role!");
+            if (user.Result is null)
+                return new ApiResponse(400,user.Message);
 
-            var result = await _userManager.CreateAsync(user, user.NationalId);
+            var result = await _userManager.CreateAsync(user.Result, user.Result.NationalId);
             if (!result.Succeeded)
                 return new ApiResponse(400, $"Failed to register! {string.Join(", ", result.Errors.Select(e => e.Description))}");
 
             var roleName = role.ToString();
-            if (!(await _userManager.AddToRoleAsync(user, roleName)).Succeeded)
+            if (!(await _userManager.AddToRoleAsync(user.Result, roleName)).Succeeded)
                 return new ApiResponse(400, "Failed to assign the role!");
 
-            var emailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var confirmationUrl = GenerateConfirmationUrl(user.Id, emailToken, RedirectUrl);
+            var emailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user.Result);
+            var confirmationUrl = GenerateConfirmationUrl(user.Result.Id, emailToken, RedirectUrl);
 
             var emailSent = await _emailService.SendEmailAsync(person.Email, confirmationUrl, EmailType.ConfirmEmail);
             if (emailSent.StatusCode != 200)
@@ -82,7 +82,7 @@ namespace EduCredit.Service.Services
             return confirmationUrl;
         }
 
-        private Person? CreateUser(BaseUserDto person, Roles role)
+        private ApiResponse<Person>? CreateUser(BaseUserDto person, Roles role)
         {
             string userName = person.FullName.Replace(" ", "");
 
@@ -91,7 +91,7 @@ namespace EduCredit.Service.Services
             {
                 case Roles.StudentRole:
                     var guide = _teacherServices.AssignGuideToStudent(person.DepartmentId);
-                    if (guide is null) throw new Exception("There are no teachers available in the department");
+                    if (guide is null) return new ApiResponse<Person>(400,"There are no teachers available in the department",null);
                     user = new Student
                     {
                         GPA = 0.0f,
@@ -129,7 +129,7 @@ namespace EduCredit.Service.Services
             user.FullName = person.FullName;
             user.EmailConfirmed = false;
 
-            return user;
+            return new ApiResponse<Person>(200, "",user);
         }
 
         #endregion

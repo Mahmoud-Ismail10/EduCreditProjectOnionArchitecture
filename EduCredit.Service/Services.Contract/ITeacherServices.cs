@@ -1,4 +1,6 @@
-﻿using EduCredit.Core.Specifications.TeacherSpecefications;
+﻿using EduCredit.Core.Enums;
+using EduCredit.Core.Specifications.TeacherSpecefications;
+using EduCredit.Service.DTOs.AdminDTOs;
 using EduCredit.Service.DTOs.TeacherDTOs;
 using EduCredit.Service.Errors;
 using System;
@@ -16,5 +18,6 @@ namespace EduCredit.Service.Services.Contract
         Task<UpdateTeacherDto?> UpdateTeacherAsync(UpdateTeacherDto updateteacherDto, Guid id);
         Task<ApiResponse> DeleteTeacherAsync(Guid id);
         ReadTeacherDto? AssignGuideToStudent(Guid? departmentId);
+        Task<StatisticsDto> GetStatistics(TeacherStatistics type, Guid? TeacherId);
     }
 }

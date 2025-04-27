@@ -4,6 +4,7 @@ using EduCredit.Repository.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EduCredit.Repository.Data.Migrations
 {
     [DbContext(typeof(EduCreditContext))]
-    partial class EduCreditContextModelSnapshot : ModelSnapshot
+    [Migration("20250424195123_AddScheduleId")]
+    partial class AddScheduleId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,7 +55,9 @@ namespace EduCredit.Repository.Data.Migrations
 
                     b.HasIndex("DepartmentId");
 
-                    b.HasIndex("PreviousCourseId");
+                    b.HasIndex("PreviousCourseId")
+                        .IsUnique()
+                        .HasFilter("[PreviousCourseId] IS NOT NULL");
 
                     b.ToTable("Courses");
                 });
@@ -331,7 +336,8 @@ namespace EduCredit.Repository.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CourseId");
+                    b.HasIndex("CourseId")
+                        .IsUnique();
 
                     b.ToTable("Schedules");
                 });
@@ -559,8 +565,8 @@ namespace EduCredit.Repository.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("EduCredit.Core.Models.Course", "PreviousCourse")
-                        .WithMany()
-                        .HasForeignKey("PreviousCourseId");
+                        .WithOne()
+                        .HasForeignKey("EduCredit.Core.Models.Course", "PreviousCourseId");
 
                     b.Navigation("Department");
 
@@ -628,8 +634,8 @@ namespace EduCredit.Repository.Data.Migrations
             modelBuilder.Entity("EduCredit.Core.Relations.Schedule", b =>
                 {
                     b.HasOne("EduCredit.Core.Models.Course", "Course")
-                        .WithMany("Schedules")
-                        .HasForeignKey("CourseId")
+                        .WithOne("Schedule")
+                        .HasForeignKey("EduCredit.Core.Relations.Schedule", "CourseId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -777,7 +783,8 @@ namespace EduCredit.Repository.Data.Migrations
                 {
                     b.Navigation("Enrollments");
 
-                    b.Navigation("Schedules");
+                    b.Navigation("Schedule")
+                        .IsRequired();
 
                     b.Navigation("SemesterCourses");
                 });

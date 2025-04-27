@@ -1,10 +1,11 @@
-﻿using EduCredit.Core.Security;
+﻿using EduCredit.Core.Relations;
+using EduCredit.Core.Security;
+using EduCredit.Core.Specifications.EnrollmentsSpecifications;
 using EduCredit.Service.DTOs.EnrollmentDTOs;
 using EduCredit.Service.Errors;
-using EduCredit.Service.Services;
+using EduCredit.Service.Helper;
 using EduCredit.Service.Services.Contract;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -34,7 +35,21 @@ namespace EduCredit.APIs.Controllers
             else
                 return BadRequest(new ApiResponse(400, "Failure to assign the grade!"));
         }
-        
+        [HttpGet("Results")]
+        [ProducesResponseType(typeof(ApiResponse<Pagination<ReadEnrollmentDto>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
+        public ActionResult<ApiResponse<Pagination<IReadOnlyList<Enrollment>>>> GetAllResults([FromQuery] EnrollmentSpecificationParams spec)
+        {
+            int count;
+            var Enrollments = _enrollmentServices.GetAllEnrollmentsAsync(spec,out count);
+            return Ok(new ApiResponse<Pagination<ReadEnrollmentDto>>(200, "Success", new Pagination<ReadEnrollmentDto>(spec.PageSize, spec.PageIndex, count, Enrollments)));
+        }
+
+
+
+
+        #region oldVersion
         //[HttpPost]
         //[Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}, {AuthorizationConstants.StudentRole}")]
         //[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
@@ -73,5 +88,6 @@ namespace EduCredit.APIs.Controllers
         //        return NotFound(new ApiResponse(404, "Enrollment not found!"));
         //    return Ok(new ApiResponse<ReadEnrollmentDto>(200,"Success",enrollmentDto));
         //}
+        #endregion
     }
 }

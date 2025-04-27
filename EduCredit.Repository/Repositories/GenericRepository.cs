@@ -14,7 +14,7 @@ namespace EduCredit.Repository.Repositories
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         private readonly EduCreditContext _dbcontext;
-
+        
         public GenericRepository(EduCreditContext dbcontext)
         {
             _dbcontext = dbcontext;
@@ -30,14 +30,11 @@ namespace EduCredit.Repository.Repositories
             _dbcontext.Set<T>().Remove(entity);
             return Task.CompletedTask;
         }
-
         public Task Update(T entity)
         {
             _dbcontext.Set<T>().Update(entity);
             return Task.CompletedTask;
         }
-
-
         public IReadOnlyList<T?> GetAllSpecification(ISpecification<T> spec, out int count)
         {
             return ApplyQuery(spec, out count).AsNoTracking().ToList();
@@ -46,7 +43,7 @@ namespace EduCredit.Repository.Repositories
       
         public async Task<T?> GetByIdSpecificationAsync(ISpecification<T> spec)
         {
-            return await ApplyQuery(spec, out _).AsNoTracking().FirstOrDefaultAsync(); /// 'Find' local looking first then looking at DB
+            return await ApplyQuery(spec, out _).FirstOrDefaultAsync(); /// 'Find' local looking first then looking at DB
         }
 
         private IQueryable<T> ApplyQuery(ISpecification<T> spec, out int count)

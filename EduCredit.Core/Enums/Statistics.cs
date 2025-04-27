@@ -13,5 +13,9 @@ namespace EduCredit.Core.Enums
         Courses,
         Departments,
         SuccessRate,
+        DepartmentSuccessRate,
+        DepartmentTotalCourses,
+        DepartmentTotalStudents,
+        DepartmentTotalTeachers,
     }
 }

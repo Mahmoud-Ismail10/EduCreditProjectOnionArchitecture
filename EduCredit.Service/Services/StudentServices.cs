@@ -49,8 +49,28 @@ namespace EduCredit.Service.Services
             var spec = new StudentWithDepartmentAndGuideSpecification(id);
             var student = await _unitOfWork.Repository<Student>().GetByIdSpecificationAsync(spec);
             if (student is null) return null;
-
-            return _mapper.Map<Student, ReadStudentDto>(student);
+            var enrolledCourses = student.EnrollmentTables.SelectMany(E => E.Enrollments.Where(E => E.IsPassAtCourse == true)).Count();
+            var availableHours = (student.GPA >= 2 || enrolledCourses == 0) && student.CreditHours <= 108 ? 18 : student.GPA < 2 ? 12 : 21;
+            var MappedStudent = new ReadStudentDto
+            {
+                Id = student.Id,
+                Email = student.Email,
+                PhoneNumber = student.PhoneNumber,
+                Address = student.Address,
+                AcademicGuide = student.Teacher.FullName,
+                FullName = student.FullName,
+                AvailableHours = availableHours,
+                BirthDate = student.BirthDate,
+                CoursesCount = enrolledCourses,
+                Gender = student.Gender,
+                GPA = student.GPA,
+                Level = student.Level,
+                NationalId = student.NationalId,
+                Obtainedhours = student.CreditHours,
+                DepartmentName = student.Department.Name
+            };
+            return MappedStudent;
+            // return _mapper.Map<Student, ReadStudentDto>(student);
         }
 
         //public async Task<IReadOnlyList<ReadStudentDto>>? GetstudentsByTeacherIdAsync(Guid teacherId)
@@ -67,13 +87,17 @@ namespace EduCredit.Service.Services
             var student = await _unitOfWork.Repository<Student>().GetByIdSpecificationAsync(spec);
             if (student is null) return new ApiResponse(404);
 
-            var newStudent = _mapper.Map(updateStudentDto, student);
-            await _unitOfWork.Repository<Student>().Update(newStudent);
+            _mapper.Map(updateStudentDto, student);
+
+            student.DepartmentId = updateStudentDto.DepartmentId; 
+
+           await _unitOfWork.Repository<Student>().Update(student); 
 
             int result = await _unitOfWork.CompleteAsync();
             if (result <= 0) return new ApiResponse(400);
             return new ApiResponse(200);
         }
+
 
 
 

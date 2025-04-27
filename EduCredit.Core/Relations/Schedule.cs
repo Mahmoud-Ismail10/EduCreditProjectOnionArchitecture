@@ -10,18 +10,19 @@ namespace EduCredit.Core.Relations
 {
     public class Schedule
     {
-        public Guid CourseId { get; set; } // Primary key
+        public Guid Id { get; set; }
 
-        public Day Day { get; set; } // enum
-        public TimeOnly LectureStart { get; set; }
-        public TimeOnly LectureEnd { get; set; }
-        public string LectureLocation { get; set; }
+        public Day? Day { get; set; } // enum
+        public TimeOnly? LectureStart { get; set; }
+        public TimeOnly? LectureEnd { get; set; }
+        public string? LectureLocation { get; set; }
         public DateOnly? ExamDate { get; set; }
         public TimeOnly? ExamStart { get; set; }
         public TimeOnly? ExamEnd { get; set; }
         public string? ExamLocation { get; set; }
 
         /// One-to-One: Between Schedule and Course
+         public Guid CourseId { get; set; } // Forign key
         public Course Course { get; set; }
 
         /// Many-to-many: Between Schedule and Teacher (JoinTable)

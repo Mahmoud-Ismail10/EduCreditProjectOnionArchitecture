@@ -22,25 +22,25 @@ namespace EduCredit.APIs.Controllers
             _scheduleServices = scheduleServices;
         }
 
-        [HttpPost]
-        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
-        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<ApiResponse>> AssignTeachersToCourse([FromBody] CreateScheduleDto createScheduleDto)
-        {
-            var response = await _scheduleServices.AssignSchedule(createScheduleDto);
-            if (response.StatusCode == 200)
-                return Ok(new ApiResponse(200, response.Message));
-            return BadRequest(new ApiResponse(400, response.Message));
-        }
+        //[HttpPost]
+        //[Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
+        //[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
+        //[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
+        //public async Task<ActionResult<ApiResponse>> AssignTeachersToCourse([FromBody] CreateScheduleDto createScheduleDto)
+        //{
+        //    var response = await _scheduleServices.AssignSchedule(createScheduleDto);
+        //    if (response.StatusCode == 200)
+        //        return Ok(new ApiResponse(200, response.Message));
+        //    return BadRequest(new ApiResponse(400, response.Message));
+        //}
 
-        [HttpGet("{courseId}")]
+        [HttpGet("{CourseId}")]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ApiResponse<ReadScheduleDto>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<ApiResponse<ReadScheduleDto>>> GetSchedule(Guid courseId)
+        public async Task<ActionResult<ApiResponse<ReadScheduleDto>>> GetSchedule(Guid CourseId)
         {
-            var scheduleDto = await _scheduleServices.GetSchedule(courseId);
+            var scheduleDto = await _scheduleServices.GetSchedule(CourseId);
             if (scheduleDto is null)
                 return NotFound(new ApiResponse(404, "Schedule not found!"));
             return Ok(new ApiResponse<ReadScheduleDto>(200, "Success", scheduleDto));
@@ -72,13 +72,13 @@ namespace EduCredit.APIs.Controllers
             return Ok(new ApiResponse<IReadOnlyList<ReadScheduleEnrollCourseDto>>(200, "Success", studentCourses));
         }
 
-        [HttpPut("{courseId}")]
+        [HttpPut("{ScheduleId}")]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<ApiResponse>> UpdateSchedule(Guid courseId, [FromBody] UpdateScheduleDto updateScheduleDto)
+        public async Task<ActionResult<ApiResponse>> UpdateSchedule(Guid ScheduleId, [FromBody] UpdateScheduleDto updateScheduleDto)
         {
-            var response = await _scheduleServices.UpdateSchedule(courseId, updateScheduleDto);
+            var response = await _scheduleServices.UpdateSchedule(ScheduleId, updateScheduleDto);
             if (response.StatusCode == 200)
                 return Ok(new ApiResponse(200, "Schedule updated successfully!"));
             else if (response.StatusCode == 404)

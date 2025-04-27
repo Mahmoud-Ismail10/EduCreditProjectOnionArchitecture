@@ -1,4 +1,5 @@
-﻿using EduCredit.Core.Specifications.CourseSpecifications;
+﻿using EduCredit.Core.Models;
+using EduCredit.Core.Specifications.CourseSpecifications;
 using EduCredit.Service.DTOs.CourseDTOs;
 using EduCredit.Service.Errors;
 using System;
@@ -14,8 +15,9 @@ namespace EduCredit.Service.Services.Contract
         Task<CreateCourseDto> CreateCourseAsync(CreateCourseDto createCourseDto);
         Task<ReadCourseDto?> GetCourseByIdAsync(Guid id);
         IReadOnlyList<ReadCourseDto?> GetAllCourses(CourseSpecificationParams specParams, out int count);
+        //Task<IReadOnlyList<ReadCourseDto?>> GetCoursesByCurrentSemesterId(Guid? departmentId);
         Task<ApiResponse> UpdateCourseAsync(UpdateCourseDto updateCourseDto, Guid id);
         Task<ApiResponse> DeleteCourseAsync(Guid id);
-        //Task<IReadOnlyList<ReadTeacherCourseDto>> GetCoursesByTeacherIdAsync(Guid teacherId);
+        Task<IReadOnlyList<ReadTeacherCourseDto>> GetCoursesByTeacherIdAsync(Guid teacherId);
     }
 }

@@ -92,7 +92,7 @@ namespace EduCredit.APIs.Controllers
             {
                 var departmentDto = await _departmentServices.UpdateDepertmentAsync(updateDeptDto, id);
                 if (departmentDto is null) return NotFound(new ApiResponse(404));
-                return Ok(new ApiResponse<UpdateDepartmentDto>(200,"Updated Successfully"));
+                return Ok(new ApiResponse(200,"Updated Successfully"));
             }
             return BadRequest(new ApiResponse(400));
         }

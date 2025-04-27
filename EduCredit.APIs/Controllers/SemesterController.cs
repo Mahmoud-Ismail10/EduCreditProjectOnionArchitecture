@@ -1,8 +1,11 @@
 ﻿using EduCredit.Core.Enums;
 using EduCredit.Core.Security;
+using EduCredit.Core.Specifications.SemesterSpecifications;
+using EduCredit.Service.DTOs.AdminDTOs;
 using EduCredit.Service.DTOs.DepartmentDTOs;
 using EduCredit.Service.DTOs.SemesterDTOs;
 using EduCredit.Service.Errors;
+using EduCredit.Service.Helper;
 using EduCredit.Service.Services.Contract;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -35,6 +38,48 @@ namespace EduCredit.APIs.Controllers
                 return BadRequest(new ApiResponse(400, response.Message));
             }
             return BadRequest(new ApiResponse(400, "Invalid input data!"));
+        }
+
+        /// PUT: api/Semester/CurrentSemester
+
+        [HttpGet("CurrentSemester")]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]
+        [ProducesResponseType(typeof(ApiResponse<ReadSemesterDto>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
+        public async Task<ActionResult<ApiResponse<ReadSemesterDto>>> GetCurrentSemester()
+        {
+            var response = await _semesterServices.GetCurrentSemester();
+            if (response is null)
+                return NotFound(new ApiResponse(404, "Current semester not found!"));
+            return Ok(new ApiResponse<ReadSemesterDto>(200, "Current semester retrieved successfully", response));
+        }
+
+        /// GET: api/Semester
+
+        [HttpGet]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
+        [ProducesResponseType(typeof(ApiResponse<Pagination<IReadOnlyList<ReadSemesterDto>>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        public ActionResult<ApiResponse<Pagination<IReadOnlyList<ReadSemesterDto>>>> GetAllSemesters([FromQuery]SemesterSpecificationParams spec)
+        {
+            int count;
+            var semesters = _semesterServices.GetAllSemesters(spec,out count);
+            if (semesters is null)
+                return NotFound(new ApiResponse(404, "No semesters found!"));
+            return Ok(new ApiResponse<Pagination<ReadSemesterDto>>(200, "Success", new Pagination<ReadSemesterDto>(spec.PageSize, spec.PageIndex, count, semesters)));
+        }
+        /// GET: api/Semester/{id}
+
+        [HttpGet("{id}")]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
+        [ProducesResponseType(typeof(ApiResponse<ReadSemesterDto>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        public async Task<ActionResult<ApiResponse<ReadSemesterDto>>> GetSemesterById(Guid id)
+        {
+            var response = await _semesterServices.GetSemesterByIdAsync(id);
+            if (response is null)
+                return NotFound(new ApiResponse(404, "Semester not found!"));
+            return Ok(new ApiResponse<ReadSemesterDto>(200, "Success", response));
         }
 
         /// PUT: api/Semester/{id}

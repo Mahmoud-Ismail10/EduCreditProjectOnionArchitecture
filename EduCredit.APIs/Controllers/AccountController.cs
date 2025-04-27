@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
 using System.Text;
@@ -134,20 +135,48 @@ namespace EduCredit.APIs.Controllers
         #endregion
 
         #region Logout
+        //[HttpGet("logout")]
+        //[Authorize]
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //[ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+        //public async Task<ActionResult> Logout()
+        //{
+        //    var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ","");
+        //    if (string.IsNullOrWhiteSpace(token))
+        //        return Unauthorized(new ApiResponse(401, "UnAuthrize!"));
+        //    var expiry = TimeSpan.FromHours(1);
+        //    await _blacklistService.AddTokenToBlacklistAsync(token, expiry);
+        //    await _cacheService.DeleteCashAsync(token);
+        //    return Ok(new ApiResponse (200, "Logged out successfully"));
+        //}
+
+
         [HttpGet("logout")]
         [Authorize]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse),StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult> Logout()
         {
-            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ","");
+            var authHeader = HttpContext.Request.Headers["Authorization"].ToString();
+            if (string.IsNullOrWhiteSpace(authHeader) || !authHeader.StartsWith("Bearer "))
+                return Unauthorized(new ApiResponse(401, "Unauthorized"));
+
+            var token = authHeader["Bearer ".Length..].Trim();
             if (string.IsNullOrWhiteSpace(token))
-                return Unauthorized(new ApiResponse(401, "UnAuthrize!"));
-            var expiry = TimeSpan.FromHours(1);
+                return Unauthorized(new ApiResponse(401, "Unauthorized"));
+
+            TimeSpan expiry = TimeSpan.FromHours(1);
+           
+                var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+                expiry = jwtToken.ValidTo.ToUniversalTime() - DateTime.UtcNow;
+          
             await _blacklistService.AddTokenToBlacklistAsync(token, expiry);
-            await _cacheService.DeleteCashAsync(token);
-            return Ok(new ApiResponse (200, "Logged out successfully"));
+
+             await _cacheService.DeleteCashAsync(token); 
+
+            return Ok(new ApiResponse(200, "Logged out successfully"));
         }
+
         #endregion
 
         #region ForgotPassword

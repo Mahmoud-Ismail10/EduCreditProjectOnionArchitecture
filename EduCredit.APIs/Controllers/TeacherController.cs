@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
+using EduCredit.Core.Enums;
 using EduCredit.Core.Security;
 using EduCredit.Core.Specifications.TeacherSpecefications;
+using EduCredit.Service.DTOs.AdminDTOs;
 using EduCredit.Service.DTOs.TeacherDTOs;
 using EduCredit.Service.Errors;
 using EduCredit.Service.Helper;
@@ -23,7 +25,7 @@ namespace EduCredit.APIs.Controllers
 
         /// GET: api/Teachers
         [HttpGet]
-        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.TeacherRole}")]
         [ProducesResponseType(typeof(ApiResponse<Pagination<ReadTeacherDto>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public ActionResult<IReadOnlyList<ApiResponse<Pagination<ReadTeacherDto>>>> GetAllTeachers([FromQuery] TeacherSpecificationParams specParams) // Create class contains all of params (refactor)
@@ -73,6 +75,14 @@ namespace EduCredit.APIs.Controllers
                 return NotFound(new ApiResponse(404, "Teacher not found!"));
             else
                 return BadRequest(new ApiResponse(400, "It is not suitable to delete the Teacher!"));
+        }
+
+        [HttpGet("statistics/{type}")]
+       // [Authorize(Roles = $"{AuthorizationConstants.TeacherRole}")]
+        public async Task<ActionResult<ApiResponse<StatisticsDto>>> GetStatistics(TeacherStatistics type, Guid TeacherId)
+        {
+            var result = await _teacherServices.GetStatistics(type,TeacherId);
+            return Ok(result);
         }
     }
 }

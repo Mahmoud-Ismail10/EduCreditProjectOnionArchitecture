@@ -1,10 +1,9 @@
-﻿using EduCredit.Service.Services.Contract;
+﻿using EduCredit.Service.Errors;
+using EduCredit.Service.Services.Contract;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace EduCredit.Service.Middlewares
@@ -26,10 +25,20 @@ namespace EduCredit.Service.Middlewares
             {
                 var blacklistService = serviceProvider.GetRequiredService<ITokenBlacklistService>();
                 bool isBlacklisted = await blacklistService.IsTokenBlacklistedAsync(token);
+
                 if (isBlacklisted)
                 {
                     context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                    await context.Response.WriteAsync("Token is blacklisted.");
+                    context.Response.ContentType = "application/json";
+
+                    var response = new ApiResponse(401, "Token is blacklisted.");
+                    var jsonOptions = new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                    };
+
+                    await context.Response.WriteAsync(JsonSerializer.Serialize(response, jsonOptions));
                     return;
                 }
             }

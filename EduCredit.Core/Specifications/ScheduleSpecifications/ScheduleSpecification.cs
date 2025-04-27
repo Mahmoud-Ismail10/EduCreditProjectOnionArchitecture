@@ -27,6 +27,13 @@ namespace EduCredit.Core.Specifications.ScheduleSpecifications
             Includes.Add(s => s.Course);
             Includes.Add(s => s.TeacherSchedules);
         }
+        public ScheduleSpecification(Guid courseId)
+            : base(s => s.CourseId == courseId)
+        {
+            Includes.Add(s => s.Course);
+            Includes.Add(s => s.TeacherSchedules);
+            ThenIncludes.Add("TeacherSchedules.Teacher");
+        }
     }
 
 }

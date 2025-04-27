@@ -14,27 +14,26 @@ namespace EduCredit.Repository.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Schedule> builder)
         {
-            builder.HasKey(s => s.CourseId); // CourseId as primary key
+            builder.HasKey(s => s.Id); // Id as primary key
 
             /// Store day in database as string and fetch it from DB as Day(Enum)
             builder.Property(t => t.Day)
                 .HasConversion(
                 Dy => Dy.ToString(),
-                Dy => (Day)Enum.Parse(typeof(Day), Dy));
+                Dy => (Day)Enum.Parse(typeof(Day), Dy))
+                .IsRequired(false);
 
             builder.Property(s => s.LectureStart)
-                .HasConversion(v => v.ToTimeSpan(),
-                             v => TimeOnly.FromTimeSpan(v))
-                .IsRequired();
+                   .HasConversion(v => v.HasValue ? v.Value.ToTimeSpan() : (TimeSpan?)null,
+                             v => v.HasValue ? TimeOnly.FromTimeSpan(v.Value) : (TimeOnly?)null);
 
             builder.Property(s => s.LectureEnd)
-                .HasConversion(v => v.ToTimeSpan(),
-                             v => TimeOnly.FromTimeSpan(v))
-                .IsRequired();
+               .HasConversion(v => v.HasValue ? v.Value.ToTimeSpan() : (TimeSpan?)null,
+                             v => v.HasValue ? TimeOnly.FromTimeSpan(v.Value) : (TimeOnly?)null);
 
             builder.Property(s => s.LectureLocation)
                 .HasMaxLength(50)
-                .IsRequired();
+                .IsRequired(false);
 
             builder.Property(s => s.ExamDate)
                 .HasConversion(v => v.HasValue ? v.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null,
@@ -49,12 +48,13 @@ namespace EduCredit.Repository.Data.Configurations
                              v => v.HasValue ? TimeOnly.FromTimeSpan(v.Value) : (TimeOnly?)null);
 
             builder.Property(s => s.ExamLocation)
-                .HasMaxLength(50);
+                .HasMaxLength(50)
+                .IsRequired(false);
 
-            /// One-to-One: Between Schedule and Course
+            /// Many-to-one: Between Schedule and Course
             builder.HasOne(d => d.Course)
-                .WithOne(d => d.Schedule)
-                .HasForeignKey<Schedule>(d => d.CourseId) // CourseId as foreign key
+                .WithMany(d => d.Schedules)
+                .HasForeignKey(d => d.CourseId) // CourseId as foreign key
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

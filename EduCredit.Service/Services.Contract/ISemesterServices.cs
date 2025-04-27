@@ -1,5 +1,8 @@
-﻿using EduCredit.Service.DTOs.SemesterDTOs;
+﻿    using EduCredit.Core.Specifications.SemesterSpecifications;
+using EduCredit.Service.DTOs.AdminDTOs;
+using EduCredit.Service.DTOs.SemesterDTOs;
 using EduCredit.Service.Errors;
+using EduCredit.Service.Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,5 +18,7 @@ namespace EduCredit.Service.Services.Contract
         Task<ApiResponse> DeleteSemester(Guid semesterId);
         Task<ReadSemesterDto?> GetCurrentSemester();
         Task<bool> IsEnrollmentOpenAsync();
+        IReadOnlyList<ReadSemesterDto>? GetAllSemesters(SemesterSpecificationParams spec ,out int count);
+        Task<ReadSemesterDto?> GetSemesterByIdAsync(Guid id);
     }
 }

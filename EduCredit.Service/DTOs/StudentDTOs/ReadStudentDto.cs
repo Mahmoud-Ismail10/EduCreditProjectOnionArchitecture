@@ -17,5 +17,6 @@ namespace EduCredit.Service.DTOs.StudentDTOs
         public Level Level { get; set; }
         public string DepartmentName { get; set; }
         public string AcademicGuide { get; set; }
+        public int CoursesCount { get; set; }
     }
 }

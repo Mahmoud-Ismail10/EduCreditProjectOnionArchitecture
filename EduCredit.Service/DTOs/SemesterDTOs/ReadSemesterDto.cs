@@ -9,6 +9,6 @@ namespace EduCredit.Service.DTOs.SemesterDTOs
     public class ReadSemesterDto : BaseSemesterDto
     {
         public Guid Id { get; set; }
-
+        public string Name { get; set; }
     }
 }

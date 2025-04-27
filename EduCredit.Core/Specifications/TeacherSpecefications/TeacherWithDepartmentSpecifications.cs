@@ -34,6 +34,10 @@ namespace EduCredit.Core.Specifications.TeacherSpecefications
         public TeacherWithDepartmentSpecifications(Guid id) : base(d => d.Id == id)
         {
             Includes.Add(d => d.Department);
+        } 
+        public TeacherWithDepartmentSpecifications(Guid? DepartmrntId) 
+            : base(d => d.DepartmentId == DepartmrntId)
+        {
         }
     }
 }

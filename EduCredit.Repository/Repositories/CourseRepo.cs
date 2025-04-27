@@ -19,6 +19,16 @@ namespace EduCredit.Repository.Repositories
             _dbcontext = dbcontext;
         }
 
+        public async Task<IReadOnlyList<Course?>> GetCoursesInCurrentsemester(Guid? DepartmentId, Guid CurrentSemesterId)
+        {
+              var courses =await _dbcontext.Courses
+                .Where(c => c.DepartmentId == DepartmentId&& c.SemesterCourses.Select(s=>s.SemesterId).FirstOrDefault()== CurrentSemesterId)
+                .ToListAsync();
+            if (courses is null) return null;
+            return courses;
+
+        }
+
         public async Task<IReadOnlyList<Guid>> GetValidCourseIds(List<Guid> courseIds)
         {
             var existingCourseIds = await _dbcontext.Courses
@@ -28,14 +38,14 @@ namespace EduCredit.Repository.Repositories
 
             return existingCourseIds;
         }
-        public async Task<IReadOnlyList<Guid>> GetCoursesByEnrollmentTableIdAsync(Guid enrollmentTableId)
-        {
-            var CoursesIds = await _dbcontext.Enrollments
-                .Where(e => e.EnrollmentTableId == enrollmentTableId)
-                .Select(e => e.CourseId)
-                .ToListAsync();
-            return CoursesIds;
-        }
+        //public async Task<IReadOnlyList<Guid>> GetCoursesByEnrollmentTableIdAsync(Guid enrollmentTableId)
+        //{
+        //    var CoursesIds = await _dbcontext.Enrollments
+        //        .Where(e => e.EnrollmentTableId == enrollmentTableId)
+        //        .Select(e => e.CourseId)
+        //        .ToListAsync();
+        //    return CoursesIds;
+        //}
         //public async Task<IReadOnlyList<Course>> GetCoursesByTeacherIdAsync(Guid teacherId)
         //{
         //    var courses = await _dbcontext.TeacherSchedules

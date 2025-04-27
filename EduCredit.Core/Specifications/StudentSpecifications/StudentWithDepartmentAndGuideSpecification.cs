@@ -42,6 +42,15 @@ namespace EduCredit.Core.Specifications.StudentSpecifications
         {
             Includes.Add(d => d.Department);
             Includes.Add(t => t.Teacher); // Academic Guide
+            Includes.Add(t => t.EnrollmentTables);
+            ThenIncludes.Add("EnrollmentTables.Enrollments");
+        }
+        public StudentWithDepartmentAndGuideSpecification(Guid? DepartmentId = null,Guid? TeacherId = null)
+             : base(d => !DepartmentId.HasValue || d.DepartmentId == DepartmentId &&
+                 !TeacherId.HasValue || d.TeacherId == TeacherId
+            )
+
+        {
         }
     }
 }
