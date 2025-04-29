@@ -89,10 +89,14 @@ namespace EduCredit.Service.Services
             return scheduleMapped;
         }
 
-        public async Task<ApiResponse> UpdateSchedule(Guid CourseId, Guid SemesterId, UpdateScheduleDto updateScheduleDto)
+        public async Task<ApiResponse> UpdateSchedule(Guid CourseId, UpdateScheduleDto updateScheduleDto)
         {
+            /// Check if current semester is exist or no
+            var semester = await _unitOfWork._semesterRepo.GetCurrentSemester();
+            if (semester is null) return new ApiResponse(404, "There is no current semester!");
+
             /// Check if schedule is exist or no
-            var spec = new ScheduleSpecification(CourseId, SemesterId);
+            var spec = new ScheduleSpecification(CourseId, semester.Id);
             var scheduleSpecList = await _unitOfWork.Repository<Schedule>().GetByIdSpecificationAsync(spec);
             if (scheduleSpecList is null) return new ApiResponse(404);
 
@@ -115,10 +119,14 @@ namespace EduCredit.Service.Services
             return new ApiResponse(200);
         }
 
-        public async Task<ApiResponse> DeleteSchedule(Guid CourseId, Guid SemesterId)
+        public async Task<ApiResponse> DeleteSchedule(Guid CourseId)
         {
+            /// Check if current semester is exist or no
+            var semester = await _unitOfWork._semesterRepo.GetCurrentSemester();
+            if (semester is null) return new ApiResponse(404, "There is no current semester!");
+
             /// Check if schedule is exist or no
-            var spec = new ScheduleSpecification(CourseId, SemesterId);
+            var spec = new ScheduleSpecification(CourseId, semester.Id);
             var scheduleSpecList = await _unitOfWork.Repository<Schedule>().GetByIdSpecificationAsync(spec);
             if (scheduleSpecList is null) return new ApiResponse(404);
 

@@ -21,7 +21,7 @@ namespace EduCredit.Repository.Data.Configurations
 
             builder.HasOne(ts => ts.Schedule)
                 .WithMany(s => s.TeacherSchedules)
-                .HasForeignKey(ts => new { ts.CourseId, ts.SemesterId });
+                .HasForeignKey(ts => new { ts.SemesterId, ts.CourseId });
         }
     }
 }

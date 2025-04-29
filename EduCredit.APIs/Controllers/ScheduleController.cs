@@ -75,14 +75,14 @@ namespace EduCredit.APIs.Controllers
             return Ok(new ApiResponse<IReadOnlyList<ReadScheduleEnrollCourseDto>>(200, "Success", studentCourses));
         }
 
-        /// PUT: api/Schedule/{CourseId}/{SemesterId}
-        [HttpPut("{CourseId}/{SemesterId}")]
+        /// PUT: api/Schedule/{CourseId}
+        [HttpPut("{CourseId}")]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<ApiResponse>> UpdateSchedule(Guid CourseId, Guid SemesterId, [FromBody] UpdateScheduleDto updateScheduleDto)
+        public async Task<ActionResult<ApiResponse>> UpdateSchedule(Guid CourseId, [FromBody] UpdateScheduleDto updateScheduleDto)
         {
-            var response = await _scheduleServices.UpdateSchedule(CourseId, SemesterId, updateScheduleDto);
+            var response = await _scheduleServices.UpdateSchedule(CourseId, updateScheduleDto);
             if (response.StatusCode == 200)
                 return Ok(new ApiResponse(200, "Schedule updated successfully!"));
             else if (response.StatusCode == 404)
@@ -91,14 +91,14 @@ namespace EduCredit.APIs.Controllers
                 return BadRequest(new ApiResponse(400, "It is not suitable to update the schedule!"));
         }
 
-        /// DELETE: api/Schedule/{CourseId}/{SemesterId}
-        [HttpDelete("{CourseId}/{SemesterId}")]
+        /// DELETE: api/Schedule/{CourseId}
+        [HttpDelete("{CourseId}")]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<ApiResponse>> DeleteSchedule(Guid CourseId, Guid SemesterId)
+        public async Task<ActionResult<ApiResponse>> DeleteSchedule(Guid CourseId)
         {
-            var response = await _scheduleServices.DeleteSchedule(CourseId, SemesterId);
+            var response = await _scheduleServices.DeleteSchedule(CourseId);
             if (response.StatusCode == 200)
                 return Ok(new ApiResponse(200, "Schedule deleted successfully!"));
             else if (response.StatusCode == 404)
