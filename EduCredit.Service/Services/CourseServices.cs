@@ -81,14 +81,14 @@ namespace EduCredit.Service.Services
             var semester = await _unitOfWork._semesterRepo.GetCurrentSemester();
 
             //Returning Courses of each teacher with the count of student
-            var courses = await _unitOfWork._semesterCourseRepo.GetCoursesByTeacherIdAsync(teacherId,semester.Id);
+            var courses = await _unitOfWork._scheduleRepo.GetSchedulesByTeacherIdAsync(teacherId, semester.Id);
             if (courses is null) return null;
             
             var coursemapped = courses.Select(s => new ReadTeacherCourseDto
             {
-                Count=s.Enrollments.Select(s=>s.EnrollmentTableId).Count(),
-                Id=s.Id,
-                Name=s.Name
+                Id = s.CourseId,
+                Name = s.Course.Name,
+                //Count = s.Enrollments.Select(s => s.EnrollmentTableId).Count(), // update later
             }).ToList();
             return coursemapped;
         }

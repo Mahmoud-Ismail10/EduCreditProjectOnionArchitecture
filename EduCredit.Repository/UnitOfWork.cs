@@ -3,6 +3,7 @@ using EduCredit.Core.Repositories.Contract;
 using EduCredit.Repository.Data;
 using EduCredit.Repository.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -20,11 +21,12 @@ namespace EduCredit.Repository
         public IEnrollmentRepo _enrollmentRepo { get; }
         public IScheduleRepo _scheduleRepo { get; }
         public ISemesterRepo _semesterRepo { get; }
-        public ISemeterCourseRepo _semesterCourseRepo { get; }
+        //public ISemeterCourseRepo _semesterCourseRepo { get; }
         public ICourseRepo _courseRepo { get; }
         public ITeacherRepo _teacherRepo { get; }
         public IStudentRepo _studentRepo { get; }
         public IDepartmentRepo _departmentRepo { get; }
+        private IDbContextTransaction _transaction;
 
         /// Ask CLR for creating object from DbContext and use it in service layer
         public UnitOfWork(EduCreditContext dbcontext,
@@ -34,8 +36,8 @@ namespace EduCredit.Repository
             ISemesterRepo semesterRepo,
             ITeacherRepo teacherRepo,
             ICourseRepo courseRepo,
-            IDepartmentRepo departmentRepo,
-            ISemeterCourseRepo semesterCourseRepo
+            IDepartmentRepo departmentRepo
+            //ISemeterCourseRepo semesterCourseRepo
             //,IStudentRepo studentRepo
             )
         {
@@ -48,7 +50,7 @@ namespace EduCredit.Repository
             _teacherRepo = teacherRepo;
             _courseRepo = courseRepo;
             _departmentRepo = departmentRepo;
-            _semesterCourseRepo = semesterCourseRepo;
+            //_semesterCourseRepo = semesterCourseRepo;
             //_studentRepo = studentRepo;
         }
 
@@ -74,5 +76,50 @@ namespace EduCredit.Repository
             }
             return _repo[Key] as IGenericRepository<TEntity>;
         }
+
+        public async Task BeginTransactionAsync()
+        {
+            if (_transaction == null)
+                _transaction = await _dbcontext.Database.BeginTransactionAsync();
+        }
+
+        public async Task CommitTransactionAsync()
+        {
+            try
+            {
+                await _dbcontext.SaveChangesAsync(); // Ensure all changes are saved
+                await _transaction?.CommitAsync();
+            }
+            catch
+            {
+                await RollbackTransactionAsync();
+                throw;
+            }
+            finally
+            {
+                if (_transaction != null)
+                {
+                    await _transaction.DisposeAsync();
+                    _transaction = null;
+                }
+            }
+        }
+
+        public async Task RollbackTransactionAsync()
+        {
+            try
+            {
+                await _transaction?.RollbackAsync();
+            }
+            finally
+            {
+                if (_transaction != null)
+                {
+                    await _transaction.DisposeAsync();
+                    _transaction = null;
+                }
+            }
+        }
+
     }
 }

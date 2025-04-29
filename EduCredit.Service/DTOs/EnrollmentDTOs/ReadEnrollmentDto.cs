@@ -24,8 +24,5 @@ namespace EduCredit.Service.DTOs.EnrollmentDTOs
         public float? TotalObtainedhours { get; set; }
         public float? TotalPercentageOfSemester { get; set; }
 
-
-
-
     }   
 }

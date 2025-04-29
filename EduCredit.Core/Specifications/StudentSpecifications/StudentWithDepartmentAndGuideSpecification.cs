@@ -35,16 +35,16 @@ namespace EduCredit.Core.Specifications.StudentSpecifications
             }
             ApplyPagination((spec.PageIndex - 1) * spec.PageSize, spec.PageSize);
         }
+
         /// for get one student (with Criteria)
-        public StudentWithDepartmentAndGuideSpecification(Guid id) 
-            : base(d => d.Id == id)
-            
+        public StudentWithDepartmentAndGuideSpecification(Guid id) : base(d => d.Id == id)
         {
             Includes.Add(d => d.Department);
             Includes.Add(t => t.Teacher); // Academic Guide
             Includes.Add(t => t.EnrollmentTables);
             ThenIncludes.Add("EnrollmentTables.Enrollments");
         }
+
         public StudentWithDepartmentAndGuideSpecification(Guid? DepartmentId = null,Guid? TeacherId = null)
              : base(d => !DepartmentId.HasValue || d.DepartmentId == DepartmentId &&
                  !TeacherId.HasValue || d.TeacherId == TeacherId

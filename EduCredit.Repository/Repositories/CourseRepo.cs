@@ -22,7 +22,7 @@ namespace EduCredit.Repository.Repositories
         public async Task<IReadOnlyList<Course?>> GetCoursesInCurrentsemester(Guid? DepartmentId, Guid CurrentSemesterId)
         {
               var courses =await _dbcontext.Courses
-                .Where(c => c.DepartmentId == DepartmentId&& c.SemesterCourses.Select(s=>s.SemesterId).FirstOrDefault()== CurrentSemesterId)
+                .Where(c => c.DepartmentId == DepartmentId&& c.Schedules.Select(s=>s.SemesterId).FirstOrDefault()== CurrentSemesterId)
                 .ToListAsync();
             if (courses is null) return null;
             return courses;

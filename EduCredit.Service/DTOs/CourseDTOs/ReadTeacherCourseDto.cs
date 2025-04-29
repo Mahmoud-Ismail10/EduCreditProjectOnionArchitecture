@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EduCredit.Service.DTOs.CourseDTOs
 {
-    public class ReadTeacherCourseDto:departmentcourseDto
+    public class ReadTeacherCourseDto : departmentcourseDto
     {
         public int Count { get; set; }
     }

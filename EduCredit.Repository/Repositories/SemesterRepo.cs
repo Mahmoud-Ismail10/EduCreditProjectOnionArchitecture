@@ -20,21 +20,23 @@ namespace EduCredit.Repository.Repositories
             _dbcontext = dbcontext;
         }
 
-        public async Task<bool> AssignCoursesToSemester(Guid semesterId, List<Guid> courseIds)
-        {
-            var newSemesterCourses = courseIds.Select(courseId => new SemesterCourse
-            {
-                SemesterId = semesterId,
-                CourseId = courseId
-            }).ToList();
+        //public async Task<bool> AssignCoursesToSemester(Guid semesterId, List<Guid> courseIds)
+        //{
+        //    var newSemesterCourses = courseIds.Select(courseId => new Schedule
+        //    {
+        //        SemesterId = semesterId,
+        //        CourseId = courseId
+        //    }).ToList();
 
-            await _dbcontext.SemesterCourses.AddRangeAsync(newSemesterCourses);
-            return await _dbcontext.SaveChangesAsync() > 0;
-        }
+        //    await _dbcontext.Schedules.AddRangeAsync(newSemesterCourses);
+        //    return await _dbcontext.SaveChangesAsync() > 0;
+        //}
 
         public async Task<Semester?> GetCurrentSemester()
         {
             return await _dbcontext.Semesters
+                .Include(s => s.Schedules)
+                    .ThenInclude(sc => sc.Course)
                 .AsNoTracking()
                 .SingleOrDefaultAsync(s => s.StartDate <= DateOnly.FromDateTime(DateTime.UtcNow)
                                         && s.EndDate >= DateOnly.FromDateTime(DateTime.UtcNow));

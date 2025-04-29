@@ -10,7 +10,11 @@ namespace EduCredit.Core.Relations
 {
     public class Schedule
     {
-        public Guid Id { get; set; }
+        public Guid CourseId { get; set; }
+        public Course Course { get; set; }
+
+        public Guid SemesterId { get; set; }
+        public Semester Semester { get; set; }
 
         public Day? Day { get; set; } // enum
         public TimeOnly? LectureStart { get; set; }
@@ -20,11 +24,7 @@ namespace EduCredit.Core.Relations
         public TimeOnly? ExamStart { get; set; }
         public TimeOnly? ExamEnd { get; set; }
         public string? ExamLocation { get; set; }
-
-        /// One-to-One: Between Schedule and Course
-         public Guid CourseId { get; set; } // Forign key
-        public Course Course { get; set; }
-
+        
         /// Many-to-many: Between Schedule and Teacher (JoinTable)
         public ICollection<TeacherSchedule> TeacherSchedules { get; set; } = new HashSet<TeacherSchedule>();
     }

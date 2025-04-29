@@ -14,7 +14,7 @@ namespace EduCredit.Repository.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Schedule> builder)
         {
-            builder.HasKey(s => s.Id); // Id as primary key
+            builder.HasKey(e => new { e.SemesterId, e.CourseId }); // as composite primary key
 
             /// Store day in database as string and fetch it from DB as Day(Enum)
             builder.Property(t => t.Day)
@@ -51,10 +51,16 @@ namespace EduCredit.Repository.Data.Configurations
                 .HasMaxLength(50)
                 .IsRequired(false);
 
-            /// Many-to-one: Between Schedule and Course
+            /// one-to-Many: Between Schedule and Course
             builder.HasOne(d => d.Course)
                 .WithMany(d => d.Schedules)
                 .HasForeignKey(d => d.CourseId) // CourseId as foreign key
+                .OnDelete(DeleteBehavior.Restrict);
+
+            /// one-to-Many: Between Schedule and Semester
+            builder.HasOne(d => d.Semester)
+                .WithMany(d => d.Schedules)
+                .HasForeignKey(d => d.SemesterId) // SemesterId as foreign key
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

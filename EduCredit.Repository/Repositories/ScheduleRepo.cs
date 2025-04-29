@@ -27,12 +27,12 @@ namespace EduCredit.Repository.Repositories
             return exists;
         }
 
-        public async Task<Schedule?> GetScheduleByCourseIdAsync(Guid ScheduleId)
-        {
-            Schedule? schedule = await _dbcontext.Schedules
-                .FirstOrDefaultAsync(c => c.Id == ScheduleId);
-            return schedule;
-        }
+        //public async Task<Schedule?> GetScheduleAsync(Guid CourseId, Guid SemesterId)
+        //{
+        //    Schedule? schedule = await _dbcontext.Schedules
+        //        .FirstOrDefaultAsync(c => c.CourseId == CourseId && c.SemesterId == SemesterId);
+        //    return schedule;
+        //}
 
         public async Task<IReadOnlyList<Guid>> GetValidScheduleIds(List<Guid> scheduleIds)
         {
@@ -42,6 +42,17 @@ namespace EduCredit.Repository.Repositories
                 .ToListAsync();
 
             return existingScheduleIds;
+        }
+
+        public async Task<IReadOnlyList<Schedule?>> GetSchedulesByTeacherIdAsync(Guid teacherId, Guid semesterID)
+        {
+            var courses = _dbcontext.Schedules
+                .Where(sc => sc.SemesterId == semesterID)
+                .Where(t => t.Course.Schedules.SelectMany(s => s.TeacherSchedules).Where(s => s.TeacherId == teacherId).Any())
+                .Include(E => E.Course.Enrollments)
+                .ToListAsync();
+            if (courses is null) return null;
+            return await courses;
         }
     }
 }

@@ -12,7 +12,8 @@ namespace EduCredit.Core.Relations
         public Guid TeacherId { get; set; }
         public Teacher Teacher { get; set; }
 
-        public Guid ScheduleId { get; set; }
+        public Guid CourseId { get; set; }
+        public Guid SemesterId { get; set; }
         public Schedule Schedule { get; set; }
     }
 }

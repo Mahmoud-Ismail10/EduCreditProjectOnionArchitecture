@@ -5,12 +5,13 @@ using EduCredit.Core.Relations;
 using EduCredit.Core.Specifications.EnrollmentsSpecifications;
 using EduCredit.Core.Specifications.EnrollmentTableSpecifications;
 using EduCredit.Core.Specifications.ScheduleSpecifications;
-using EduCredit.Core.Specifications.SemesterCoursesSpecifications;
+//using EduCredit.Core.Specifications.SemesterCoursesSpecifications;
 using EduCredit.Core.Specifications.StudentSpecifications;
 using EduCredit.Core.Specifications.TeacherSchedualeSpecifications;
 using EduCredit.Service.DTOs.ScheduleDTOs;
 using EduCredit.Service.Errors;
 using EduCredit.Service.Services.Contract;
+using Microsoft.EntityFrameworkCore;
 
 namespace EduCredit.Service.Services
 {
@@ -25,57 +26,54 @@ namespace EduCredit.Service.Services
             _mapper = mapper;
         }
 
-        //public async Task<ApiResponse> AssignSchedule(CreateScheduleDto createScheduleDto)
-        //{
-        //    ///// Check if course and teacher are exist or no
-        //    //var course = await _unitOfWork.Repository<Course>().GetByIdAsync(createScheduleDto.CourseId);
-        //    //if (course is null) return new ApiResponse(400, "Course not found!");
-
-        //    ///// Check if all requested teachers exist
-        //    //var existingTeacherIds = await _unitOfWork._teacherRepo.GetValidTeacherIds(createScheduleDto.TeacherIds);
-        //    //var missingTeachers = createScheduleDto.TeacherIds.Except(existingTeacherIds).ToList();
-        //    //if (missingTeachers.Any())
-        //    //    return new ApiResponse(400, $"Teachers not found: {string.Join(", ", missingTeachers)}");
-
-        //    ///// Check if Schedule is exist or no
-        //    //var existingSchedule = await _unitOfWork._scheduleRepo.GetScheduleByCourseIdAsync(createScheduleDto.CourseId);
-        //    //if (existingSchedule is not null) return new ApiResponse(400, "Schedule already exists for this course!");
-
-        //    /// Mapping data
-        //    var newSchedule = _mapper.Map<CreateScheduleDto, Schedule>(createScheduleDto);
-
-        //    newSchedule.TeacherSchedules = createScheduleDto.TeacherIds
-        //            .Select(teacherId => new TeacherSchedule {ScheduleId = Id, TeacherId = teacherId })
-        //            .ToList();
-
-        //    /// Create Schedule
-        //    await _unitOfWork.Repository<Schedule>().CreateAsync(newSchedule);
-
-        //    /// Save in DB
-        //    int result = await _unitOfWork.CompleteAsync();
-        //    if (result <= 0) return new ApiResponse(400, "Failed to assign schedule!");
-        //    return new ApiResponse(200, "The schedule was successfully assigned");
-        //}
-
-        public async Task<ReadScheduleDto?> GetSchedule(Guid courseId)
+        /// Under development
+        public async Task<ApiResponse> AssignSchedule(CreateScheduleDto createScheduleDto)
         {
-       //     var schedule = await _unitOfWork._scheduleRepo.GetScheduleByCourseIdAsync(courseId);
-            var scheduleSpec = new ScheduleSpecification(courseId);
+            ///// Check if course and teacher are exist or no
+            //var course = await _unitOfWork.Repository<Course>().GetByIdAsync(createScheduleDto.CourseId);
+            //if (course is null) return new ApiResponse(400, "Course not found!");
+
+            ///// Check if all requested teachers exist
+            //var existingTeacherIds = await _unitOfWork._teacherRepo.GetValidTeacherIds(createScheduleDto.TeacherIds);
+            //var missingTeachers = createScheduleDto.TeacherIds.Except(existingTeacherIds).ToList();
+            //if (missingTeachers.Any())
+            //    return new ApiResponse(400, $"Teachers not found: {string.Join(", ", missingTeachers)}");
+
+            ///// Check if Schedule is exist or no
+            //var existingSchedule = await _unitOfWork._scheduleRepo.GetScheduleByCourseIdAsync(createScheduleDto.CourseId);
+            //if (existingSchedule is not null) return new ApiResponse(400, "Schedule already exists for this course!");
+
+            /// Mapping data
+            //var newSchedule = _mapper.Map<CreateScheduleDto, Schedule>(createScheduleDto);
+
+            //newSchedule.TeacherSchedules = createScheduleDto.TeacherIds
+            //        .Select(teacherId => new TeacherSchedule { ScheduleId = Id, TeacherId = teacherId })
+            //        .ToList();
+
+            ///// Create Schedule
+            //await _unitOfWork.Repository<Schedule>().CreateAsync(newSchedule);
+
+            ///// Save in DB
+            //int result = await _unitOfWork.CompleteAsync();
+            //if (result <= 0) return new ApiResponse(400, "Failed to assign schedule!");
+            return new ApiResponse(200, "The schedule was successfully assigned");
+        }
+
+        public async Task<ReadScheduleDto?> GetSchedule(Guid CourseId, Guid SemesterId)
+        {
+            var scheduleSpec = new ScheduleSpecification(CourseId, SemesterId);
             var scheduleSpecList = await _unitOfWork.Repository<Schedule>().GetByIdSpecificationAsync(scheduleSpec);
             if (scheduleSpecList is null) return null;
-            //var scheduleDto = _mapper.Map<Schedule, ReadScheduleDto>(schedule);
-            var scheduleMapped =
-                   new ReadScheduleDto
+            var scheduleMapped = new ReadScheduleDto
                    {
-                       Id=scheduleSpecList.Id,
+                       SemesterName = scheduleSpecList.Semester.Name,
                        CourseName = scheduleSpecList.Course.Name,
                        CreditHours = scheduleSpecList.Course.CreditHours,
                        MinimumDegree = scheduleSpecList.Course.MinimumDegree,
                        PreviousCourse = scheduleSpecList.Course.PreviousCourse?.Name,
-                       TeachersName = scheduleSpecList.TeacherSchedules?
-                                        .Where(s => s.Teacher != null)
-                                        .Select(s => s.Teacher.FullName)
-                                        .ToList(),
+                       TeachersName = string.Join(", ", scheduleSpecList.TeacherSchedules?
+                                            .Where(s => s.Teacher != null)
+                                            .Select(t => t.Teacher.FullName)),
 
                        Duration = scheduleSpecList.Course.Duration,
                        Hours = scheduleSpecList.Course.CreditHours,
@@ -87,22 +85,25 @@ namespace EduCredit.Service.Services
                        LectureEnd = scheduleSpecList.LectureEnd,
                        LectureLocation = scheduleSpecList.LectureLocation,
                        LectureStart = scheduleSpecList.LectureStart,
-                       //TeacherIds = s.TeacherSchedules.Select(ts => ts.TeacherId).ToList(),
                    }; 
             return scheduleMapped;
         }
 
-        public async Task<ApiResponse> UpdateSchedule(Guid ScheduleId, UpdateScheduleDto updateScheduleDto)
+        public async Task<ApiResponse> UpdateSchedule(Guid CourseId, Guid SemesterId, UpdateScheduleDto updateScheduleDto)
         {
             /// Check if schedule is exist or no
-            var schedule = await _unitOfWork._scheduleRepo.GetScheduleByCourseIdAsync(ScheduleId);
-            if (schedule is null) return new ApiResponse(404);
+            var spec = new ScheduleSpecification(CourseId, SemesterId);
+            var scheduleSpecList = await _unitOfWork.Repository<Schedule>().GetByIdSpecificationAsync(spec);
+            if (scheduleSpecList is null) return new ApiResponse(404);
+
+            /// Delete all the old teachers
+            await _unitOfWork.Repository<TeacherSchedule>().DeleteRange(scheduleSpecList.TeacherSchedules.ToList());
 
             /// Mapping data
-            var newSchedule = _mapper.Map(updateScheduleDto, schedule);
+            var newSchedule = _mapper.Map(updateScheduleDto, scheduleSpecList);
 
             newSchedule.TeacherSchedules = updateScheduleDto.TeacherIds
-                    .Select(teacherId => new TeacherSchedule { ScheduleId = schedule.Id, TeacherId = teacherId })
+                    .Select(teacherId => new TeacherSchedule { SemesterId = scheduleSpecList.SemesterId, CourseId = scheduleSpecList.CourseId, TeacherId = teacherId })
                     .ToList();
 
             /// Update Schedule
@@ -114,14 +115,15 @@ namespace EduCredit.Service.Services
             return new ApiResponse(200);
         }
 
-        public async Task<ApiResponse> DeleteSchedule(Guid courseId)
+        public async Task<ApiResponse> DeleteSchedule(Guid CourseId, Guid SemesterId)
         {
             /// Check if schedule is exist or no
-            var schedule = await _unitOfWork._scheduleRepo.GetScheduleByCourseIdAsync(courseId);
-            if (schedule is null) return new ApiResponse(404);
+            var spec = new ScheduleSpecification(CourseId, SemesterId);
+            var scheduleSpecList = await _unitOfWork.Repository<Schedule>().GetByIdSpecificationAsync(spec);
+            if (scheduleSpecList is null) return new ApiResponse(404);
 
             /// Delete Schedule
-            await _unitOfWork.Repository<Schedule>().Delete(schedule);
+            await _unitOfWork.Repository<Schedule>().Delete(scheduleSpecList);
 
             /// Save in DB
             int result = await _unitOfWork.CompleteAsync();
@@ -129,7 +131,7 @@ namespace EduCredit.Service.Services
             return new ApiResponse(200);
         }
 
-        public async Task<IReadOnlyList<ReadScheduleEnrollCourseDto>?> GetStudentAvailableCourses(Guid stuId)
+        public async Task<IReadOnlyList<ReadScheduleEnrollCourseDto>?> GetStudentWithAvailableCourses(Guid stuId)
         {
             // Retrieve student data
             var studentSpec = new StudentWithDepartmentAndGuideSpecification(stuId);
@@ -150,7 +152,7 @@ namespace EduCredit.Service.Services
 
             int count;
             // Retrieve enrolled courses
-            var enrollmentsSpec = new EnrollmentsWithCoursesSpecification(enrollmentTable.Id,null);
+            var enrollmentsSpec = new EnrollmentsWithCoursesSpecification(enrollmentTable.Id, null);
             var enrolledCourses = _unitOfWork.Repository<Enrollment>().GetAllSpecification(enrollmentsSpec, out count);
 
             // Retrieve the schedule courses
@@ -159,12 +161,15 @@ namespace EduCredit.Service.Services
 
 
             //if (schedules is null) return null;
-            var TeacherSchedulesSpec = new TeacherScheduleSpecification(student.DepartmentId);
+            var TeacherSchedulesSpec = new TeacherScheduleSpecification(student.DepartmentId); /// student.DepartmentId, semester.Id
             var teacherSchedules = _unitOfWork.Repository<TeacherSchedule>().GetAllSpecification(TeacherSchedulesSpec, out count).ToList();
 
             // Extract enrolled course IDs
             var enrolledCourseIds = enrolledCourses.Select(e => e.CourseId).ToList();
-            var schedules = teacherSchedules.Select(s => s.Schedule).ToList();
+            var schedules = teacherSchedules
+                .Select(ts => ts.Schedule)
+                .Where(s => s.SemesterId == semester.Id)
+                .ToList();
             // Filter out courses that do not meet the PreviousCourseNotTaken or have already been passed
             foreach (var schedule in schedules)
             {
@@ -185,9 +190,9 @@ namespace EduCredit.Service.Services
             var scheduleMapped =
                  schedules.Select(s => new ReadScheduleDto
                  {
-                     Id = s.Id,
+                     SemesterName = s.Semester.Name,
                      CourseName = s.Course.Name,
-                     TeachersName = s.TeacherSchedules.Select(s=>s.Teacher.FullName).ToList(),
+                     TeachersName = string.Join(", ", s.TeacherSchedules.Select(t => t.Teacher.FullName)),
                      Duration = s.Course.Duration,
                      Hours = s.Course.CreditHours,
                      Day = s.Day,
@@ -198,7 +203,6 @@ namespace EduCredit.Service.Services
                      LectureEnd = s.LectureEnd,
                      LectureLocation = s.LectureLocation,
                      LectureStart = s.LectureStart,
-                     //TeacherIds = s.TeacherSchedules.Select(ts => ts.TeacherId).ToList(),
                  }).ToList();
 
             if (scheduleMapped is null) return null;
@@ -213,7 +217,7 @@ namespace EduCredit.Service.Services
                 Obtainedhours = student.CreditHours,
                 AvailableHours = availableHours,
                 AcademicGuide = student.Teacher?.FullName ?? "",
-                SchedualeCourses = scheduleMapped,
+                Schedules = scheduleMapped,
             };
 
             return new List<ReadScheduleEnrollCourseDto> { studentWithAvailableCourses };
@@ -234,15 +238,18 @@ namespace EduCredit.Service.Services
 
             var TeacherSchedulesSpec = new TeacherScheduleSpecification(enrollmentTable.Student.DepartmentId);
             var teacherSchedules = _unitOfWork.Repository<TeacherSchedule>().GetAllSpecification(TeacherSchedulesSpec, out count).ToList();
-            var schedules = teacherSchedules.Select(s => s.Schedule).ToList();
+            var schedules = teacherSchedules
+                .Select(ts => ts.Schedule)
+                .Where(s => s.SemesterId == semester.Id)
+                .ToList();
 
             //var scheduleMapped = _mapper.Map<IReadOnlyList<Schedule>, List<ReadScheduleDto>>(schedule);
             var scheduleMapped =
                 schedules.Select(s => new ReadScheduleDto
                 {
-                    Id = s.Id,
+                    SemesterName = s.Semester.Name,
                     CourseName = s.Course.Name,
-                    TeachersName = s.TeacherSchedules.Select(s => s.Teacher.FullName).ToList(),
+                    TeachersName = string.Join(", ", s.TeacherSchedules.Select(t => t.Teacher.FullName)),
                     Duration = s.Course.Duration,
                     Hours = s.Course.CreditHours,
                     Day = s.Day,
@@ -253,7 +260,6 @@ namespace EduCredit.Service.Services
                     LectureEnd = s.LectureEnd,
                     LectureLocation = s.LectureLocation,
                     LectureStart = s.LectureStart,
-                    //TeacherIds = s.TeacherSchedules.Select(ts => ts.TeacherId).ToList(),
                 }).ToList();
 
             if (scheduleMapped is null) return null;
@@ -267,7 +273,7 @@ namespace EduCredit.Service.Services
                 Obtainedhours = enrollmentTable.Student.CreditHours,
                 AvailableHours = enrollmentTable.Student.CreditHours <= 102 ? 18 : 21,
                 AcademicGuide = enrollmentTable.Student.Teacher?.FullName ?? "",
-                SchedualeCourses = scheduleMapped,
+                Schedules = scheduleMapped,
             };
             return new List<ReadScheduleEnrollCourseDto> { studentWithSchedule };
         }

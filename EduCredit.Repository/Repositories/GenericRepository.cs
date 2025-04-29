@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -53,6 +54,11 @@ namespace EduCredit.Repository.Repositories
         public async Task<T?> GetByIdAsync(Guid id)
         {
             return await _dbcontext.Set<T>().FindAsync(id);
+        }
+
+        public async Task<IReadOnlyList<T?>> ListAsync(Expression<Func<T, bool>> predicate)
+        {
+            return await _dbcontext.Set<T>().AsNoTracking().Where(predicate).ToListAsync();
         }
 
         public async Task<IReadOnlyList<T?>> GetAllAsync()

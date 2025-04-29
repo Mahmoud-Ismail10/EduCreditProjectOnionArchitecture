@@ -22,30 +22,32 @@ namespace EduCredit.APIs.Controllers
             _scheduleServices = scheduleServices;
         }
 
-        //[HttpPost]
-        //[Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
-        //[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
-        //[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
-        //public async Task<ActionResult<ApiResponse>> AssignTeachersToCourse([FromBody] CreateScheduleDto createScheduleDto)
-        //{
-        //    var response = await _scheduleServices.AssignSchedule(createScheduleDto);
-        //    if (response.StatusCode == 200)
-        //        return Ok(new ApiResponse(200, response.Message));
-        //    return BadRequest(new ApiResponse(400, response.Message));
-        //}
+        [HttpPost]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
+        public async Task<ActionResult<ApiResponse>> AssignTeachersToCourse([FromBody] CreateScheduleDto createScheduleDto)
+        {
+            var response = await _scheduleServices.AssignSchedule(createScheduleDto);
+            if (response.StatusCode == 200)
+                return Ok(new ApiResponse(200, response.Message));
+            return BadRequest(new ApiResponse(400, response.Message));
+        }
 
-        [HttpGet("{CourseId}")]
+        /// GET: api/Schedule/{CourseId}/{SemesterId}
+        [HttpGet("{CourseId}/{SemesterId}")]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ApiResponse<ReadScheduleDto>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<ApiResponse<ReadScheduleDto>>> GetSchedule(Guid CourseId)
+        public async Task<ActionResult<ApiResponse<ReadScheduleDto>>> GetSchedule(Guid CourseId, Guid SemesterId)
         {
-            var scheduleDto = await _scheduleServices.GetSchedule(CourseId);
+            var scheduleDto = await _scheduleServices.GetSchedule(CourseId, SemesterId);
             if (scheduleDto is null)
                 return NotFound(new ApiResponse(404, "Schedule not found!"));
             return Ok(new ApiResponse<ReadScheduleDto>(200, "Success", scheduleDto));
-        }   
+        }
 
+        /// GET: api/Schedule/Study-Schedule/{StudentId}
         [HttpGet("Study-Schedule/{StudentId}")]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<ReadScheduleEnrollCourseDto>>), (int)HttpStatusCode.OK)]
@@ -58,6 +60,7 @@ namespace EduCredit.APIs.Controllers
             return Ok(new ApiResponse<IReadOnlyList<ReadScheduleEnrollCourseDto>>(200, "Success", schedulesDto));
         }
 
+        /// GET: api/Schedule/Get-EnrollmentOfCourseScheduale/{StudentId}
         [HttpGet("Get-EnrollmentOfCourseScheduale/{StudentId}")]
         [Authorize(Roles = $"{AuthorizationConstants.StudentRole}, {AuthorizationConstants.SuperAdminRole}")]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<ReadScheduleEnrollCourseDto>>>> GetStudentWithHisAvalaibleCourses(Guid StudentId)
@@ -67,18 +70,19 @@ namespace EduCredit.APIs.Controllers
             var userRole = User.FindFirstValue(ClaimTypes.Role);
             if (userRole == AuthorizationConstants.StudentRole)
                 StudentId = currentUserIdAsGuid;
-            var studentCourses = await _scheduleServices.GetStudentAvailableCourses(StudentId);
+            var studentCourses = await _scheduleServices.GetStudentWithAvailableCourses(StudentId);
             if (studentCourses is null) return NotFound(new ApiResponse(404));
             return Ok(new ApiResponse<IReadOnlyList<ReadScheduleEnrollCourseDto>>(200, "Success", studentCourses));
         }
 
-        [HttpPut("{ScheduleId}")]
+        /// PUT: api/Schedule/{CourseId}/{SemesterId}
+        [HttpPut("{CourseId}/{SemesterId}")]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<ApiResponse>> UpdateSchedule(Guid ScheduleId, [FromBody] UpdateScheduleDto updateScheduleDto)
+        public async Task<ActionResult<ApiResponse>> UpdateSchedule(Guid CourseId, Guid SemesterId, [FromBody] UpdateScheduleDto updateScheduleDto)
         {
-            var response = await _scheduleServices.UpdateSchedule(ScheduleId, updateScheduleDto);
+            var response = await _scheduleServices.UpdateSchedule(CourseId, SemesterId, updateScheduleDto);
             if (response.StatusCode == 200)
                 return Ok(new ApiResponse(200, "Schedule updated successfully!"));
             else if (response.StatusCode == 404)
@@ -86,14 +90,15 @@ namespace EduCredit.APIs.Controllers
             else
                 return BadRequest(new ApiResponse(400, "It is not suitable to update the schedule!"));
         }
-        
-        [HttpDelete("{courseId}")]
+
+        /// DELETE: api/Schedule/{CourseId}/{SemesterId}
+        [HttpDelete("{CourseId}/{SemesterId}")]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<ApiResponse>> DeleteSchedule(Guid courseId)
+        public async Task<ActionResult<ApiResponse>> DeleteSchedule(Guid CourseId, Guid SemesterId)
         {
-            var response = await _scheduleServices.DeleteSchedule(courseId);
+            var response = await _scheduleServices.DeleteSchedule(CourseId, SemesterId);
             if (response.StatusCode == 200)
                 return Ok(new ApiResponse(200, "Schedule deleted successfully!"));
             else if (response.StatusCode == 404)

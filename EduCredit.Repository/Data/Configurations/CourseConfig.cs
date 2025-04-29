@@ -26,9 +26,9 @@ namespace EduCredit.Repository.Data.Configurations
             builder.Property(c => c.Duration)
                 .HasColumnType("int");
 
-            /// Self-reference to represent the previous course
+            /// One-to-many: Self-reference to represent the previous course
             builder.HasOne(c => c.PreviousCourse)
-                .WithMany()
+                .WithMany(c => c.NextCourses)
                 .HasForeignKey(c => c.PreviousCourseId)
                 .OnDelete(DeleteBehavior.ClientSetNull);
 

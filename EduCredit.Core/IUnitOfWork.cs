@@ -12,11 +12,14 @@ namespace EduCredit.Core
         /// Generic Method
         IGenericRepository<TEntity> Repository<TEntity>() where TEntity : class;
         Task<int> CompleteAsync();
+        Task BeginTransactionAsync();
+        Task CommitTransactionAsync();
+        Task RollbackTransactionAsync();
         IEnrollmentTableRepo _enrollmentTableRepo { get; }
         IEnrollmentRepo _enrollmentRepo { get; }
         IScheduleRepo _scheduleRepo { get; }
         ISemesterRepo _semesterRepo { get; }
-        ISemeterCourseRepo _semesterCourseRepo { get; }
+        //ISemeterCourseRepo _semesterCourseRepo { get; }
         ICourseRepo _courseRepo { get; }
         ITeacherRepo _teacherRepo { get; }
         IStudentRepo _studentRepo { get; }

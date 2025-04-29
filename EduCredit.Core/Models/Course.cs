@@ -15,21 +15,19 @@ namespace EduCredit.Core.Models
         public float MinimumDegree { get; set; }
         public int Duration { get; set; }
 
-        /// Self-reference to represent the previous course
+        /// One-to-Many: Self-reference to represent the previous course
         public Guid? PreviousCourseId { get; set; } // Foreign Key allow null
         public Course PreviousCourse { get; set; }
+        public ICollection<Course> NextCourses { get; set; } = new HashSet<Course>();
 
         /// One-to-many: Between Course and Department
         public Guid DepartmentId { get; set; } // Foreign Key
         public Department Department { get; set; }
 
-        /// One-to-Many: Between Course and Schedule
-        public ICollection<Schedule> Schedules { get; set; }=new HashSet<Schedule>();
-
         /// Many-to-many: Between Course and EnrollmentTable (JoinTable)
         public ICollection<Enrollment> Enrollments { get; set; } = new HashSet<Enrollment>();
 
         /// Many-to-many: Between Course and Semester (JoinTable)
-        public ICollection<SemesterCourse> SemesterCourses { get; set; } = new HashSet<SemesterCourse>();
+        public ICollection<Schedule> Schedules { get; set; } = new HashSet<Schedule>();
     }
 }

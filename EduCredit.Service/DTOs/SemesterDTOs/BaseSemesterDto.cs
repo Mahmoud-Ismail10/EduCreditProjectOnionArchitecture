@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace EduCredit.Service.DTOs.SemesterDTOs
@@ -27,6 +28,5 @@ namespace EduCredit.Service.DTOs.SemesterDTOs
 
         [Required(ErrorMessage = "Enrollment Close is required")]
         public DateTime EnrollmentClose { get; set; }
-
     }
 }

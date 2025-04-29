@@ -41,7 +41,6 @@ namespace EduCredit.APIs.Controllers
         }
 
         /// PUT: api/Semester/CurrentSemester
-
         [HttpGet("CurrentSemester")]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]
         [ProducesResponseType(typeof(ApiResponse<ReadSemesterDto>), (int)HttpStatusCode.OK)]
@@ -55,7 +54,6 @@ namespace EduCredit.APIs.Controllers
         }
 
         /// GET: api/Semester
-
         [HttpGet]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ApiResponse<Pagination<IReadOnlyList<ReadSemesterDto>>>), (int)HttpStatusCode.OK)]
@@ -68,8 +66,8 @@ namespace EduCredit.APIs.Controllers
                 return NotFound(new ApiResponse(404, "No semesters found!"));
             return Ok(new ApiResponse<Pagination<ReadSemesterDto>>(200, "Success", new Pagination<ReadSemesterDto>(spec.PageSize, spec.PageIndex, count, semesters)));
         }
-        /// GET: api/Semester/{id}
 
+        /// GET: api/Semester/{id}
         [HttpGet("{id}")]
         [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
         [ProducesResponseType(typeof(ApiResponse<ReadSemesterDto>), (int)HttpStatusCode.OK)]

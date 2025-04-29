@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace EduCredit.Core.Relations
 {
-    public class SemesterCourse
-    {
-        public Guid SemesterId { get; set; }
-        public Semester Semester { get; set; }
+    //public class SemesterCourse
+    //{
+    //    public Guid SemesterId { get; set; }
+    //    public Semester Semester { get; set; }
 
-        public Guid CourseId { get; set; }
-        public Course Course { get; set; }
-    }
+    //    public Guid CourseId { get; set; }
+    //    public Course Course { get; set; }
+    //}
 }

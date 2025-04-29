@@ -15,11 +15,12 @@ namespace EduCredit.Core.Specifications.CourseSpecifications
             (string.IsNullOrEmpty(spec.Search) || d.Name.ToLower().Contains(spec.Search.ToLower())) &&
             (!spec.DepartmentId.HasValue || d.DepartmentId == spec.DepartmentId.Value) &&
             (!spec.PreviousCourseId.HasValue || d.PreviousCourseId == spec.PreviousCourseId.Value)&&
-            (!spec.SemesterId.HasValue || d.SemesterCourses.Any(sc => sc.SemesterId == spec.SemesterId.Value)))
+            (!spec.SemesterId.HasValue || d.Schedules.Any(sc => sc.SemesterId == spec.SemesterId.Value)))
         {
             Includes.Add(d => d.Department);
             Includes.Add(d => d.PreviousCourse);
-            Includes.Add(d => d.SemesterCourses);
+            Includes.Add(d => d.Schedules);
+            //Includes.Add(d => d.Schedules);
             if (!string.IsNullOrEmpty(spec.Sort))
             {
                 switch (spec.Sort.ToLower())
@@ -40,7 +41,7 @@ namespace EduCredit.Core.Specifications.CourseSpecifications
         {
             Includes.Add(d => d.Department);
             Includes.Add(d => d.PreviousCourse);
-            Includes.Add(c => c.SemesterCourses);
+            Includes.Add(c => c.Schedules);
         }   
         public CourseWithDeptAndPrevCourseSpecification(Guid? DepartmentId)
             : base(d => !DepartmentId.HasValue|| d.DepartmentId == DepartmentId)

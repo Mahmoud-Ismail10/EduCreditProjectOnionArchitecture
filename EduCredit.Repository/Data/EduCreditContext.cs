@@ -34,7 +34,7 @@ namespace EduCredit.Repository.Data
         public DbSet<EnrollmentTable> EnrollmentTables { get; set; }
         public DbSet<Schedule> Schedules { get; set; }
         public DbSet<Semester> Semesters { get; set; }
-        public DbSet<SemesterCourse> SemesterCourses { get; set; }
+        //public DbSet<SemesterCourse> SemesterCourses { get; set; }
         public DbSet<TeacherSchedule> TeacherSchedules { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 

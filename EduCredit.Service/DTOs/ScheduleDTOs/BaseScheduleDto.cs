@@ -11,7 +11,6 @@ namespace EduCredit.Service.DTOs.ScheduleDTOs
 {
     public class BaseScheduleDto
     {
-      
         public Day? Day { get; set; } // enum
         public TimeOnly? LectureStart { get; set; }
         public TimeOnly? LectureEnd { get; set; }

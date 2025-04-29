@@ -4,6 +4,7 @@ using EduCredit.Core.Specifications.DepartmentSpecifications;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,6 +15,7 @@ namespace EduCredit.Core.Repositories.Contract
         Task<T?> GetByIdSpecificationAsync(ISpecification<T> spec);
         Task<T?> GetByIdAsync(Guid id);
         IReadOnlyList<T?> GetAllSpecification(ISpecification<T> spec, out int count);
+        Task<IReadOnlyList<T?>> ListAsync(Expression<Func<T, bool>> predicate);
         Task<IReadOnlyList<T?>> GetAllAsync();
         Task CreateAsync(T entity);
         Task Update(T entity);
