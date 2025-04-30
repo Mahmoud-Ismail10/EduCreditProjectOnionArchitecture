@@ -34,14 +34,15 @@ namespace EduCredit.APIs.Controllers
             return BadRequest(new ApiResponse(400, response.Message));
         }
 
+       
         /// GET: api/Schedule/{CourseId}/{SemesterId}
-        [HttpGet("{CourseId}/{SemesterId}")]
-        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
+        [HttpGet("{CourseId}")]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]
         [ProducesResponseType(typeof(ApiResponse<ReadScheduleDto>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<ApiResponse<ReadScheduleDto>>> GetSchedule(Guid CourseId, Guid SemesterId)
+        public async Task<ActionResult<ApiResponse<ReadScheduleDto>>> GetSchedule(Guid CourseId)
         {
-            var scheduleDto = await _scheduleServices.GetSchedule(CourseId, SemesterId);
+            var scheduleDto = await _scheduleServices.GetSchedule(CourseId);
             if (scheduleDto is null)
                 return NotFound(new ApiResponse(404, "Schedule not found!"));
             return Ok(new ApiResponse<ReadScheduleDto>(200, "Success", scheduleDto));
@@ -88,7 +89,8 @@ namespace EduCredit.APIs.Controllers
             else if (response.StatusCode == 404)
                 return NotFound(new ApiResponse(404, "Schedule not found!"));
             else
-                return BadRequest(new ApiResponse(400, "It is not suitable to update the schedule!"));
+
+                return BadRequest(new ApiResponse(400, response.Message));
         }
 
         /// DELETE: api/Schedule/{CourseId}

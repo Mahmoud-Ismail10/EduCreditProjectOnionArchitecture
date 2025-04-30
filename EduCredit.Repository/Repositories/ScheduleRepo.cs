@@ -54,5 +54,23 @@ namespace EduCredit.Repository.Repositories
             if (courses is null) return null;
             return await courses;
         }
+
+        public async Task<Schedule?> GetScheduleAsync(Guid CourseId, Guid semesterId)
+        {
+            var schedules = await _dbcontext.Schedules
+                .Where(sc => sc.CourseId == CourseId && sc.SemesterId == semesterId)
+                .Include(E => E.Course.Enrollments).FirstOrDefaultAsync();
+            if (schedules is null) return null;
+            return schedules;
+        }
+
+        public async Task<List<Schedule?>> GetScheduleByManycoursesAsync(List<Guid> CourseId, Guid semesterId)
+        {
+            var schedules = await _dbcontext.Schedules
+                .Where(sc => CourseId.Contains(sc.CourseId) && sc.SemesterId == semesterId)
+                .Include(s=>s.Course)
+                .ToListAsync();
+            return schedules;
+        }
     }
 }

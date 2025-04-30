@@ -9,6 +9,7 @@ using EduCredit.Service.DTOs.AdminDTOs;
 using EduCredit.Service.DTOs.DepartmentDTOs;
 using EduCredit.Service.DTOs.EnrollmentDTOs;
 using EduCredit.Service.DTOs.ScheduleDTOs;
+using EduCredit.Service.DTOs.SemesterDTOs;
 using EduCredit.Service.Errors;
 using EduCredit.Service.Services.Contract;
 using Microsoft.AspNetCore.Mvc;
@@ -60,96 +61,80 @@ namespace EduCredit.Service.Services
             if (result <= 0) return new ApiResponse(400);
             return new ApiResponse(200);
         }
-        public IReadOnlyList<ReadEnrollmentDto> GetAllEnrollmentsAsync(EnrollmentSpecificationParams specParam, out int count)
+        public EnrollmentResultDto? GetAllEnrollmentsAsync(EnrollmentSpecificationParams specParam, Guid studentId, out int count)
         {
             var EnrollmentRepo = _unitOfWork.Repository<Enrollment>();
             var spec = new EnrollmentsWithCoursesSpecification(specParam);
+            var Enrollments = EnrollmentRepo.GetAllSpecification(spec, out count);
 
-            // Use asynchronous method if possible to avoid blocking IO operations
-            var enrollments =  EnrollmentRepo.GetAllSpecification(spec, out count);
+            if (Enrollments is null || !Enrollments.Any())
+                return null;
 
-            if (enrollments is null || !enrollments.Any())
-                return new List<ReadEnrollmentDto>();
-
-            var student = enrollments.Select(e => e.EnrollmentTable.Student).FirstOrDefault();
+            var student = Enrollments.Where(s => s.EnrollmentTable.StudentId == studentId)
+                                     .Select(s => s.EnrollmentTable.Student)
+                                     .FirstOrDefault();
 
             if (student is null)
-                return new List<ReadEnrollmentDto>();
+                return null;
 
-            // Calculate total credit hours and grade points
-            var totalCreditHours = enrollments
-                .Where(e => e.EnrollmentTable.StudentId == student.Id)
+            var studentEnrollments = Enrollments.Where(s => s.EnrollmentTable.StudentId == student.Id).ToList();
+
+            // Total values across all semesters
+            var totalCreditHours = studentEnrollments.Sum(s => s.Course.CreditHours);
+            var totalGradePoints = studentEnrollments.Sum(e =>
+                (e.Appreciation.HasValue && e.Appreciation == Appreciation.F) ? 0 : e.Grade);
+            var totalObtainedHours = studentEnrollments
+                .Where(e => e.IsPassAtCourse == true)
                 .Sum(e => e.Course.CreditHours);
+            var totalPercentage = (student.GPA / 4.0) * 100;
 
-            var totalGradePoints = enrollments
-                .Where(e => e.EnrollmentTable.StudentId == student.Id)
-                .Sum(e => (e.Appreciation == Appreciation.F || !e.Appreciation.HasValue) ? 0 : e.Grade); // Setting Grade to 0 if below threshold
+            // Group by semester
+            var semesters = studentEnrollments
+                .GroupBy(e => new {
+                    e.EnrollmentTable.Semester.Id,
+                    e.EnrollmentTable.Semester.Name
+                })
+                .Select(g =>
+                {
+                    var semesterEnrollments = g.ToList();
+                    var semesterCreditHours = semesterEnrollments.Sum(s => s.Course.CreditHours);
+                    var semesterGradePoints = semesterEnrollments.Sum(e =>
+                        (e.Appreciation.HasValue && e.Appreciation == Appreciation.F) ? 0 : e.Grade);
+                    var semesterObtainedHours = semesterEnrollments
+                        .Where(e => e.IsPassAtCourse == true)
+                        .Sum(e => e.Course.CreditHours);
+                    var semesterPercentage = (semesterGradePoints / (semesterCreditHours * 100.0)) * 100;
 
-            // GPA percentage calculation
-            var totalPercentageOfSemester = totalGradePoints / (totalCreditHours * 100f) * 100;
-            var totalPercentage = (student.GPA / 4.0f) * 100;
+                    return new SemesterResultDto
+                    {
+                        SemesterName = g.Key.Name,
+                        CreditHours = semesterCreditHours,
+                        ObtainedHours = semesterObtainedHours,
+                        GPA = semesterCreditHours == 0 ? 0 : Math.Round((double)semesterGradePoints / semesterCreditHours / 100.0 * 4, 2),
+                        Percentage = semesterPercentage,
+                        Courses = semesterEnrollments.Select(s => new ReadEnrollmentDto
+                        {
+                            Appreciation = s.Appreciation,
+                            CourseId = s.CourseId,
+                            EnrollmentTableId = s.EnrollmentTableId,
+                            Grade = s.Grade,
+                            IsPassAtCourse = s.IsPassAtCourse,
+                            Percentage = s.Percentage,
+                        }).ToList()
+                    };
+                }).ToList();
 
-            // Map Enrollments to ReadEnrollmentDto
-            var enrollmentDtos = enrollments.Select(e => new ReadEnrollmentDto
+            return new EnrollmentResultDto
             {
                 StudentName = student.FullName,
                 GPA = student.GPA,
-                Obtainedhours = student.CreditHours,
+                ObtainedHours = student.CreditHours,
                 CreditHours = totalCreditHours,
-                TotalObtainedhours = totalCreditHours - ((!e.IsPassAtCourse.HasValue||e.IsPassAtCourse.Value) ? 0 : e.Course.CreditHours),
-                TotalPercentageOfSemester = totalPercentageOfSemester,
+                TotalObtainedHours = totalObtainedHours,
                 TotalPercentage = totalPercentage,
-                Appreciation = e.Appreciation,
-                CourseId = e.CourseId,
-                EnrollmentTableId = e.EnrollmentTableId,
-                Grade = e.Grade,
-                IsPassAtCourse = e.IsPassAtCourse,
-                Percentage = e.Percentage,
-            }).ToList();
-
-            return enrollmentDtos;
+                Semesters = semesters
+            };
         }
-
-        //public IReadOnlyList<ReadEnrollmentDto?> GetAllEnrollmentsAsync(EnrollmentSpecificationParams specParam, out int count)
-        //{
-        //    var EnrollmentRepo = _unitOfWork.Repository<Enrollment>();
-        //    var spec = new EnrollmentsWithCoursesSpecification(specParam);
-        //    var Enrollments = EnrollmentRepo.GetAllSpecification(spec, out count);
-        //    if (Enrollments is null)
-        //        return null;
-        //    var student = Enrollments.Select(e => e.EnrollmentTable.Student).FirstOrDefault();
-        //    if (student is null)
-        //        return null;
-        //    var TotalCreditHours = Enrollments.Where(s=>s.EnrollmentTable.StudentId==student.Id).Sum(e => e.Course.CreditHours);
-        //    var studentEnrollments = Enrollments.Where(s => s.EnrollmentTable.StudentId == student.Id).ToList();
-
-        //    var totalGradePoints = studentEnrollments.Sum(e =>
-        //         (e.Appreciation.HasValue&& e.Appreciation== Appreciation.F)? 0 : e.Grade); // Set Grade to 0 if below the threshold
-
-        //    var totalCreditHours = studentEnrollments.Sum(s => s.Course.CreditHours);
-
-        //    var totalPercentageOfSemester = (totalGradePoints / (totalCreditHours * 100)) * 100;
-        //    var totalPercentage = (student.GPA/4.0f)*100;
-
-        //    var enrollmentDto = Enrollments.Select(s => new ReadEnrollmentDto
-        //    {
-        //        StudentName = student.FullName,
-        //        GPA = student.GPA,
-        //        Obtainedhours = student.CreditHours,
-        //        CreditHours = TotalCreditHours,
-        //        TotalObtainedhours =TotalCreditHours- (s.IsPassAtCourse ==false? 0 : s.Course.CreditHours),
-        //        TotalPercentageOfSemester = totalPercentageOfSemester,
-        //        TotalPercentage= totalPercentage,
-        //        Appreciation = s.Appreciation,
-        //        CourseId = s.CourseId,
-        //        EnrollmentTableId = s.EnrollmentTableId,
-        //        Grade = s.Grade,
-        //        IsPassAtCourse = s.IsPassAtCourse,
-        //        Percentage = s.Percentage,
-        //    }).ToList();
-        //  //  var enrollmentDto = _mapper.Map<IReadOnlyList<Enrollment>, IReadOnlyList<ReadEnrollmentDto>>(Enrollments);
-        //    return enrollmentDto;
-        //}
 
         //public async Task<ApiResponse> AssignEnrollment(CreateEnrollmentDto createEnrollmentDto)
         //{

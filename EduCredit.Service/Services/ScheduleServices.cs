@@ -59,13 +59,14 @@ namespace EduCredit.Service.Services
             return new ApiResponse(200, "The schedule was successfully assigned");
         }
 
-        public async Task<ReadScheduleDto?> GetSchedule(Guid CourseId, Guid SemesterId)
+        public async Task<ReadScheduleDto?> GetSchedule(Guid CourseId)
         {
-            var scheduleSpec = new ScheduleSpecification(CourseId, SemesterId);
+            var currentSemester = await _unitOfWork._semesterRepo.GetCurrentSemester();
+            var scheduleSpec = new ScheduleSpecification(CourseId, currentSemester.Id);
             var scheduleSpecList = await _unitOfWork.Repository<Schedule>().GetByIdSpecificationAsync(scheduleSpec);
             if (scheduleSpecList is null) return null;
             var scheduleMapped = new ReadScheduleDto
-                   {
+            {
                        SemesterName = scheduleSpecList.Semester.Name,
                        CourseName = scheduleSpecList.Course.Name,
                        CreditHours = scheduleSpecList.Course.CreditHours,
@@ -85,7 +86,7 @@ namespace EduCredit.Service.Services
                        LectureEnd = scheduleSpecList.LectureEnd,
                        LectureLocation = scheduleSpecList.LectureLocation,
                        LectureStart = scheduleSpecList.LectureStart,
-                   }; 
+            }; 
             return scheduleMapped;
         }
 
@@ -103,19 +104,64 @@ namespace EduCredit.Service.Services
             /// Delete all the old teachers
             await _unitOfWork.Repository<TeacherSchedule>().DeleteRange(scheduleSpecList.TeacherSchedules.ToList());
 
+            // Mapping data into existing schedule
+            _mapper.Map(updateScheduleDto, schedule);
+
+            // Get current semester
+            var currentSemester = await _unitOfWork._semesterRepo.GetCurrentSemester();
+            if (currentSemester is null) return new ApiResponse(404, "There is no current semester");
+
+            // Get existing teacher schedules for this schedule in the current semester
+            var existingTeacherSchedules = await _unitOfWork._teacherScheduleRepo.GetTeacherSchedulesByScheduleIdAsync(CourseId,SemesterId);
+            var existingTeacherIds = existingTeacherSchedules.Select(x => x).ToList();
+
+            var distinctTeacherIds = updateScheduleDto.TeacherIds.Distinct().ToList();
+
+            // 1. Identify teachers to remove ( موجودين في الداتا بيز بس مش مبعوتين دلوقتي )
+            var teachersToRemove = existingTeacherSchedules
+                .Where(ts => !distinctTeacherIds.Contains(ts))
+                .ToList();
             /// Mapping data
             var newSchedule = _mapper.Map(updateScheduleDto, scheduleSpecList);
 
+            // 2. Identify teachers to add ( مبعوتين دلوقتي ومش موجودين في الداتا بيز )
+            var teachersToAdd = distinctTeacherIds
+                .Where(id => !existingTeacherIds.Contains(id))
+                .Select(teacherId => new TeacherSchedule
+                {
+                    TeacherId = teacherId
+                })
+                .ToList();
             newSchedule.TeacherSchedules = updateScheduleDto.TeacherIds
                     .Select(teacherId => new TeacherSchedule { SemesterId = scheduleSpecList.SemesterId, CourseId = scheduleSpecList.CourseId, TeacherId = teacherId })
                     .ToList();
 
-            /// Update Schedule
-            await _unitOfWork.Repository<Schedule>().Update(newSchedule);
+            // 3. Remove old teacher schedules
+            if (teachersToRemove.Any())
+            {
+                // هنا هنعمل تحويل لعناصر teachersToRemove بحيث تكون كائنات من نوع TeacherSchedule
+                var teacherSchedulesToRemove = teachersToRemove.Select(ts => new TeacherSchedule
+                {
+                    TeacherId = ts,
+                    CourseId = CourseId,
+                    SemesterId = SemesterId
+                }).ToList();
 
-            /// Save in DB
+                await _unitOfWork.Repository<TeacherSchedule>().DeleteRange(teacherSchedulesToRemove);
+            }
+
+
+            // 4. Add new teacher schedules
+            if (teachersToAdd.Any())
+                await _unitOfWork.Repository<TeacherSchedule>().CreateRangeAsync(teachersToAdd);
+
+            // 5. Update basic schedule info
+            await _unitOfWork.Repository<Schedule>().Update(schedule);
+
+            // 6. Save changes
             int result = await _unitOfWork.CompleteAsync();
-            if (result <= 0) return new ApiResponse(400, "Failed to assign schedule!");
+            if (result <= 0) return new ApiResponse(400, "Failed to save schedule!");
+
             return new ApiResponse(200);
         }
 
@@ -174,10 +220,8 @@ namespace EduCredit.Service.Services
 
             // Extract enrolled course IDs
             var enrolledCourseIds = enrolledCourses.Select(e => e.CourseId).ToList();
-            var schedules = teacherSchedules
-                .Select(ts => ts.Schedule)
-                .Where(s => s.SemesterId == semester.Id)
-                .ToList();
+           var schedules = await _unitOfWork._scheduleRepo.GetScheduleByManycoursesAsync(enrolledCourseIds, semester.Id);
+          if(schedules is null) return null;    
             // Filter out courses that do not meet the PreviousCourseNotTaken or have already been passed
             foreach (var schedule in schedules)
             {
@@ -240,16 +284,16 @@ namespace EduCredit.Service.Services
             // Retrieve enrolled courses
             var enrollmentTableSpec = new EnrollmentTableWithSemesterAndStudentSpecification(stuId, semester.Id);
             var enrollmentTable = await _unitOfWork.Repository<EnrollmentTable>().GetByIdSpecificationAsync(enrollmentTableSpec);
-
+            if (enrollmentTable is null)
+                return null;
+            
             var enrollmentsSpec = new EnrollmentsWithCoursesSpecification(enrollmentTable.Id, semester.Id);
             var enrolledCourses = _unitOfWork.Repository<Enrollment>().GetAllSpecification(enrollmentsSpec, out int count);
-
+            if(enrolledCourses is null) return null;
             var TeacherSchedulesSpec = new TeacherScheduleSpecification(enrollmentTable.Student.DepartmentId);
             var teacherSchedules = _unitOfWork.Repository<TeacherSchedule>().GetAllSpecification(TeacherSchedulesSpec, out count).ToList();
-            var schedules = teacherSchedules
-                .Select(ts => ts.Schedule)
-                .Where(s => s.SemesterId == semester.Id)
-                .ToList();
+            var courses = teacherSchedules.Select(s => s.CourseId).ToList();
+            var schedules = await _unitOfWork._scheduleRepo.GetScheduleByManycoursesAsync(courses, semester.Id);
 
             //var scheduleMapped = _mapper.Map<IReadOnlyList<Schedule>, List<ReadScheduleDto>>(schedule);
             var scheduleMapped =

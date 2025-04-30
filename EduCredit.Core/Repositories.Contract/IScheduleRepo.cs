@@ -14,5 +14,7 @@ namespace EduCredit.Core.Repositories.Contract
         //Task<Schedule?> GetScheduleAsync(Guid CourseId, Guid SemesterId);
         Task<IReadOnlyList<Guid>> GetValidScheduleIds(List<Guid> scheduleIds); // update later
         Task<IReadOnlyList<Schedule?>> GetSchedulesByTeacherIdAsync(Guid teacherId, Guid semesterID);
+        Task<Schedule?> GetScheduleAsync(Guid CourseId,Guid semesterId);
+        Task<List<Schedule?>> GetScheduleByManycoursesAsync(List<Guid> CourseId,Guid semesterId);
     }
 }

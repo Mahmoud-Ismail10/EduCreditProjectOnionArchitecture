@@ -15,7 +15,9 @@ namespace EduCredit.Core.Specifications.CourseSpecifications
             (string.IsNullOrEmpty(spec.Search) || d.Name.ToLower().Contains(spec.Search.ToLower())) &&
             (!spec.DepartmentId.HasValue || d.DepartmentId == spec.DepartmentId.Value) &&
             (!spec.PreviousCourseId.HasValue || d.PreviousCourseId == spec.PreviousCourseId.Value)&&
-            (!spec.SemesterId.HasValue || d.Schedules.Any(sc => sc.SemesterId == spec.SemesterId.Value)))
+            (!spec.SemesterId.HasValue || d.Schedules.Any(sc => sc.SemesterId == spec.SemesterId.Value))&&
+            (!spec.StudentId.HasValue || d.Enrollments.Any(e => e.EnrollmentTable.StudentId == spec.StudentId.Value))
+        )
         {
             Includes.Add(d => d.Department);
             Includes.Add(d => d.PreviousCourse);

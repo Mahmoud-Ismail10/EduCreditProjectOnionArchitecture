@@ -25,5 +25,6 @@ namespace EduCredit.Core
         IStudentRepo _studentRepo { get; }
 
         IDepartmentRepo _departmentRepo { get; }
+        ITeacherScheduleRepo _teacherScheduleRepo { get; }
     }
 }

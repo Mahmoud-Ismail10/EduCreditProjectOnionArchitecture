@@ -24,7 +24,7 @@ namespace EduCredit.APIs.Controllers
 
         /// GET: api/Students
         [HttpGet]
-        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole},{AuthorizationConstants.StudentRole}")]
         [ProducesResponseType(typeof(ApiResponse<Pagination<ReadStudentDto>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public ActionResult<ApiResponse<IReadOnlyList<ReadStudentDto>>> GetAllStudents([FromQuery] StudentSpecificationParams specParams)
@@ -37,7 +37,7 @@ namespace EduCredit.APIs.Controllers
 
         /// GET: api/Students/{id}
         [HttpGet("{id}")]
-        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole},{AuthorizationConstants.StudentRole}")]
         [ProducesResponseType(typeof(ApiResponse<ReadStudentDto>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<ApiResponse<ReadStudentDto>>> GetStudent(Guid id)

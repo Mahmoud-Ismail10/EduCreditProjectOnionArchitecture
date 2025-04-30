@@ -62,7 +62,9 @@ namespace EduCredit.Service.Extensions
             services.AddScoped(typeof(ISemesterRepo), typeof(SemesterRepo));
             services.AddScoped(typeof(IDepartmentRepo), typeof(DepartmentRepo));
             //services.AddScoped(typeof(ISemeterCourseRepo), typeof(SemeterCourseRepo));
-            //services.AddScoped(typeof(IStudentRepo), typeof(StudentRepo));
+            services.AddScoped(typeof(ITeacherScheduleRepo), typeof(TeacherScheduleRepo));
+            //services.AddScoped(typeof(ISemeterCourseRepo), typeof(SemeterCourseRepo));
+            services.AddScoped(typeof(IStudentRepo), typeof(StudentRepo));
 
             services.AddScoped(typeof(IEnrollmentServices), typeof(EnrollmentServices));
             services.AddScoped(typeof(IScheduleServices), typeof(ScheduleServices));

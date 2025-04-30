@@ -62,7 +62,7 @@ namespace EduCredit.APIs.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole},{AuthorizationConstants.StudentRole}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(Pagination<ReadCourseDto>), (int)HttpStatusCode.OK)]
         public ActionResult<IReadOnlyList<ReadCourseDto>> GetCourses([FromQuery] CourseSpecificationParams specParams)
@@ -85,7 +85,7 @@ namespace EduCredit.APIs.Controllers
 
 
         [HttpPut("{id}")]
-        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}")]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.StudentRole}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(ReadCourseDto), (int)HttpStatusCode.OK)]

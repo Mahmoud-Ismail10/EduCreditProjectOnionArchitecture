@@ -11,6 +11,7 @@ namespace EduCredit.Core.Specifications.CourseSpecifications
         public Guid? DepartmentId { get; set; }
         public Guid? PreviousCourseId { get; set; }
         public Guid? SemesterId { get; set; }
+        public Guid? StudentId { get; set; }
 
     }
 }

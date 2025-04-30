@@ -32,6 +32,7 @@ namespace EduCredit.Core.Specifications.EnrollmentsSpecifications
         {
             Includes.Add(d => d.Course);
             ThenIncludes.Add("EnrollmentTable.Student");
+            ThenIncludes.Add("EnrollmentTable.Semester");
             if (!string.IsNullOrEmpty(spec.Sort))
             {
                 /// if client return another value other than 'nameAsc', 'nameDesc' is the sorting value is 'nameAsc'
