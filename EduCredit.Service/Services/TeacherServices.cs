@@ -61,7 +61,10 @@ namespace EduCredit.Service.Services
         {
             var teacher = await _unitOfWork.Repository<Teacher>().GetByIdAsync(id);
             if (teacher is null) return new ApiResponse(404);
-
+            if (teacher.Students.Count > 0)
+            {
+                return new ApiResponse(400, "Students are associated with this Teacher. Please delete the students first.");
+            }
             await _unitOfWork.Repository<Teacher>().Delete(teacher);
             int result = await _unitOfWork.CompleteAsync();
             if (result <= 0) return new ApiResponse(400);

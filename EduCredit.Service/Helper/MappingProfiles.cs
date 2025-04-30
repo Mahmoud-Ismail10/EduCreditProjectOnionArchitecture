@@ -68,7 +68,7 @@ namespace EduCredit.Service.Helper
                 .ForMember(d => d.Duration, o => o.MapFrom(s => s.Course.Duration))
                 .ForMember(d => d.Hours, o => o.MapFrom(s => s.Course.CreditHours));
 
-
+         
             //CreateMap<Teacher, TeacherDropDownListDto>()
             //    .ForMember(d => d.Id, o => o.MapFrom(s => s.Id))
             //    .ForMember(d => d.Name, o => o.MapFrom(s => s.FullName));

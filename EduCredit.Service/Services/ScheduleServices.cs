@@ -105,14 +105,14 @@ namespace EduCredit.Service.Services
             await _unitOfWork.Repository<TeacherSchedule>().DeleteRange(scheduleSpecList.TeacherSchedules.ToList());
 
             // Mapping data into existing schedule
-            _mapper.Map(updateScheduleDto, schedule);
+            _mapper.Map(updateScheduleDto, scheduleSpecList);
 
             // Get current semester
             var currentSemester = await _unitOfWork._semesterRepo.GetCurrentSemester();
             if (currentSemester is null) return new ApiResponse(404, "There is no current semester");
 
             // Get existing teacher schedules for this schedule in the current semester
-            var existingTeacherSchedules = await _unitOfWork._teacherScheduleRepo.GetTeacherSchedulesByScheduleIdAsync(CourseId,SemesterId);
+            var existingTeacherSchedules = await _unitOfWork._teacherScheduleRepo.GetTeacherSchedulesByScheduleIdAsync(CourseId, semester.Id);
             var existingTeacherIds = existingTeacherSchedules.Select(x => x).ToList();
 
             var distinctTeacherIds = updateScheduleDto.TeacherIds.Distinct().ToList();
@@ -144,7 +144,7 @@ namespace EduCredit.Service.Services
                 {
                     TeacherId = ts,
                     CourseId = CourseId,
-                    SemesterId = SemesterId
+                    SemesterId = semester.Id
                 }).ToList();
 
                 await _unitOfWork.Repository<TeacherSchedule>().DeleteRange(teacherSchedulesToRemove);
@@ -156,7 +156,7 @@ namespace EduCredit.Service.Services
                 await _unitOfWork.Repository<TeacherSchedule>().CreateRangeAsync(teachersToAdd);
 
             // 5. Update basic schedule info
-            await _unitOfWork.Repository<Schedule>().Update(schedule);
+            await _unitOfWork.Repository<Schedule>().Update(scheduleSpecList);
 
             // 6. Save changes
             int result = await _unitOfWork.CompleteAsync();
@@ -219,7 +219,7 @@ namespace EduCredit.Service.Services
             var teacherSchedules = _unitOfWork.Repository<TeacherSchedule>().GetAllSpecification(TeacherSchedulesSpec, out count).ToList();
 
             // Extract enrolled course IDs
-            var enrolledCourseIds = enrolledCourses.Select(e => e.CourseId).ToList();
+            var enrolledCourseIds =teacherSchedules.Select(s=>s.CourseId).ToList();
            var schedules = await _unitOfWork._scheduleRepo.GetScheduleByManycoursesAsync(enrolledCourseIds, semester.Id);
           if(schedules is null) return null;    
             // Filter out courses that do not meet the PreviousCourseNotTaken or have already been passed
@@ -244,7 +244,9 @@ namespace EduCredit.Service.Services
                  {
                      SemesterName = s.Semester.Name,
                      CourseName = s.Course.Name,
-                     TeachersName = string.Join(", ", s.TeacherSchedules.Select(t => t.Teacher.FullName)),
+                     TeachersName = string.Join(", ",teacherSchedules?
+                                            .Where(s => s.Teacher != null)
+                                            .Select(t => t.Teacher.FullName)),
                      Duration = s.Course.Duration,
                      Hours = s.Course.CreditHours,
                      Day = s.Day,
@@ -301,7 +303,9 @@ namespace EduCredit.Service.Services
                 {
                     SemesterName = s.Semester.Name,
                     CourseName = s.Course.Name,
-                    TeachersName = string.Join(", ", s.TeacherSchedules.Select(t => t.Teacher.FullName)),
+                    TeachersName = string.Join(", ", teacherSchedules?
+                                            .Where(s => s.Teacher != null)
+                                            .Select(t => t.Teacher.FullName)),
                     Duration = s.Course.Duration,
                     Hours = s.Course.CreditHours,
                     Day = s.Day,

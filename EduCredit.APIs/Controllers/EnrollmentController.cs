@@ -35,11 +35,11 @@ namespace EduCredit.APIs.Controllers
             else
                 return BadRequest(new ApiResponse(400, "Failure to assign the grade!"));
         }
-        [HttpGet("Results")]
+        [HttpGet("Results/{studentId}")]
         [ProducesResponseType(typeof(ApiResponse<Pagination<ReadEnrollmentDto>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
-        public ActionResult<ApiResponse<Pagination<EnrollmentResultDto>>> GetAllResults([FromQuery] EnrollmentSpecificationParams spec, [FromQuery] Guid studentId)
+        public ActionResult<ApiResponse<Pagination<EnrollmentResultDto>>> GetAllResults([FromQuery] EnrollmentSpecificationParams spec,Guid studentId)
         {
             int count;
             var Enrollments = _enrollmentServices.GetAllEnrollmentsAsync(spec,studentId,out count);
