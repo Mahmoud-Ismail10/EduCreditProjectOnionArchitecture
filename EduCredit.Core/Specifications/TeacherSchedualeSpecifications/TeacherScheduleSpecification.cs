@@ -18,6 +18,14 @@ namespace EduCredit.Core.Specifications.TeacherSchedualeSpecifications
             ThenIncludes.Add("Schedule.Course");
             ThenIncludes.Add("Schedule.Semester");
         }
+        public TeacherScheduleSpecification(Guid CourseId, Guid SemesterId):
+            base(s => s.CourseId == CourseId && s.SemesterId == SemesterId)
+        {
+            Includes.Add(d => d.Teacher);
+            Includes.Add(d => d.Schedule);
+            ThenIncludes.Add("Schedule.Course");
+            ThenIncludes.Add("Schedule.Semester");
+        }
 
      //   public TeacherScheduleSpecification()
      //: base(e =>

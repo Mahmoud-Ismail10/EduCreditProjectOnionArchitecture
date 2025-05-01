@@ -21,12 +21,13 @@ namespace EduCredit.Repository
         public IEnrollmentRepo _enrollmentRepo { get; }
         public IScheduleRepo _scheduleRepo { get; }
         public ISemesterRepo _semesterRepo { get; }
-        //public ISemeterCourseRepo _semesterCourseRepo { get; }
         public ICourseRepo _courseRepo { get; }
         public ITeacherRepo _teacherRepo { get; }
         public IStudentRepo _studentRepo { get; }
         public IDepartmentRepo _departmentRepo { get; }
         public ITeacherScheduleRepo _teacherScheduleRepo { get; }
+        public IUserCourseGroupRepo _userCourseGroupRepo { get; }
+        public IChatMessageRepo _chatMessageRepo { get; }
         private IDbContextTransaction _transaction;
 
         /// Ask CLR for creating object from DbContext and use it in service layer
@@ -39,10 +40,9 @@ namespace EduCredit.Repository
             ICourseRepo courseRepo,
             IDepartmentRepo departmentRepo,
             ITeacherScheduleRepo teacherScheduleRepo,
-            //ISemeterCourseRepo semesterCourseRepo,
-            IStudentRepo studentRepo
-
-            //ISemeterCourseRepo semesterCourseRepo
+            IStudentRepo studentRepo,
+            IUserCourseGroupRepo userCourseGroupRepo,
+            IChatMessageRepo chatMessageRepo
             //,IStudentRepo studentRepo
             )
         {
@@ -56,7 +56,8 @@ namespace EduCredit.Repository
             _courseRepo = courseRepo;
             _departmentRepo = departmentRepo;
             _teacherScheduleRepo = teacherScheduleRepo;
-            //_semesterCourseRepo = semesterCourseRepo;
+            _userCourseGroupRepo = userCourseGroupRepo;
+            _chatMessageRepo = chatMessageRepo;
             //_studentRepo = studentRepo;
         }
 

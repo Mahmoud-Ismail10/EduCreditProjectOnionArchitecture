@@ -1,0 +1,15 @@
+﻿using EduCredit.Core.Chat;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace EduCredit.Core.Repositories.Contract
+{
+    public interface IChatMessageRepo
+    {
+        Task<IEnumerable<ChatMessage>> GetMessagesByCourseIdAsync(Guid courseId);
+        Task AddAsync(ChatMessage message);
+    }
+}

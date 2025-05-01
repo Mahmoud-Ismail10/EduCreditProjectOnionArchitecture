@@ -29,6 +29,8 @@ using EduCredit.Repository.Repositories;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.OpenApi.Any;
+using EduCredit.Service.Hubs;
+using EduCredit.Core.Chat;
 
 
 namespace EduCredit.Service.Extensions
@@ -48,10 +50,10 @@ namespace EduCredit.Service.Extensions
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequiredLength = 8; // Set minimum length to 8 characters
             }).AddEntityFrameworkStores<EduCreditContext>().AddDefaultTokenProviders();
-                services.Configure<DataProtectionTokenProviderOptions>(options =>
-            {
-                options.TokenLifespan = TimeSpan.FromHours(1);
-            });
+            services.Configure<DataProtectionTokenProviderOptions>(options =>
+        {
+            options.TokenLifespan = TimeSpan.FromHours(1);
+        });
             /// Add life time for Services
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped(typeof(IEnrollmentRepo), typeof(EnrollmentRepo));
@@ -61,10 +63,10 @@ namespace EduCredit.Service.Extensions
             services.AddScoped(typeof(ICourseRepo), typeof(CourseRepo));
             services.AddScoped(typeof(ISemesterRepo), typeof(SemesterRepo));
             services.AddScoped(typeof(IDepartmentRepo), typeof(DepartmentRepo));
-            //services.AddScoped(typeof(ISemeterCourseRepo), typeof(SemeterCourseRepo));
             services.AddScoped(typeof(ITeacherScheduleRepo), typeof(TeacherScheduleRepo));
-            //services.AddScoped(typeof(ISemeterCourseRepo), typeof(SemeterCourseRepo));
             services.AddScoped(typeof(IStudentRepo), typeof(StudentRepo));
+            services.AddScoped(typeof(IChatMessageRepo), typeof(ChatMessageRepo));
+            services.AddScoped(typeof(IUserCourseGroupRepo), typeof(UserCourseGroupRepo));
 
             services.AddScoped(typeof(IEnrollmentServices), typeof(EnrollmentServices));
             services.AddScoped(typeof(IScheduleServices), typeof(ScheduleServices));
@@ -77,18 +79,21 @@ namespace EduCredit.Service.Extensions
             services.AddScoped(typeof(IAdminServices), typeof(AdminServices));
             services.AddScoped(typeof(IStudentServices), typeof(StudentServices));
             services.AddScoped(typeof(IUserService), typeof(UserService));
-            
-            services.AddScoped<ICacheService,CacheService>();
+            services.AddScoped(typeof(ICourseGroupService), typeof(CourseGroupService));
+
+            services.AddScoped<ICacheService, CacheService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IEmailServices, EmailServices>();
             services.AddScoped<ITokenBlacklistService, TokenBlacklistService>();
-
+            /// Hosted Service use for Background Task
+            services.AddHostedService<CleanupService>();
             var configuration = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
             services.AddSingleton<EmailSetting>(configuration.GetSection(nameof(EmailSetting)).Get<EmailSetting>());
             /// Auto Mapper use parameter less ctor of MappingProfiles
             services.AddAutoMapper(typeof(MappingProfiles));
-
+            /// Add SignalR services
+            services.AddSignalR();
             /// Custom Validation Errors
             services.Configure<ApiBehaviorOptions>(options =>
             {
@@ -107,12 +112,16 @@ namespace EduCredit.Service.Extensions
             });
 
             #region Cors
+            var allowedOrigins = configuration.GetSection("CorsSettings:AllowedOrigins").Get<string[]>();
             services.AddCors(Options =>
             {
                 Options.AddPolicy("AllowAll",
-                    policy => policy.AllowAnyOrigin()
+                    policy => policy
+                    //.AllowAnyOrigin() /// Not allow to use AlloeAnyOrigin with AllCredentials
+                    .WithOrigins(allowedOrigins)
                     .AllowAnyMethod()
-                    .AllowAnyHeader());
+                    .AllowAnyHeader()
+                    .AllowCredentials()); /// for get user id from claims
             });
             #endregion
 
@@ -120,7 +129,7 @@ namespace EduCredit.Service.Extensions
             services.AddMemoryCache();
             services.AddDistributedMemoryCache();
             services.AddSingleton<IIpPolicyStore, DistributedCacheIpPolicyStore>();
-            services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>(); 
+            services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
             services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
             services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>();
 
@@ -136,9 +145,9 @@ namespace EduCredit.Service.Extensions
                     }
                 };
             });
-                #endregion
-                #endregion
-                return services;
+            #endregion
+            #endregion
+            return services;
         }
         public static IServiceCollection AddSwaggerServices(this IServiceCollection services)
         {
@@ -213,12 +222,30 @@ namespace EduCredit.Service.Extensions
 
                     IssuerSigningKey = securityKey,
                     RequireExpirationTime = true,
-                    NameClaimType = "email",
-                    RoleClaimType = "role",
+
+                    //NameClaimType = "email",
+                    //RoleClaimType = "role",
+                    NameClaimType = ClaimTypes.NameIdentifier,
+                    RoleClaimType = ClaimTypes.Role,
                 };
 
                 op.Events = new JwtBearerEvents
                 {
+                    /// Support SignalR
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) &&
+                            path.StartsWithSegments("/chathub", StringComparison.OrdinalIgnoreCase))
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    },
+
                     OnTokenValidated = context =>
                     {
                         var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
@@ -258,7 +285,6 @@ namespace EduCredit.Service.Extensions
                 };
             });
         }
-
         public static void AddCustomAuthorizationPolicies(this IServiceCollection service)
         {
             service.AddAuthorization(op =>
@@ -277,8 +303,8 @@ namespace EduCredit.Service.Extensions
 
             //if (app.Environment.IsDevelopment())
             //{
-                app.UseSwagger();
-                app.UseSwaggerUI();
+            app.UseSwagger();
+            app.UseSwaggerUI();
             //}
             /// Use when there is an End Point not exist error and we need to Redirect it to another End Point.
             app.UseStatusCodePagesWithRedirects("/Error");
@@ -302,6 +328,9 @@ namespace EduCredit.Service.Extensions
             app.UseCors("AllowAll");
             app.UseIpRateLimiting();
             app.MapControllers();
+
+            // Map SignalR hubs
+            app.MapHub<ChatHub>("/chatHub");
             #endregion
             return app;
         }

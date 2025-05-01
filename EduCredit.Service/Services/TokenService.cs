@@ -29,7 +29,7 @@ namespace EduCredit.Service.Services
         #region Methods
 
         #region GenerateAccessToken
-        public string GenerateAccessToken(string email, string role,string UserId)
+        public string GenerateAccessToken(string email, string role, string UserId)
         {
             var jwtSettings = _configuration.GetSection("JwtSettings");
             var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]));
@@ -37,10 +37,13 @@ namespace EduCredit.Service.Services
 
             var claims = new List<Claim>
             {
-                     new Claim("email", email),
-                     new Claim("userId", UserId), 
-                     new Claim("role", role),
-                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()) 
+                     //new Claim("email", email),
+                     //new Claim("userId", UserId), 
+                     //new Claim("role", role),
+                     new Claim(ClaimTypes.Email, email),
+                     new Claim(ClaimTypes.Role, role),
+                     new Claim(ClaimTypes.NameIdentifier, UserId),
+                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
 

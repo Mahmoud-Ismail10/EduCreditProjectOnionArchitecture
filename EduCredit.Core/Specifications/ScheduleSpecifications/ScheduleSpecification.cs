@@ -11,15 +11,16 @@ namespace EduCredit.Core.Specifications.ScheduleSpecifications
     public class ScheduleSpecification : BaseSpecifications<Schedule>
     {
         public ScheduleSpecification(ScheduleSpecificationParams spec) : base(d =>
-            //: base(s => s.CourseId == spec.CourseId)
             (!spec.TeacherId.HasValue || d.TeacherSchedules.Any(sc => sc.TeacherId == spec.TeacherId.Value)) &&
             (!spec.SemesterId.HasValue || d.SemesterId == spec.SemesterId.Value) &&
+            (!spec.DepartmentId.HasValue || d.Course.DepartmentId == spec.DepartmentId.Value) &&
             (!spec.CourseId.HasValue || d.CourseId == spec.CourseId.Value))
         {
             Includes.Add(s => s.Course);
             Includes.Add(s => s.Semester);
             Includes.Add(s => s.TeacherSchedules);
             ThenIncludes.Add("TeacherSchedules.Teacher");
+            ThenIncludes.Add("Course.Department");
         }
         public ScheduleSpecification()
         {

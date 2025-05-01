@@ -1,4 +1,5 @@
-﻿using EduCredit.Service.DTOs.ScheduleDTOs;
+﻿using EduCredit.Core.Specifications.ScheduleSpecifications;
+using EduCredit.Service.DTOs.ScheduleDTOs;
 using EduCredit.Service.Errors;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,9 @@ namespace EduCredit.Service.Services.Contract
     public interface IScheduleServices
     {
         Task<ApiResponse> AssignSchedule(CreateScheduleDto createScheduleDto);
+        Task<ReadScheduleDto?> GetSchedule(Guid CourseId, Guid SemesterId);
         Task<ReadScheduleDto?> GetSchedule(Guid CourseId);
+        IReadOnlyList<ReadScheduleDto?> GetAllSchedules(ScheduleSpecificationParams specParams, out int count);
         Task<ApiResponse> UpdateSchedule(Guid CourseId, UpdateScheduleDto updateScheduleDto);
         Task<ApiResponse> DeleteSchedule(Guid CourseId);
         Task<IReadOnlyList<ReadScheduleEnrollCourseDto>?> GetStudentWithAvailableCourses(Guid studentId);

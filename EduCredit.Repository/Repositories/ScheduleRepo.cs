@@ -27,12 +27,12 @@ namespace EduCredit.Repository.Repositories
             return exists;
         }
 
-        //public async Task<Schedule?> GetScheduleAsync(Guid CourseId, Guid SemesterId)
-        //{
-        //    Schedule? schedule = await _dbcontext.Schedules
-        //        .FirstOrDefaultAsync(c => c.CourseId == CourseId && c.SemesterId == SemesterId);
-        //    return schedule;
-        //}
+        public async Task<Schedule?> GetScheduleByCourseIdAndSemesterIdAsync(Guid CourseId, Guid SemesterId)
+        {
+            Schedule? schedule = await _dbcontext.Schedules
+                .FirstOrDefaultAsync(c => c.CourseId == CourseId && c.SemesterId == SemesterId);
+            return schedule;
+        }
 
         public async Task<IReadOnlyList<Guid>> GetValidScheduleIds(List<Guid> scheduleIds)
         {

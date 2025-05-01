@@ -8,6 +8,7 @@ namespace EduCredit.Core.Specifications.ScheduleSpecifications
 {
     public class ScheduleSpecificationParams : BaseSpecificationParams
     {
+        public Guid? DepartmentId { get; set; }
         public Guid? TeacherId { get; set; }
         public Guid? CourseId { get; set; }
         public Guid? SemesterId { get; set; }

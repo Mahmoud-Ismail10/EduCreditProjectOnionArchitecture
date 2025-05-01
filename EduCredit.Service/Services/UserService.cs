@@ -46,6 +46,7 @@ namespace EduCredit.Service.Services
             var userDto = _mapper.Map<BaseRegisterDto>(user);
             return userDto;
         }
+
         private async Task<Person?> GetUserByRoleAsync<T>(string userId) where T : Person
         {
             if (!Guid.TryParse(userId, out var userGuid))
@@ -54,7 +55,15 @@ namespace EduCredit.Service.Services
             return await _unitOfWork.Repository<T>().GetByIdAsync(userGuid);
         }
 
+        public Guid GetUserGuidFromClaims(ClaimsPrincipal user)
+        {
+            var userId = user?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
+            if (string.IsNullOrEmpty(userId))
+                throw new Exception("User is not authenticated");
+
+            return Guid.Parse(userId);
+        }
 
     }
 }

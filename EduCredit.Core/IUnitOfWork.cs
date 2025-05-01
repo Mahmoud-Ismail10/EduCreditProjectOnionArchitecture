@@ -15,16 +15,17 @@ namespace EduCredit.Core
         Task BeginTransactionAsync();
         Task CommitTransactionAsync();
         Task RollbackTransactionAsync();
+
         IEnrollmentTableRepo _enrollmentTableRepo { get; }
         IEnrollmentRepo _enrollmentRepo { get; }
         IScheduleRepo _scheduleRepo { get; }
         ISemesterRepo _semesterRepo { get; }
-        //ISemeterCourseRepo _semesterCourseRepo { get; }
         ICourseRepo _courseRepo { get; }
         ITeacherRepo _teacherRepo { get; }
         IStudentRepo _studentRepo { get; }
-
         IDepartmentRepo _departmentRepo { get; }
         ITeacherScheduleRepo _teacherScheduleRepo { get; }
+        IChatMessageRepo _chatMessageRepo { get; }
+        IUserCourseGroupRepo _userCourseGroupRepo { get; }
     }
 }

@@ -24,6 +24,7 @@ namespace EduCredit.Repository.Repositories
         {
             var teacherSchedules = await _dbcontext.TeacherSchedules
                 .Where(ts => ts.Schedule.CourseId == courseId && ts.Schedule.SemesterId == SemesterId)
+                .AsNoTracking()
                 .Select(ts => ts.TeacherId)
                 .ToListAsync();
             if (teacherSchedules is null) return null;

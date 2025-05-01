@@ -10,6 +10,10 @@ namespace EduCredit.Service.DTOs.ScheduleDTOs
     public class CreateScheduleDto : BaseScheduleDto
     {
         [Required]
+        public Guid CourseId { get; set; }
+        public Guid SemesterId { get; set; }
+
+        [Required]
         public List<Guid> TeacherIds { get; set; } = new List<Guid>();
     }
 }
