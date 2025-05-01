@@ -36,7 +36,7 @@ namespace EduCredit.APIs.Controllers
                 return BadRequest(new ApiResponse(400, "Failure to assign the grade!"));
         }
         [HttpGet("Results/{studentId}")]
-        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole},{AuthorizationConstants.TeacherRole},{AuthorizationConstants.StudentRole}")]
+        [Authorize]
         [ProducesResponseType(typeof(ApiResponse<Pagination<ReadEnrollmentDto>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]

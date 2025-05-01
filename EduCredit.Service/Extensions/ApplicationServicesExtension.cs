@@ -223,10 +223,8 @@ namespace EduCredit.Service.Extensions
                     IssuerSigningKey = securityKey,
                     RequireExpirationTime = true,
 
-                    //NameClaimType = "email",
-                    //RoleClaimType = "role",
-                    NameClaimType = ClaimTypes.NameIdentifier,
-                    RoleClaimType = ClaimTypes.Role,
+                    NameClaimType = "email",
+                    RoleClaimType = "role",
                 };
 
                 op.Events = new JwtBearerEvents

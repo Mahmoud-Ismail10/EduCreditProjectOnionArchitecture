@@ -37,12 +37,9 @@ namespace EduCredit.Service.Services
 
             var claims = new List<Claim>
             {
-                     //new Claim("email", email),
-                     //new Claim("userId", UserId), 
-                     //new Claim("role", role),
-                     new Claim(ClaimTypes.Email, email),
-                     new Claim(ClaimTypes.Role, role),
-                     new Claim(ClaimTypes.NameIdentifier, UserId),
+                     new Claim("email", email),
+                     new Claim("userId", UserId),
+                     new Claim("role", role),
                      new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
