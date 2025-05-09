@@ -1,4 +1,5 @@
-﻿using EduCredit.Core.Relations;
+﻿using EduCredit.Core.Models;
+using EduCredit.Core.Relations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,8 +10,9 @@ namespace EduCredit.Core.Specifications.TeacherSchedualeSpecifications
 {
     public class TeacherScheduleSpecification : BaseSpecifications<TeacherSchedule>
     {
-        public TeacherScheduleSpecification(Guid? DepartmentId):
-            base(s => s.Schedule.Course.DepartmentId== DepartmentId)
+        public TeacherScheduleSpecification(Guid? DepartmentId,Guid? teacherId=null,Guid? studentId=null) :
+            base(s => (s.Schedule.Course.DepartmentId== DepartmentId)
+            )
         {
            
             Includes.Add(d => d.Teacher);
@@ -18,15 +20,6 @@ namespace EduCredit.Core.Specifications.TeacherSchedualeSpecifications
             ThenIncludes.Add("Schedule.Course");
             ThenIncludes.Add("Schedule.Semester");
         }
-        public TeacherScheduleSpecification(Guid CourseId, Guid SemesterId):
-            base(s => s.CourseId == CourseId && s.SemesterId == SemesterId)
-        {
-            Includes.Add(d => d.Teacher);
-            Includes.Add(d => d.Schedule);
-            ThenIncludes.Add("Schedule.Course");
-            ThenIncludes.Add("Schedule.Semester");
-        }
-
      //   public TeacherScheduleSpecification()
      //: base(e =>
      //    (!.HasValue || e.EnrollmentTableId == enrollmentTableId.Value) &&

@@ -77,8 +77,8 @@ namespace EduCredit.APIs.Controllers
                 return BadRequest(new ApiResponse(400, "It is not suitable to delete the Teacher!"));
         }
 
-        [HttpGet("statistics/{type}")]
-        [Authorize(Roles = $"{AuthorizationConstants.TeacherRole}")]
+        [HttpGet("statistics/{type}/{TeacherId}")]
+        //[Authorize(Roles = $"{AuthorizationConstants.TeacherRole}")]
         public async Task<ActionResult<ApiResponse<StatisticsDto>>> GetStatistics(TeacherStatistics type, Guid TeacherId)
         {
             var result = await _teacherServices.GetStatistics(type,TeacherId);

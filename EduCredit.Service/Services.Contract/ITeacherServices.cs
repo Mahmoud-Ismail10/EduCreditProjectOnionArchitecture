@@ -18,6 +18,6 @@ namespace EduCredit.Service.Services.Contract
         Task<UpdateTeacherDto?> UpdateTeacherAsync(UpdateTeacherDto updateteacherDto, Guid id);
         Task<ApiResponse> DeleteTeacherAsync(Guid id);
         ReadTeacherDto? AssignGuideToStudent(Guid? departmentId);
-        Task<StatisticsDto> GetStatistics(TeacherStatistics type, Guid? TeacherId);
+        Task<StatisticsDto> GetStatistics(TeacherStatistics type, Guid TeacherId);
     }
 }

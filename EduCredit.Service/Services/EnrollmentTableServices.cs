@@ -11,6 +11,8 @@ using EduCredit.Service.DTOs.SemesterDTOs;
 using EduCredit.Service.DTOs.StudentDTOs;
 using EduCredit.Service.Services.Contract;
 using EduCredit.Core.Specifications.EnrollmentTableSpecifications;
+using Microsoft.AspNetCore.SignalR;
+using EduCredit.Service.Hubs;
 
 namespace EduCredit.Service.Services
 {
@@ -20,20 +22,15 @@ namespace EduCredit.Service.Services
         private readonly ISemesterServices _semesterServices;
         private readonly IMapper _mapper;
         private readonly ICacheService _cache;
-      
-        //اظهر المواد المتاحه للتسجيل 
-        //الشروط
-        //1-الطالب خلص السابق للماده
-        //2-الطالب لا يسجل الماده من قبل
-        //4-الماده متاحه للتسجيل في هذا الترم 
-        //5-أن يكون الطالب قد رسب فيها من قب لإن كان قد سجلها سابقًا ولم ينجح 
-        public EnrollmentTableServices(IUnitOfWork unitOfWork, ISemesterServices semesterServices, IMapper mapper, ICacheService cache)
+        private readonly INotificationServices _Notification;
+        public EnrollmentTableServices(IUnitOfWork unitOfWork, ISemesterServices semesterServices, IMapper mapper, ICacheService cache, INotificationServices Notification)
         {
             _unitOfWork = unitOfWork;
             _semesterServices = semesterServices;
             _mapper = mapper;
             _cache = cache;
             _mapper = mapper;
+            _Notification = Notification;
         }
 
         public async Task<ApiResponse> CreateOrUpdateEnrollmentTable(CreateOrUpdateEnrollmentTableDto createOrUpdateEnrollmentTableDto)
@@ -67,7 +64,14 @@ namespace EduCredit.Service.Services
                     await _unitOfWork.Repository<EnrollmentTable>().CreateAsync(createEnrollmentTable);
                     int result = await _unitOfWork.CompleteAsync();
                     if (result <= 0) return new ApiResponse(400, "Failed to create enrollment table!");
+                    // Notify the teacher about the new enrollment
+                    if (createEnrollmentTable.Student.TeacherId != null)
+                    {
+                        await _Notification.SendNotificationToTeacherAsync(createEnrollmentTable.Student.FullName, createEnrollmentTable.Student.TeacherId);
+                    }
+
                     return new ApiResponse(200, "Enrollment Table created successfully");
+
                 }
                 /// When the student has already enrolled the table and tries to update it
                 else
@@ -93,20 +97,14 @@ namespace EduCredit.Service.Services
                     await _unitOfWork.Repository<EnrollmentTable>().Update(updateEnrollmentTable);
                     int result = await _unitOfWork.CompleteAsync();
                     if (result <= 0) return new ApiResponse(400, "Failed to update enrollment table!");
+                    if (updateEnrollmentTable.Student.TeacherId != null)
+                    {
+                      await  _Notification.SendNotificationToTeacherAsync(updateEnrollmentTable.Student.FullName, updateEnrollmentTable.Student.TeacherId);
+                    }
                     return new ApiResponse(200, "Enrollment Table updated successfully");
                 }
             }
             return new ApiResponse(400, "Failed to create enrollment table, Because the enrollment period ended!");
         }
-
-        //public Task<IReadOnlyList<ReadEnrollmentTableDto>?> GetStudentAvailableCourses(string studentId)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //        //3-الطالب لا يسجل الماده في نفس الوقت
-        //        //5-الطالب لا يسجل اكثر من 18 ساعه في الترم الحالي
-        //        //6-الطالب لا يسجل اكثر من 10 ساعات في الصيفي
-
     }
 }

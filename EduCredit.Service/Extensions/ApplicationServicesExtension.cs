@@ -86,6 +86,7 @@ namespace EduCredit.Service.Extensions
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IEmailServices, EmailServices>();
             services.AddScoped<ITokenBlacklistService, TokenBlacklistService>();
+            services.AddScoped<INotificationServices, NotificationServices>();
             /// Hosted Service use for Background Task
             services.AddHostedService<CleanupService>();
             var configuration = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
@@ -118,10 +119,11 @@ namespace EduCredit.Service.Extensions
                 Options.AddPolicy("AllowAll",
                     policy => policy
                     //.AllowAnyOrigin() /// Not allow to use AlloeAnyOrigin with AllCredentials
-                    .WithOrigins(allowedOrigins)
+                    //.WithOrigins(allowedOrigins)
+                    .AllowAnyOrigin()
                     .AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .AllowCredentials()); /// for get user id from claims
+                    .AllowAnyHeader());
+                    //.AllowCredentials()); /// for get user id from claims
             });
             #endregion
 
@@ -328,6 +330,7 @@ namespace EduCredit.Service.Extensions
             app.MapControllers();
 
             // Map SignalR hubs
+            app.MapHub<NotificationHub>("/notificationHub");
             app.MapHub<ChatHub>("/chatHub");
             #endregion
             return app;

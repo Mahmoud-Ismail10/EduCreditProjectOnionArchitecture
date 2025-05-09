@@ -16,6 +16,7 @@ namespace EduCredit.Service.DTOs.EnrollmentDTOs
         public float? Percentage { get; set; }
         public Appreciation? Appreciation { get; set; }
         public bool? IsPassAtCourse { get; set; }
-
+        public  string? CourseName { get; set; }
+        public float? CreditHours { get; set; }
     }   
 }

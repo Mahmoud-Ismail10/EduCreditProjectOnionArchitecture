@@ -1,8 +1,11 @@
 ﻿using AutoMapper;
 using EduCredit.Core;
 using EduCredit.Core.Models;
+using EduCredit.Core.Relations;
 using EduCredit.Core.Specifications.CourseSpecifications;
+using EduCredit.Core.Specifications.ScheduleSpecifications;
 using EduCredit.Service.DTOs.CourseDTOs;
+using EduCredit.Service.DTOs.StudentDTOs;
 using EduCredit.Service.Errors;
 using EduCredit.Service.Services.Contract;
 using System;
@@ -63,35 +66,35 @@ namespace EduCredit.Service.Services
             if (course is null) return null;
             return _mapper.Map<Course, ReadCourseDto>(course);
         }
-
-        //public async Task<IReadOnlyList<ReadCourseDto?>> GetCoursesByCurrentSemesterId(Guid? departmentId)
-        //{
-        //    var currentSemester = await _unitOfWork._semesterRepo.GetCurrentSemester();
-        //    if (currentSemester is null) return null;
-        //    var courses = await _unitOfWork._courseRepo.GetCoursesInCurrentsemester(departmentId, currentSemester.Id);
-        //    if (courses is null) return null;
-        //    var coursesdto = _mapper.Map<IReadOnlyList<Course>, IReadOnlyList<ReadCourseDto>>(courses);
-        //    return coursesdto;
-        //}
-
-        // Return Courses with it`s Count of Students witch are taught by a teacher
+      
         public async Task<IReadOnlyList<ReadTeacherCourseDto>> GetCoursesByTeacherIdAsync(Guid teacherId)
         {
-            //Get the semesterId current Semester
-            var semester = await _unitOfWork._semesterRepo.GetCurrentSemester();
-
-            //Returning Courses of each teacher with the count of student
-            var courses = await _unitOfWork._scheduleRepo.GetSchedulesByTeacherIdAsync(teacherId, semester.Id);
+            // Get the current semesterId
+            var Currentsemester = await _unitOfWork._semesterRepo.GetCurrentSemester();
+            // If no current semester, return null
+            if (Currentsemester is null) return null;
+            // Get the courses taught by the teacher in the current semester
+            var courses = ScheduleSpecification.ByTeacherAndSemester(teacherId, Currentsemester.Id);
+            var scheduleSpecList = _unitOfWork.Repository<Schedule>().GetAllSpecification(courses,out int count);
             if (courses is null) return null;
-            
-            var coursemapped = courses.Select(s => new ReadTeacherCourseDto
+            // Map the courses to ReadTeacherCourseDto
+            var courseMapped = scheduleSpecList.Select(s => new ReadTeacherCourseDto
             {
                 Id = s.CourseId,
                 Name = s.Course.Name,
-                //Count = s.Enrollments.Select(s => s.EnrollmentTableId).Count(), // update later
+                Count = s.Course.Enrollments.Select(s => s.EnrollmentTableId).Count(),
+                Students = s.Course.Enrollments.Select(e => new StudentGradeDto
+                {
+                    StudentId = e.EnrollmentTable.StudentId,
+                    StudentName = e.EnrollmentTable.Student.FullName,
+                    EnrollmentTableId = e.EnrollmentTableId,
+                    grade = e.Grade,
+                }).ToList()
             }).ToList();
-            return coursemapped;
+
+            return courseMapped;
         }
+
 
         public async Task<ApiResponse> UpdateCourseAsync(UpdateCourseDto updateCourseDto, Guid id)
         {

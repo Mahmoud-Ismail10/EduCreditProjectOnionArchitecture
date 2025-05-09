@@ -116,6 +116,8 @@ namespace EduCredit.Service.Services
                         {
                             Appreciation = s.Appreciation,
                             CourseId = s.CourseId,
+                            CreditHours=s.Course.CreditHours,
+                            CourseName=s.Course.Name,
                             EnrollmentTableId = s.EnrollmentTableId,
                             Grade = s.Grade,
                             IsPassAtCourse = s.IsPassAtCourse,

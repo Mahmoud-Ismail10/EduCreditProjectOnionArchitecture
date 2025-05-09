@@ -44,10 +44,14 @@ namespace EduCredit.Core.Specifications.CourseSpecifications
             Includes.Add(d => d.Department);
             Includes.Add(d => d.PreviousCourse);
             Includes.Add(c => c.Schedules);
-        }   
-        public CourseWithDeptAndPrevCourseSpecification(Guid? DepartmentId)
-            : base(d => !DepartmentId.HasValue|| d.DepartmentId == DepartmentId)
-            
+        }
+        public CourseWithDeptAndPrevCourseSpecification(Guid? DepartmentId, Guid? teacherId = null,Guid? CurrentSemesterId=null)
+            : base(d => (!DepartmentId.HasValue || d.DepartmentId == DepartmentId) &&
+                  (!teacherId.HasValue || d.Schedules.SelectMany(t => t.TeacherSchedules).Select(s => s.TeacherId).Any(t => t == teacherId)
+            )
+            && (!CurrentSemesterId.HasValue || d.Schedules.Any(s => s.SemesterId == CurrentSemesterId))
+            )
+
         {
            
         }

@@ -13,7 +13,7 @@ namespace EduCredit.Core.Repositories.Contract
         Task<bool> CheckIfCourseExistsInScheduleAsync(Guid id); // update later
         Task<Schedule?> GetScheduleByCourseIdAndSemesterIdAsync(Guid CourseId, Guid SemesterId);
         Task<IReadOnlyList<Guid>> GetValidScheduleIds(List<Guid> scheduleIds); // update later
-        Task<IReadOnlyList<Schedule?>> GetSchedulesByTeacherIdAsync(Guid teacherId, Guid semesterID);
+        //Task<IReadOnlyList<Schedule?>> GetSchedulesByTeacherIdAsync(Guid teacherId, Guid semesterID);
         Task<Schedule?> GetScheduleAsync(Guid CourseId,Guid semesterId);
         Task<List<Schedule?>> GetScheduleByManycoursesAsync(List<Guid> CourseId,Guid semesterId);
     }

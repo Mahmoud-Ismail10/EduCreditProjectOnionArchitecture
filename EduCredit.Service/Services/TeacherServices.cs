@@ -5,6 +5,7 @@ using EduCredit.Core.Models;
 using EduCredit.Core.Relations;
 using EduCredit.Core.Specifications.CourseSpecifications;
 using EduCredit.Core.Specifications.EnrollmentsSpecifications;
+using EduCredit.Core.Specifications.ScheduleSpecifications;
 using EduCredit.Core.Specifications.StudentSpecifications;
 using EduCredit.Core.Specifications.TeacherSpecefications;
 using EduCredit.Service.DTOs.AdminDTOs;
@@ -82,15 +83,15 @@ namespace EduCredit.Service.Services
             return _mapper.Map<Teacher, ReadTeacherDto>(selectedTeacher);
         }
 
-        public async Task<StatisticsDto> GetStatistics(TeacherStatistics statistics,Guid? TeacherId)
+        public async Task<StatisticsDto> GetStatistics(TeacherStatistics statistics,Guid TeacherId)
         { 
 
             var total = statistics switch
             {
-                TeacherStatistics.Courses => await _unitOfWork.Repository<Course>().CountAsync(new CourseWithDeptAndPrevCourseSpecification(TeacherId)),
-                TeacherStatistics.Students => await _unitOfWork.Repository<Student>().CountAsync(new StudentWithDepartmentAndGuideSpecification(TeacherId)),
-                //Statistics.SuccessRate => await GetSuccessRateAsync(),
-                _=>0
+                TeacherStatistics.Courses => await _unitOfWork.Repository<Course>().CountAsync(new CourseWithDeptAndPrevCourseSpecification(null,teacherId:TeacherId)),
+                TeacherStatistics.Students => await _unitOfWork.Repository<Student>().CountAsync(new StudentWithDepartmentAndGuideSpecification(null, teacherId: TeacherId)),
+                TeacherStatistics.SuccessRate => await GetTeachersSuccessRateAsync(TeacherId),
+                _ =>0
             };
 
             if (!Enum.IsDefined(typeof(TeacherStatistics), statistics))
@@ -107,21 +108,23 @@ namespace EduCredit.Service.Services
                 Total = total
             };
         }
-        //private async Task<double> GetSuccessRateAsync()
-        //{
-            
+        private async Task<double> GetTeachersSuccessRateAsync(Guid TeacherId)
+        {
+            // Get the current semesterId
+            var semester = await _unitOfWork._semesterRepo.GetCurrentSemester();
 
-        //    var enrolledSpec = new EnrollmentsWithCoursesSpecification(passedOnly: true);
+            // جلب الـ courses
+            var coursesSpec = ScheduleSpecification.ByTeacherAndSemester(TeacherId,semester.Id);
+            var course =await _unitOfWork.Repository<Schedule>().GetByIdSpecificationAsync(coursesSpec);
+            if (course is null) return 0;
 
-        //    int totalEnrolled = await _unitOfWork
-        //        .Repository<Enrollment>()
-        //        .CountAsync(enrolledSpec);
+                var totalStudents = course.Course.Enrollments.Count();
+                var successfulStudents = course.Course.Enrollments.Count(e => e.IsPassAtCourse==true);  
 
-        //    if (totalEnrolled == 0)
-        //        return 0;
+                var successRate = totalStudents == 0 ? 0 : (successfulStudents / (double)totalStudents) * 100;
 
-        //    return Math.Round((double)totalPassed / totalEnrolled * 100, 2);
-        //}
+                return successRate;  
+        }
 
 
     }

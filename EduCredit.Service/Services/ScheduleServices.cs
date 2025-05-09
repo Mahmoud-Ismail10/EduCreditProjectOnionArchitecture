@@ -67,7 +67,7 @@ namespace EduCredit.Service.Services
 
         public async Task<ReadScheduleDto?> GetSchedule(Guid CourseId, Guid SemesterId)
         {
-            var scheduleSpec = new ScheduleSpecification(CourseId, SemesterId);
+            var scheduleSpec = ScheduleSpecification.ByCourseAndSemester(CourseId, SemesterId);
             var scheduleSpecList = await _unitOfWork.Repository<Schedule>().GetByIdSpecificationAsync(scheduleSpec);
             if (scheduleSpecList is null) return null;
             var scheduleMapped = new ReadScheduleDto
@@ -99,7 +99,7 @@ namespace EduCredit.Service.Services
             /// Check if current semester is exist or no
             var currentSemester = await _unitOfWork._semesterRepo.GetCurrentSemester();
             if (currentSemester is null) return null;
-            var scheduleSpec = new ScheduleSpecification(CourseId, currentSemester.Id);
+            var scheduleSpec = ScheduleSpecification.ByCourseAndSemester(CourseId, currentSemester.Id);
             var scheduleSpecList = await _unitOfWork.Repository<Schedule>().GetByIdSpecificationAsync(scheduleSpec);
             if (scheduleSpecList is null) return null;
             var scheduleMapped = new ReadScheduleDto
@@ -132,7 +132,7 @@ namespace EduCredit.Service.Services
             var semester = await _unitOfWork._semesterRepo.GetCurrentSemester();
             if (semester is null) return new ApiResponse(404, "There is no current semester!");
 
-            var spec = new ScheduleSpecification(CourseId, semester.Id);
+            var spec = ScheduleSpecification.ByCourseAndSemester(CourseId, semester.Id);
             var schedule = await _unitOfWork.Repository<Schedule>().GetByIdSpecificationAsync(spec);
             if (schedule is null) return new ApiResponse(404);
 
@@ -173,7 +173,7 @@ namespace EduCredit.Service.Services
             if (semester is null) return new ApiResponse(404, "There is no current semester!");
 
             /// Check if schedule is exist or no
-            var spec = new ScheduleSpecification(CourseId, semester.Id);
+            var spec = ScheduleSpecification.ByCourseAndSemester(CourseId, semester.Id);
             var scheduleSpecList = await _unitOfWork.Repository<Schedule>().GetByIdSpecificationAsync(spec);
             if (scheduleSpecList is null) return new ApiResponse(404);
 
@@ -224,17 +224,29 @@ namespace EduCredit.Service.Services
             var schedules = await _unitOfWork._scheduleRepo.GetScheduleByManycoursesAsync(enrolledCourseIds, semester.Id);
             if (schedules is null) return null;
             // Filter out courses that do not meet the PreviousCourseNotTaken or have already been passed
-            foreach (var schedule in schedules)
-            {
-                bool isPreviousCourseNotTaken = schedule.Course.PreviousCourseId.HasValue && !enrolledCourseIds.Contains(schedule.Course.PreviousCourseId.Value);
-                bool isAlreadyPassed = enrolledCourses.Any(e => e.CourseId == schedule.CourseId && (e.IsPassAtCourse ?? false));
+            //foreach (var schedule in schedules)
+            //{
+            //    bool isPreviousCourseNotTaken = schedule.Course.PreviousCourseId.HasValue && !enrolledCourseIds.Contains(schedule.Course.PreviousCourseId.Value);
+            //    bool isAlreadyPassed = enrolledCourses.Any(e => e.CourseId == schedule.CourseId && (e.IsPassAtCourse ?? false));
 
-                if (isPreviousCourseNotTaken || isAlreadyPassed)
-                {
-                    schedules.Remove(schedule);
+            //    if (isPreviousCourseNotTaken || isAlreadyPassed)
+            //    {
+            //        schedules.Remove(schedule);
 
-                }
-            }
+            //    }
+            //}
+            schedules = schedules
+                 .Where(schedule =>
+                 {
+                     bool isPreviousCourseNotTaken = schedule.Course.PreviousCourseId.HasValue &&
+                                                     !enrolledCourseIds.Contains(schedule.Course.PreviousCourseId.Value);
+
+                     bool isAlreadyPassed = enrolledCourses.Any(e => e.CourseId == schedule.CourseId &&
+                                                                     (e.IsPassAtCourse ?? false));
+
+                     return !isPreviousCourseNotTaken && !isAlreadyPassed;
+                 })
+                 .ToList();
             //var Teachers = schedules.SelectMany(s => s.TeacherSchedules.Select(s => s.TeacherId)).ToList();
             //var TeacherNames = await _unitOfWork._teacherRepo.GetSchedlesTeachers(Teachers);
             var availableHours = (student.GPA >= 2 || enrolledCourses.Count() == 0) && student.CreditHours <= 108 ? 18 : student.GPA < 2 ? 12 : 21;
@@ -337,7 +349,7 @@ namespace EduCredit.Service.Services
 
         public IReadOnlyList<ReadScheduleDto?> GetAllSchedules(ScheduleSpecificationParams specParams, out int count)
         {
-            var scheduleSpec = new ScheduleSpecification(specParams);
+            var scheduleSpec = ScheduleSpecification.ByParams(specParams);
             var schedules = _unitOfWork.Repository<Schedule>().GetAllSpecification(scheduleSpec, out count);
             if (schedules is null) return null;
             return _mapper.Map<IReadOnlyList<Schedule>, IReadOnlyList<ReadScheduleDto>>(schedules); ;
