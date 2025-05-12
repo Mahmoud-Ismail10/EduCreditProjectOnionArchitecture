@@ -44,7 +44,7 @@ namespace EduCredit.APIs.Controllers
 
         /// GET: api/Schedule/{CourseId}/{SemesterId}
         [HttpGet("{CourseId}/{SemesterId}")]
-        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole},{AuthorizationConstants.StudentRole}")]
+        [Authorize]
         [ProducesResponseType(typeof(ApiResponse<ReadScheduleDto>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<ApiResponse<ReadScheduleDto>>> GetSchedule(Guid CourseId, Guid SemesterId)
@@ -70,7 +70,7 @@ namespace EduCredit.APIs.Controllers
 
         /// GET: api/Schedule
         [HttpGet()]
-        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}")]
+        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole}, {AuthorizationConstants.AdminRole}, {AuthorizationConstants.TeacherRole}")]
         [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<ReadScheduleDto>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public ActionResult<ApiResponse<ReadScheduleDto>> GetAllSchedules([FromQuery] ScheduleSpecificationParams specParams)
@@ -84,7 +84,7 @@ namespace EduCredit.APIs.Controllers
 
         /// GET: api/Schedule/Study-Schedule/{StudentId}
         [HttpGet("Study-Schedule/{StudentId}")]
-        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole},{AuthorizationConstants.StudentRole}")]
+        [Authorize]
         [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<ReadScheduleEnrollCourseDto>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<ReadScheduleEnrollCourseDto>>>> GetSchedulesByStudentId(Guid StudentId)
@@ -96,8 +96,9 @@ namespace EduCredit.APIs.Controllers
         }
 
         /// GET: api/Schedule/Get-EnrollmentOfCourseScheduale/{StudentId}
+        [IsPeriodEnded]
         [HttpGet("Get-EnrollmentOfCourseScheduale/{StudentId}")]
-        [Authorize(Roles = $"{AuthorizationConstants.StudentRole}, {AuthorizationConstants.SuperAdminRole}")]
+        [Authorize]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<ReadScheduleEnrollCourseDto>>>> GetStudentWithHisAvalaibleCourses(Guid StudentId)
         {
             var currentUserIdAsString = User.FindFirstValue("userId");

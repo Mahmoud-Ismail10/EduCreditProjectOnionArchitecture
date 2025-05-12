@@ -106,5 +106,33 @@ namespace EduCredit.Service.Services
             }
             return new ApiResponse(400, "Failed to create enrollment table, Because the enrollment period ended!");
         }
+
+        public async Task<CreateOrUpdateEnrollmentTableDto> GetEnrollmentTableByStudentId(Guid studentId)
+        {
+            var spec = new EnrollmentTableWithSemesterAndStudentSpecification(studentId);
+            var enrollmentTable = await _unitOfWork.Repository<EnrollmentTable>().GetByIdSpecificationAsync(spec);
+            if (enrollmentTable is null) return null;
+            return _mapper.Map<EnrollmentTable, CreateOrUpdateEnrollmentTableDto>(enrollmentTable);
+        }
+
+        public async Task<ApiResponse> UpdateEnrollmentTableStatus(Guid EnrollmentTableId, UpdateEnrollmentTableDto dto)
+        {
+            var enrollmentTable = await _unitOfWork.Repository<EnrollmentTable>().GetByIdAsync(EnrollmentTableId);
+            if (enrollmentTable is null) return new ApiResponse(404, "This enrollment table does not exist!");
+
+            if (enrollmentTable.Status == dto.Status.Value)
+                return new ApiResponse(400, $"This enrollment table is already {dto.Status.Value}!");
+
+            enrollmentTable.Status = dto.Status.Value;
+
+            if (!string.IsNullOrWhiteSpace(dto.GuideNotes))
+                enrollmentTable.GuideNotes = dto.GuideNotes;
+
+            await _unitOfWork.Repository<EnrollmentTable>().Update(enrollmentTable);
+            int result = await _unitOfWork.CompleteAsync();
+            if (result <= 0) return new ApiResponse(400, "Failed to update enrollment table status!");
+
+            return new ApiResponse(200, $"Enrollment Table status updated to {dto.Status.Value} successfully");
+        }
     }
 }

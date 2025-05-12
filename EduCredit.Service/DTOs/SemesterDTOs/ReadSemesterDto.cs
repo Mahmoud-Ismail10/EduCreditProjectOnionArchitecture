@@ -13,6 +13,7 @@ namespace EduCredit.Service.DTOs.SemesterDTOs
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
+        public SemesterType SemesterType { get; set; }
         public ICollection<ReadScheduleDto> Schedules { get; set; } = new HashSet<ReadScheduleDto>();
     }
 }

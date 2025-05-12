@@ -13,14 +13,19 @@ namespace EduCredit.Service.Helper
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
             BaseCourseDto? course = validationContext.ObjectInstance as BaseCourseDto;
-            float Degree = course!.CreditHours * 100;
+            float MaxDegree = course!.CreditHours * 100;
 
             float MinDegree = float.Parse(value.ToString()!);
             if (value != null)
-                if (Degree > MinDegree)
-                    return ValidationResult.Success!;
+            {
+                if (MinDegree < 0)
+                    return new ValidationResult("Minimum Degree cannot be negative");
+                if (MaxDegree < MinDegree)
+                    return new ValidationResult($"Minimum Degree must be less than {MaxDegree}");
 
-            return new ValidationResult($"Minimum Degree must be less than {Degree}");
+                return ValidationResult.Success!;
+            }
+            return new ValidationResult("Grade is required");
         }
     }
 }

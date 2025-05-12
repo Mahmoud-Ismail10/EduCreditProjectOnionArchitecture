@@ -75,7 +75,7 @@ namespace EduCredit.Service.Services
             if (Currentsemester is null) return null;
             // Get the courses taught by the teacher in the current semester
             var courses = ScheduleSpecification.ByTeacherAndSemester(teacherId, Currentsemester.Id);
-            var scheduleSpecList = _unitOfWork.Repository<Schedule>().GetAllSpecification(courses,out int count);
+            var scheduleSpecList = _unitOfWork.Repository<Schedule>().GetAllSpecification(courses, out int count);
             if (courses is null) return null;
             // Map the courses to ReadTeacherCourseDto
             var courseMapped = scheduleSpecList.Select(s => new ReadTeacherCourseDto
@@ -94,7 +94,6 @@ namespace EduCredit.Service.Services
 
             return courseMapped;
         }
-
 
         public async Task<ApiResponse> UpdateCourseAsync(UpdateCourseDto updateCourseDto, Guid id)
         {

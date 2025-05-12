@@ -11,8 +11,6 @@ namespace EduCredit.Service.DTOs.StudentDTOs
         public Guid EnrollmentTableId { get; set; }
         public Guid StudentId { get; set; }
         public string StudentName { get; set; }
-
         public float? grade { get; set; }
-
     }
 }

@@ -10,6 +10,7 @@ namespace EduCredit.Service.DTOs.ScheduleDTOs
 {
     public class ReadScheduleEnrollCourseDto : ReadStudentDto
     {
+        public Guid EnrollmentTableId { get; set; }
         public List<ReadScheduleDto> Schedules { get; set; } = new List<ReadScheduleDto>();
     }
 }

@@ -24,7 +24,7 @@ namespace EduCredit.APIs.Controllers
 
         /// GET: api/Students
         [HttpGet]
-        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole},{AuthorizationConstants.StudentRole}")]
+        [Authorize]
         [ProducesResponseType(typeof(ApiResponse<Pagination<ReadStudentDto>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public ActionResult<ApiResponse<IReadOnlyList<ReadStudentDto>>> GetAllStudents([FromQuery] StudentSpecificationParams specParams)

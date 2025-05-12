@@ -9,6 +9,7 @@ namespace EduCredit.Service.DTOs.ScheduleDTOs
 {
     public class ReadScheduleDto : BaseScheduleDto
     {
+        public Guid CourseId { get; set; }
         public DateOnly? ExamDate { get; set; }
         public TimeOnly? ExamStart { get; set; }
         public TimeOnly? ExamEnd { get; set; }
@@ -21,6 +22,6 @@ namespace EduCredit.Service.DTOs.ScheduleDTOs
         public string? PreviousCourse { get; set; }
         public float CreditHours { get; set; }
         public float MinimumDegree { get; set; }
-
+        public bool IsEnrolled { get; set; }
     }
 }

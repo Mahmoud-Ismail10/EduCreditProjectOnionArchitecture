@@ -42,7 +42,7 @@ namespace EduCredit.APIs.Controllers
 
         /// PUT: api/Semester/CurrentSemester
         [HttpGet("CurrentSemester")]
-        [Authorize(Roles = $"{AuthorizationConstants.SuperAdminRole},{AuthorizationConstants.AdminRole}, {AuthorizationConstants.StudentRole}")]
+        [Authorize]
         [ProducesResponseType(typeof(ApiResponse<ReadSemesterDto>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
         public async Task<ActionResult<ApiResponse<ReadSemesterDto>>> GetCurrentSemester()

@@ -22,7 +22,7 @@ namespace EduCredit.Core.Specifications.CourseSpecifications
             Includes.Add(d => d.Department);
             Includes.Add(d => d.PreviousCourse);
             Includes.Add(d => d.Schedules);
-            //Includes.Add(d => d.Schedules);
+            ThenIncludes.Add("Department.Students");
             if (!string.IsNullOrEmpty(spec.Sort))
             {
                 switch (spec.Sort.ToLower())

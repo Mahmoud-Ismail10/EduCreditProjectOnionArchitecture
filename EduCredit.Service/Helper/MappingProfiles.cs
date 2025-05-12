@@ -45,7 +45,7 @@ namespace EduCredit.Service.Helper
             CreateMap<Semester, ReadSemesterDto>()
                 .ForMember(dest => dest.Schedules, opt => opt.MapFrom(src => src.Schedules))
                 .ForMember(d => d.Year, o => o.MapFrom(s => s.EndDate.Year))
-                .ForMember(d => d.SemesterType, o => o.Ignore())
+                .ForMember(d => d.SemesterType, o => o.MapFrom(s => s.Name.Split(new[] { '-' })[0]))
                 .ReverseMap();
 
             CreateMap<CreateOrUpdateEnrollmentTableDto, EnrollmentTable>();

@@ -14,7 +14,6 @@ namespace EduCredit.Core.Specifications.TeacherSchedualeSpecifications
             base(s => (s.Schedule.Course.DepartmentId== DepartmentId)
             )
         {
-           
             Includes.Add(d => d.Teacher);
             Includes.Add(d => d.Schedule);
             ThenIncludes.Add("Schedule.Course");

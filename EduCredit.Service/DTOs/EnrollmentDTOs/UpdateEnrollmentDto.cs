@@ -9,7 +9,8 @@ namespace EduCredit.Service.DTOs.EnrollmentDTOs
 {
     public class UpdateEnrollmentDto
     {
-        //[Grade]
+        [Grade]
         public float? Grade { get; set; }
+        public Guid CourseId { get; set; }
     }
 }

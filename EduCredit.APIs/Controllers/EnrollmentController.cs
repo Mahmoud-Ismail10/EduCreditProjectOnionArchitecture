@@ -35,6 +35,7 @@ namespace EduCredit.APIs.Controllers
             else
                 return BadRequest(new ApiResponse(400, "Failure to assign the grade!"));
         }
+
         [HttpGet("Results/{studentId}")]
         [Authorize]
         [ProducesResponseType(typeof(ApiResponse<Pagination<ReadEnrollmentDto>>), (int)HttpStatusCode.OK)]

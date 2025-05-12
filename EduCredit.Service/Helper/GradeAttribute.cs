@@ -17,17 +17,19 @@ namespace EduCredit.Service.Helper
         {
             if (value == null)
                 return new ValidationResult("Grade is required");
-            CreateEnrollmentDto? enrollment = validationContext.ObjectInstance as CreateEnrollmentDto;
+
+            UpdateEnrollmentDto? enrollment = validationContext.ObjectInstance as UpdateEnrollmentDto;
             var courseServices = validationContext.GetService(typeof(ICourseServices)) as ICourseServices;
             var course = courseServices.GetCourseByIdAsync(enrollment.CourseId).Result;
-            float Degree = course.CreditHours * 100;
+            float MaxDegree = course.CreditHours * 100;
 
             float Grade = float.Parse(value.ToString()!);
-            if (value != null)
-                if (Degree >= Grade)
-                    return ValidationResult.Success!;
+            if (Grade < 0)
+                return new ValidationResult("Grade cannot be negative");
+            if (Grade > MaxDegree)
+                return new ValidationResult($"Grade must be less than or equal to {MaxDegree}");
 
-            return new ValidationResult($"Grade must be less than or equal to {Degree}");
+            return ValidationResult.Success!;
         }
     }
 }
