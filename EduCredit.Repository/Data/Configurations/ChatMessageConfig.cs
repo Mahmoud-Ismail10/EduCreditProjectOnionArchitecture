@@ -21,12 +21,12 @@ namespace EduCredit.Repository.Data.Configurations
                    .IsRequired();
 
             builder.HasOne(x => x.Sender)
-                   .WithMany()
+                   .WithMany(x => x.ChatMessages)
                    .HasForeignKey(x => x.SenderId)
                    .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(x => x.Course)
-                   .WithMany()
+                   .WithMany(x => x.ChatMessages)
                    .HasForeignKey(x => x.CourseId)
                    .OnDelete(DeleteBehavior.Cascade);
         }

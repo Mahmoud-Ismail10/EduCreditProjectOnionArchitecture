@@ -57,13 +57,12 @@ namespace EduCredit.Service.Services
 
         public Guid GetUserGuidFromClaims(ClaimsPrincipal user)
         {
-            var userId = user?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
+            var userId = user?.FindFirst("userId")?.Value;
             if (string.IsNullOrEmpty(userId))
-                throw new Exception("User is not authenticated");
-
+            {
+                throw new Exception();
+            }
             return Guid.Parse(userId);
         }
-
     }
 }

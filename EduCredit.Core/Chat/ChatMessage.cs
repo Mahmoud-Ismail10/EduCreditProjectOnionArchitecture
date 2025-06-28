@@ -9,7 +9,7 @@ namespace EduCredit.Core.Chat
 {
     public class ChatMessage
     {
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
         public Guid SenderId { get; set; }
         public Person Sender { get; set; }
         public Guid CourseId { get; set; }

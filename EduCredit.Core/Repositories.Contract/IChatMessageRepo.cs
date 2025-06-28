@@ -9,7 +9,6 @@ namespace EduCredit.Core.Repositories.Contract
 {
     public interface IChatMessageRepo
     {
-        Task<IEnumerable<ChatMessage>> GetMessagesByCourseIdAsync(Guid courseId);
-        Task AddAsync(ChatMessage message);
+        Task<IReadOnlyList<ChatMessage>> GetMessagesByCourseIdAsync(Guid courseId);
     }
 }

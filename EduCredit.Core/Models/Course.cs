@@ -1,4 +1,5 @@
-﻿using EduCredit.Core.Relations;
+﻿using EduCredit.Core.Chat;
+using EduCredit.Core.Relations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,5 +30,8 @@ namespace EduCredit.Core.Models
 
         /// Many-to-many: Between Course and Semester (JoinTable)
         public ICollection<Schedule> Schedules { get; set; } = new HashSet<Schedule>();
+
+        /// One-to-many: Between Course and ChatMessage
+        public ICollection<ChatMessage> ChatMessages { get; set; } = new HashSet<ChatMessage>();
     }
 }

@@ -8,5 +8,6 @@ namespace EduCredit.Service.Services.Contract
         Task<ApiResponse> CreateOrUpdateEnrollmentTable(CreateOrUpdateEnrollmentTableDto createOrUpdateEnrollmentTableDto);
         Task<CreateOrUpdateEnrollmentTableDto> GetEnrollmentTableByStudentId(Guid studentId);
         Task<ApiResponse> UpdateEnrollmentTableStatus(Guid EnrollmentTableId, UpdateEnrollmentTableDto dto);
+        Task<int> EnrollmentTablesToDeleteAsync();
     }
 }

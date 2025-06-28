@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using EduCredit.Core;
+using EduCredit.Core.Chat;
 using EduCredit.Core.Models;
 using EduCredit.Core.Relations;
 using EduCredit.Core.Specifications.CourseSpecifications;
@@ -59,6 +60,14 @@ namespace EduCredit.Service.Services
             /// Create Schedule
             await _unitOfWork.Repository<Schedule>().CreateAsync(newSchedule);
 
+            /// Add teachers to their groups
+            await _unitOfWork.Repository<UserCourseGroup>().CreateRangeAsync(newSchedule.TeacherSchedules
+                .Select(ts => new UserCourseGroup
+                {
+                    UserId = ts.TeacherId,
+                    CourseId = ts.CourseId
+                }).ToList());
+
             /// Save in DB
             int result = await _unitOfWork.CompleteAsync();
             if (result <= 0) return new ApiResponse(400, "Failed to assign schedule!");
@@ -95,7 +104,7 @@ namespace EduCredit.Service.Services
             };
             return scheduleMapped;
         }
-        
+
         public async Task<ReadScheduleDto?> GetSchedule(Guid CourseId)
         {
             /// Check if current semester is exist or no
@@ -143,6 +152,10 @@ namespace EduCredit.Service.Services
             if (schedule.TeacherSchedules != null && schedule.TeacherSchedules.Any())
             {
                 await _unitOfWork.Repository<TeacherSchedule>().DeleteRange(schedule.TeacherSchedules.ToList());
+                // Also remove UserCourseGroup entries for the old TeacherSchedules
+                await _unitOfWork.Repository<UserCourseGroup>().DeleteRange(schedule.TeacherSchedules
+                    .Select(ts => new UserCourseGroup { UserId = ts.TeacherId, CourseId = ts.CourseId })
+                    .ToList());     
             }
 
             // 2. Update basic schedule info
@@ -159,7 +172,15 @@ namespace EduCredit.Service.Services
                 })
                 .ToList();
 
-            // 4. Save updated schedule
+            // 4. Add teachers to their groups
+            await _unitOfWork.Repository<UserCourseGroup>().CreateRangeAsync(schedule.TeacherSchedules
+                .Select(ts => new UserCourseGroup
+                {
+                    UserId = ts.TeacherId,
+                    CourseId = ts.CourseId
+                }).ToList());
+
+            // 5. Save updated schedule
             await _unitOfWork.Repository<Schedule>().Update(schedule);
             int result = await _unitOfWork.CompleteAsync();
 

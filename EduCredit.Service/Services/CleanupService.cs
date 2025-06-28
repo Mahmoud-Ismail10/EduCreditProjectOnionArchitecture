@@ -1,5 +1,7 @@
 ﻿using EduCredit.Core;
+using EduCredit.Core.Chat;
 using EduCredit.Core.Models;
+using EduCredit.Service.Services.Contract;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -49,28 +51,51 @@ namespace EduCredit.Service.Services
                     return;
 
                 var now = DateTime.Now;
-                var startDate = currentSemester.EnrollmentOpen;
-                var endDate = currentSemester.EnrollmentClose;
+                var enrollmentStartDate = currentSemester.EnrollmentOpen;
+                var enrollmentEndDate = currentSemester.EnrollmentClose;
 
-                if (now < startDate)
-                    return;
+                var semesterStartDate = currentSemester.StartDate;
+                var semesterEndDate = currentSemester.EndDate;
 
-                if (now >= endDate)
+                /// If the period of enrollment is ended, delete all pending or rejected enrollment tables
+                if (now >= enrollmentEndDate) // update later
                 {
-                    var enrollmentTablesToDelete = await _unitOfWork._enrollmentTableRepo
-                        .GetEnrollmentTablesArePendingOrRejectedAsync(currentSemester.Id);
+                    var _enrollmentTableServices = scope.ServiceProvider.GetRequiredService<IEnrollmentTableServices>();
 
-                    if (enrollmentTablesToDelete.Any())
+                    int result = await _enrollmentTableServices.EnrollmentTablesToDeleteAsync();
+                    if (result > 0)
+                        _logger.LogInformation("Cleaning the enrollment tables has been completed.");
+                    else if (result == 0)
+                        _logger.LogWarning("No enrollment table has been cleaned.");
+                    else
+                        _logger.LogError("Error during cleaning the enrollment tables.");
+                }
+
+                /// If the semester is ended, delete all course groups and chat messages
+                if (DateOnly.FromDateTime(now) == semesterEndDate) // update later
+                {
+                    var _courseGroupServices = scope.ServiceProvider.GetRequiredService<ICourseGroupService>();
+
+                    int result = await _courseGroupServices.DeleteAllGroupsAsync();
+                    if (result > 0)
+                        _logger.LogInformation("Cleaning the course groups has been completed.");
+                    else if (result == 0)
+                        _logger.LogWarning("No course groups have been cleaned.");
+                    else
+                        _logger.LogError("Error during cleaning the course groups.");
+
+                    var allChatMessages = await _unitOfWork.Repository<ChatMessage>().GetAllAsync();
+                    if (allChatMessages != null && allChatMessages.Any())
                     {
-                        await _unitOfWork.Repository<EnrollmentTable>().DeleteRange(enrollmentTablesToDelete);
-                        int result = await _unitOfWork.CompleteAsync();
-                        if (result > 0)
-                            _logger.LogInformation("Cleaning the enrollment tables has been completed.");
+                        await _unitOfWork.Repository<ChatMessage>().DeleteRange(allChatMessages);
+                        int chatResult = await _unitOfWork.CompleteAsync();
+                        if (chatResult > 0)
+                            _logger.LogInformation($"Found {allChatMessages.Count} chat messages to clean.");
+                        else if (chatResult == 0)
+                            _logger.LogWarning("No chat messages were cleaned, possibly none existed.");
                         else
-                            _logger.LogError("Error during cleaning the enrollment tables!");
+                            _logger.LogError("Failed to clean chat messages.");
                     }
-
-                    _timer?.Change(Timeout.Infinite, 0);
                 }
             }
             catch (Exception ex)

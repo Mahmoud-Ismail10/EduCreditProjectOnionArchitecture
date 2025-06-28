@@ -48,7 +48,7 @@ namespace EduCredit.Repository.Data.Migrations
 
                     b.HasIndex("SenderId");
 
-                    b.ToTable("ChatMessages");
+                    b.ToTable("ChatMessages", (string)null);
                 });
 
             modelBuilder.Entity("EduCredit.Core.Chat.UserCourseGroup", b =>
@@ -63,7 +63,7 @@ namespace EduCredit.Repository.Data.Migrations
 
                     b.HasIndex("CourseId");
 
-                    b.ToTable("UserCourseGroups");
+                    b.ToTable("UserCourseGroups", (string)null);
                 });
 
             modelBuilder.Entity("EduCredit.Core.Models.Course", b =>
@@ -98,7 +98,7 @@ namespace EduCredit.Repository.Data.Migrations
 
                     b.HasIndex("PreviousCourseId");
 
-                    b.ToTable("Courses");
+                    b.ToTable("Courses", (string)null);
                 });
 
             modelBuilder.Entity("EduCredit.Core.Models.Department", b =>
@@ -121,7 +121,7 @@ namespace EduCredit.Repository.Data.Migrations
                         .IsUnique()
                         .HasFilter("[DepartmentHeadId] IS NOT NULL");
 
-                    b.ToTable("Departments");
+                    b.ToTable("Departments", (string)null);
                 });
 
             modelBuilder.Entity("EduCredit.Core.Models.EnrollmentTable", b =>
@@ -154,7 +154,7 @@ namespace EduCredit.Repository.Data.Migrations
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("EnrollmentTables");
+                    b.ToTable("EnrollmentTables", (string)null);
                 });
 
             modelBuilder.Entity("EduCredit.Core.Models.Person", b =>
@@ -277,7 +277,7 @@ namespace EduCredit.Repository.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("RefreshTokens");
+                    b.ToTable("RefreshTokens", (string)null);
                 });
 
             modelBuilder.Entity("EduCredit.Core.Models.Semester", b =>
@@ -305,7 +305,7 @@ namespace EduCredit.Repository.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Semesters");
+                    b.ToTable("Semesters", (string)null);
                 });
 
             modelBuilder.Entity("EduCredit.Core.Relations.Enrollment", b =>
@@ -335,7 +335,7 @@ namespace EduCredit.Repository.Data.Migrations
 
                     b.HasIndex("CourseId");
 
-                    b.ToTable("Enrollments");
+                    b.ToTable("Enrollments", (string)null);
                 });
 
             modelBuilder.Entity("EduCredit.Core.Relations.Schedule", b =>
@@ -376,7 +376,7 @@ namespace EduCredit.Repository.Data.Migrations
 
                     b.HasIndex("CourseId");
 
-                    b.ToTable("Schedules");
+                    b.ToTable("Schedules", (string)null);
                 });
 
             modelBuilder.Entity("EduCredit.Core.Relations.TeacherSchedule", b =>
@@ -394,7 +394,7 @@ namespace EduCredit.Repository.Data.Migrations
 
                     b.HasIndex("SemesterId", "CourseId");
 
-                    b.ToTable("TeacherSchedules");
+                    b.ToTable("TeacherSchedules", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>

@@ -1,6 +1,9 @@
-﻿using EduCredit.Core.Chat;
+﻿using EduCredit.Core;
+using EduCredit.Core.Chat;
 using EduCredit.Core.Models;
+using EduCredit.Service.DTOs.ChatDTOs;
 using EduCredit.Service.Services.Contract;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
@@ -14,22 +17,22 @@ namespace EduCredit.Service.Hubs
     public class ChatHub : Hub
     {
         private readonly IUserService _userService;
-        private readonly ICourseGroupService _groupService;
+        private readonly ICourseGroupService _courseGroupService;
 
-        public ChatHub(IUserService userService, ICourseGroupService groupService)
+        public ChatHub(IUserService userService, ICourseGroupService courseGroupService)
         {
             _userService = userService;
-            _groupService = groupService;
+            _courseGroupService = courseGroupService;
         }
 
         public override async Task OnConnectedAsync()
         {
             var userGuid = _userService.GetUserGuidFromClaims(Context.User);
 
-            var courseGroups = await _groupService.GetUserCourseGroups(userGuid);
+            var courseGroups = await _courseGroupService.GetUserCourseGroups(userGuid);
             foreach (var group in courseGroups)
             {
-                await Groups.AddToGroupAsync(Context.ConnectionId, group);
+                await Groups.AddToGroupAsync(Context.ConnectionId, group.GroupId.ToString());
             }
 
             await base.OnConnectedAsync();
@@ -44,23 +47,42 @@ namespace EduCredit.Service.Hubs
         {
             var userGuid = _userService.GetUserGuidFromClaims(Context.User);
 
-            var chatMessage = new ChatMessage
+            var userGroups = await _courseGroupService.GetUserCourseGroups(userGuid);
+            if (!userGroups.Any(g => g.GroupId == courseId))
+                throw new HubException("Unauthorized to send messages in this course.");
+
+            var newMessageDto = new ReadMessageDto
             {
-                Id = Guid.NewGuid(),
                 SenderId = userGuid,
                 CourseId = courseId,
-                Message = message,
-                SendAt = DateTime.UtcNow
+                Message = message
             };
 
-            await _groupService.SaveMessageAsync(chatMessage);
-
-            await Clients.Group(courseId.ToString()).SendAsync("ReceiveMessage", new
+            try
             {
-                SenderId = userGuid,
-                Message = message,
-                Timestamp = chatMessage.SendAt
-            });
+                var preparedMessage = await _courseGroupService.CreateMessageDtoAsync(newMessageDto);
+                var savedMessage = await _courseGroupService.SaveMessageAsync(preparedMessage);
+
+                if (savedMessage == null)
+                    throw new HubException("Failed to save message.");
+
+                await Clients.Group(courseId.ToString()).SendAsync("ReceiveMessage", savedMessage);
+            }
+            catch (Exception ex)
+            {
+                throw new HubException("An error occurred while sending the message.", ex);
+            }
+        }
+
+        public async Task SendTypingNotification(Guid courseId, string userName)
+        {
+            var userGuid = _userService.GetUserGuidFromClaims(Context.User);
+
+            var userGroups = await _courseGroupService.GetUserCourseGroups(userGuid);
+            if (!userGroups.Any(g => g.GroupId == courseId))
+                throw new HubException("Unauthorized to send typing notification in this course.");
+
+            await Clients.Group(courseId.ToString()).SendAsync("UserTyping", userName);
         }
     }
 }

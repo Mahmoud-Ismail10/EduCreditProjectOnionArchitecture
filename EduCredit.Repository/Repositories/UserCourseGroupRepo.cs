@@ -33,22 +33,14 @@ namespace EduCredit.Repository.Repositories
                 .AnyAsync(x => x.UserId == userId && x.CourseId == courseId);
         }
 
-        public async Task AddAsync(UserCourseGroup userCourseGroup)
-        {
-            _dbcontext.UserCourseGroups.Add(userCourseGroup);
-            await _dbcontext.SaveChangesAsync();
-        }
-
-        public async Task RemoveAsync(UserCourseGroup userCourseGroup)
-        {
-            _dbcontext.UserCourseGroups.Remove(userCourseGroup);
-            await _dbcontext.SaveChangesAsync();
-        }
-
-        public async Task<UserCourseGroup?> GetAsync(Guid userId, Guid courseId)
+        public async Task<List<UserCourseGroup>> GetUserCourseGroupsWithChatMessages(Guid userId)
         {
             return await _dbcontext.UserCourseGroups
-                .FirstOrDefaultAsync(x => x.UserId == userId && x.CourseId == courseId);
+                .Where(ug => ug.UserId == userId)
+                .Include(ug => ug.Course)
+                    .ThenInclude(c => c.ChatMessages)
+                        .ThenInclude(m => m.Sender)
+                .ToListAsync();
         }
     }
 }

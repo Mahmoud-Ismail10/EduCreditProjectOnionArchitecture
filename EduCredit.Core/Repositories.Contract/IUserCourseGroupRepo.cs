@@ -10,9 +10,7 @@ namespace EduCredit.Core.Repositories.Contract
     public interface IUserCourseGroupRepo
     {
         Task<IEnumerable<Guid>> GetCourseIdsByUserIdAsync(Guid userId);
+        Task<List<UserCourseGroup>> GetUserCourseGroupsWithChatMessages(Guid userId);
         Task<bool> ExistsAsync(Guid userId, Guid courseId);
-        Task AddAsync(UserCourseGroup userCourseGroup);
-        Task RemoveAsync(UserCourseGroup userCourseGroup);
-        Task<UserCourseGroup?> GetAsync(Guid userId, Guid courseId);
     }
 }

@@ -1,18 +1,26 @@
 ﻿using EduCredit.Core.Chat;
+using EduCredit.Service.DTOs.ChatDTOs;
+using EduCredit.Service.Hubs;
+using EduCredit.Service.Services;
 using EduCredit.Service.Services.Contract;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
 
 namespace EduCredit.APIs.Controllers
 {
     public class ChatController : BaseApiController
     {
-        private readonly ICourseGroupService _groupService;
+        private readonly ICourseGroupService _courseGroupService;
+        private readonly IUserService _userService;
 
-        public ChatController(ICourseGroupService groupService)
+        public ChatController(ICourseGroupService courseGroupService, IUserService userService)
         {
-            _groupService = groupService;
+            _courseGroupService = courseGroupService;
+            _userService = userService;
         }
 
         [Authorize]
@@ -22,22 +30,43 @@ namespace EduCredit.APIs.Controllers
             if (!Guid.TryParse(courseId, out Guid parsedCourseId))
                 return BadRequest("Invalid course ID");
 
-            var messages = await _groupService.GetMessagesForCourse(parsedCourseId);
+            var userGuid = _userService.GetUserGuidFromClaims(User);
+            var userGroups = await _courseGroupService.GetUserCourseGroups(userGuid);
+
+            if (!userGroups.Any(g => g.GroupId == parsedCourseId))
+                return Forbid("You are not authorized to access this course's messages.");
+
+            var messages = await _courseGroupService.GetMessagesForCourse(parsedCourseId);
             return Ok(messages);
         }
 
         [Authorize]
         [HttpPost("messages")]
-        public async Task<IActionResult> PostMessage([FromBody] ChatMessage message)
+        public async Task<IActionResult> PostMessage([FromBody] ReadMessageDto message)
         {
-            if (message == null || message.CourseId == Guid.Empty || message.SenderId == Guid.Empty || string.IsNullOrWhiteSpace(message.Message))
-            {
-                return BadRequest("Invalid message data.");
-            }
+            var userGuid = _userService.GetUserGuidFromClaims(User);
 
-            message.SendAt = DateTime.UtcNow;
-            await _groupService.SaveMessageAsync(message);
-            return Ok();
+            var userGroups = await _courseGroupService.GetUserCourseGroups(userGuid);
+            if (!userGroups.Any(g => g.GroupId == message.CourseId))
+                return Forbid("You are not authorized to send messages in this course.");
+
+            message.SenderId = userGuid;
+
+            try
+            {
+                var preparedMessage = await _courseGroupService.CreateMessageDtoAsync(message);
+                var savedMessage = await _courseGroupService.SaveMessageAsync(preparedMessage);
+
+                if (savedMessage == null)
+                    return BadRequest("Failed to save message.");
+
+                await _courseGroupService.BroadcastMessageAsync(savedMessage);
+                return Ok(savedMessage);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while sending the message: {ex.Message}");
+            }
         }
 
         [Authorize]
@@ -47,7 +76,7 @@ namespace EduCredit.APIs.Controllers
             if (!Guid.TryParse(userId, out Guid parsedUserId))
                 return BadRequest("Invalid user ID");
 
-            var groups = await _groupService.GetUserCourseGroups(parsedUserId);
+            var groups = await _courseGroupService.GetUserCourseGroups(parsedUserId);
             return Ok(groups);
         }
     }

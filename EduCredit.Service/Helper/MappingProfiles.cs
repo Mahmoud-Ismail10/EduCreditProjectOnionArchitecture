@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using EduCredit.Core.Chat;
 using EduCredit.Core.Models;
 using EduCredit.Core.Relations;
 using EduCredit.Service.DTOs.AdminDTOs;
 using EduCredit.Service.DTOs.AuthDTOs;
+using EduCredit.Service.DTOs.ChatDTOs;
 using EduCredit.Service.DTOs.CourseDTOs;
 using EduCredit.Service.DTOs.DepartmentDTOs;
 using EduCredit.Service.DTOs.EnrollmentDTOs;
@@ -97,6 +99,10 @@ namespace EduCredit.Service.Helper
 
             CreateMap<Person, BaseRegisterDto>()
                 .ForMember(d => d.FullName, o => o.MapFrom(s => s.FullName)).ReverseMap();
+
+            CreateMap<ChatMessage, ReadMessageDto>()
+                .ForMember(d => d.SenderName, o => o.MapFrom(s => s.Sender.FullName)).ReverseMap();
+            CreateMap<ReadMessageDto, ChatMessage>();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using EduCredit.Core.Enums;
+﻿using EduCredit.Core.Chat;
+using EduCredit.Core.Enums;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
@@ -16,5 +17,6 @@ namespace EduCredit.Core.Models
         public DateOnly BirthDate { get; set; }
         public Gender Gender { get; set; } // enum
         public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();//Navigation Prop
+        public ICollection<ChatMessage> ChatMessages { get; set; } = new HashSet<ChatMessage>();
     }
 }

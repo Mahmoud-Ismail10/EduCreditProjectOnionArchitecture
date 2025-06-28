@@ -20,10 +20,11 @@ namespace EduCredit.Service.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ISemesterServices _semesterServices;
+        private readonly ICourseGroupService _courseGroupServices;
         private readonly IMapper _mapper;
         private readonly ICacheService _cache;
         private readonly INotificationServices _Notification;
-        public EnrollmentTableServices(IUnitOfWork unitOfWork, ISemesterServices semesterServices, IMapper mapper, ICacheService cache, INotificationServices Notification)
+        public EnrollmentTableServices(IUnitOfWork unitOfWork, ISemesterServices semesterServices, IMapper mapper, ICacheService cache, INotificationServices Notification, ICourseGroupService courseGroupServices)
         {
             _unitOfWork = unitOfWork;
             _semesterServices = semesterServices;
@@ -31,6 +32,7 @@ namespace EduCredit.Service.Services
             _cache = cache;
             _mapper = mapper;
             _Notification = Notification;
+            _courseGroupServices = courseGroupServices;
         }
 
         public async Task<ApiResponse> CreateOrUpdateEnrollmentTable(CreateOrUpdateEnrollmentTableDto createOrUpdateEnrollmentTableDto)
@@ -99,7 +101,7 @@ namespace EduCredit.Service.Services
                     if (result <= 0) return new ApiResponse(400, "Failed to update enrollment table!");
                     if (updateEnrollmentTable.Student.TeacherId != null)
                     {
-                      await  _Notification.SendNotificationToTeacherAsync(updateEnrollmentTable.Student.FullName, updateEnrollmentTable.Student.TeacherId);
+                        await _Notification.SendNotificationToTeacherAsync(updateEnrollmentTable.Student.FullName, updateEnrollmentTable.Student.TeacherId);
                     }
                     return new ApiResponse(200, "Enrollment Table updated successfully");
                 }
@@ -109,7 +111,7 @@ namespace EduCredit.Service.Services
 
         public async Task<CreateOrUpdateEnrollmentTableDto> GetEnrollmentTableByStudentId(Guid studentId)
         {
-            var spec = new EnrollmentTableWithSemesterAndStudentSpecification(studentId);
+            var spec = EnrollmentTableWithSemesterAndStudentSpecification.ByStudentId(studentId);
             var enrollmentTable = await _unitOfWork.Repository<EnrollmentTable>().GetByIdSpecificationAsync(spec);
             if (enrollmentTable is null) return null;
             return _mapper.Map<EnrollmentTable, CreateOrUpdateEnrollmentTableDto>(enrollmentTable);
@@ -117,7 +119,8 @@ namespace EduCredit.Service.Services
 
         public async Task<ApiResponse> UpdateEnrollmentTableStatus(Guid EnrollmentTableId, UpdateEnrollmentTableDto dto)
         {
-            var enrollmentTable = await _unitOfWork.Repository<EnrollmentTable>().GetByIdAsync(EnrollmentTableId);
+            var spec = EnrollmentTableWithSemesterAndStudentSpecification.ByEnrollmentTableId(EnrollmentTableId);
+            var enrollmentTable = await _unitOfWork.Repository<EnrollmentTable>().GetByIdSpecificationAsync(spec);
             if (enrollmentTable is null) return new ApiResponse(404, "This enrollment table does not exist!");
 
             if (enrollmentTable.Status == dto.Status.Value)
@@ -129,10 +132,30 @@ namespace EduCredit.Service.Services
                 enrollmentTable.GuideNotes = dto.GuideNotes;
 
             await _unitOfWork.Repository<EnrollmentTable>().Update(enrollmentTable);
+
+            /// Add users to their groups
+            foreach (var enrollment in enrollmentTable.Enrollments)
+            {
+                var course = await _unitOfWork.Repository<Course>().GetByIdAsync(enrollment.CourseId);
+                if (course is null) continue;
+                // Add student to the groups
+                await _courseGroupServices.AddUserToCourseGroup(enrollmentTable.StudentId, course.Id);
+            }
             int result = await _unitOfWork.CompleteAsync();
             if (result <= 0) return new ApiResponse(400, "Failed to update enrollment table status!");
-
             return new ApiResponse(200, $"Enrollment Table status updated to {dto.Status.Value} successfully");
+        }
+        
+        public async Task<int> EnrollmentTablesToDeleteAsync()
+        {
+            var currentSemester = await _unitOfWork._semesterRepo.GetCurrentSemester();
+            if (currentSemester is null) return 0;
+            var enrollmentTables = await _unitOfWork._enrollmentTableRepo
+                .GetEnrollmentTablesArePendingOrRejectedAsync(currentSemester.Id);
+            if (enrollmentTables.Count == 0) return 0;
+            await _unitOfWork.Repository<EnrollmentTable>().DeleteRange(enrollmentTables);
+            int result = await _unitOfWork.CompleteAsync();
+            return result;
         }
     }
 }

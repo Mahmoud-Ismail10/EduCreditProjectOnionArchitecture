@@ -19,18 +19,13 @@ namespace EduCredit.Repository.Repositories
             _dbcontext = dbcontext;
         }
 
-        public async Task<IEnumerable<ChatMessage>> GetMessagesByCourseIdAsync(Guid courseId)
+        public async Task<IReadOnlyList<ChatMessage>> GetMessagesByCourseIdAsync(Guid courseId)
         {
             return await _dbcontext.ChatMessages
+                .Include(msg => msg.Sender) // Include the sender details
                 .Where(msg => msg.CourseId == courseId)
                 .OrderBy(msg => msg.SendAt)
                 .ToListAsync();
-        }
-
-        public async Task AddAsync(ChatMessage message)
-        {
-            _dbcontext.ChatMessages.Add(message);
-            await _dbcontext.SaveChangesAsync();
         }
     }
 }
