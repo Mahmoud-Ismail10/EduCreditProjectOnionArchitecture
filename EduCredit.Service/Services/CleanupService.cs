@@ -58,7 +58,7 @@ namespace EduCredit.Service.Services
                 var semesterEndDate = currentSemester.EndDate;
 
                 /// If the period of enrollment is ended, delete all pending or rejected enrollment tables
-                if (now >= enrollmentEndDate) // update later
+                if (!currentSemester.IsEnrollmentTablesCleared && now >= enrollmentEndDate)
                 {
                     var _enrollmentTableServices = scope.ServiceProvider.GetRequiredService<IEnrollmentTableServices>();
 
@@ -69,10 +69,12 @@ namespace EduCredit.Service.Services
                         _logger.LogWarning("No enrollment table has been cleaned.");
                     else
                         _logger.LogError("Error during cleaning the enrollment tables.");
+
+                    currentSemester.IsEnrollmentTablesCleared = true; // Mark as cleared
                 }
 
                 /// If the semester is ended, delete all course groups and chat messages
-                if (DateOnly.FromDateTime(now) == semesterEndDate) // update later
+                if (!currentSemester.IsCourseGroupsCleared && DateOnly.FromDateTime(now) == semesterEndDate) // update later
                 {
                     var _courseGroupServices = scope.ServiceProvider.GetRequiredService<ICourseGroupService>();
 
@@ -96,6 +98,8 @@ namespace EduCredit.Service.Services
                         else
                             _logger.LogError("Failed to clean chat messages.");
                     }
+
+                    currentSemester.IsCourseGroupsCleared = true; // Mark as cleared
                 }
             }
             catch (Exception ex)

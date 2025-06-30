@@ -26,14 +26,22 @@ namespace EduCredit.Repository.Data.Configurations
               .HasConversion(v => v.ToDateTime(TimeOnly.MinValue),
                              v => DateOnly.FromDateTime(v))
               .IsRequired();
-            
+
             builder.Property(s => s.EnrollmentOpen)
                 .HasColumnType("datetime2")
                 .IsRequired();
-            
+
             builder.Property(s => s.EnrollmentClose)
                 .HasColumnType("datetime2")
                 .IsRequired();
+
+            builder.Property(s => s.IsCourseGroupsCleared)
+                .IsRequired()
+                .HasDefaultValue(false);
+
+            builder.Property(s => s.IsEnrollmentTablesCleared)
+                .IsRequired()
+                .HasDefaultValue(false);
         }
-    }   
+    }
 }

@@ -16,6 +16,9 @@ namespace EduCredit.Core.Models
         public DateOnly EndDate { get; set; }
         public DateTime EnrollmentOpen { get; set; }
         public DateTime EnrollmentClose { get; set; }
+        public bool IsCourseGroupsCleared { get; set; } = false;
+        public bool IsEnrollmentTablesCleared { get; set; } = false;
+
 
         /// One-to-many: Between Semester and EnrollmentTanle
         public ICollection<EnrollmentTable> EnrollmentTables { get; set; } = new HashSet<EnrollmentTable>();

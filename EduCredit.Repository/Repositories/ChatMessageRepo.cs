@@ -24,7 +24,7 @@ namespace EduCredit.Repository.Repositories
             return await _dbcontext.ChatMessages
                 .Include(msg => msg.Sender) // Include the sender details
                 .Where(msg => msg.CourseId == courseId)
-                .OrderByDescending(msg => msg.SendAt)
+                .OrderBy(msg => msg.SendAt)
                 .ToListAsync();
         }
     }
