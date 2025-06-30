@@ -90,6 +90,7 @@ namespace EduCredit.Service.Extensions
             /// Hosted Service use for Background Task
             services.AddHostedService<CleanupService>();
             var configuration = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
+            services.AddSingleton<IInMemoryNotificationStore, InMemoryNotificationStore>();
             services.AddSingleton<EmailSetting>(configuration.GetSection(nameof(EmailSetting)).Get<EmailSetting>());
             /// Auto Mapper use parameter less ctor of MappingProfiles
             services.AddAutoMapper(typeof(MappingProfiles));

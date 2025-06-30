@@ -13,6 +13,7 @@ using EduCredit.Service.Services.Contract;
 using EduCredit.Core.Specifications.EnrollmentTableSpecifications;
 using Microsoft.AspNetCore.SignalR;
 using EduCredit.Service.Hubs;
+using EduCredit.Repository;
 
 namespace EduCredit.Service.Services
 {
@@ -143,9 +144,19 @@ namespace EduCredit.Service.Services
             }
             int result = await _unitOfWork.CompleteAsync();
             if (result <= 0) return new ApiResponse(400, "Failed to update enrollment table status!");
+
+            if (dto.Status == Status.Rejected)
+            {
+                var student = await _unitOfWork.Repository<Student>().GetByIdAsync(enrollmentTable.StudentId);
+                if (student is null) return new ApiResponse(404, "Student not found!");
+                await _Notification.SendNotificationToStudentAsync(dto.Status, dto.GuideNotes, enrollmentTable.StudentId);
+                return new ApiResponse(200, $"Enrollment Table status updated to {dto.Status.Value} successfully");
+                // Notify the student about the enrollment acceptance
+            }
+            await _Notification.SendNotificationToStudentAsync(dto.Status, dto.GuideNotes, enrollmentTable.StudentId);
             return new ApiResponse(200, $"Enrollment Table status updated to {dto.Status.Value} successfully");
         }
-        
+
         public async Task<int> EnrollmentTablesToDeleteAsync()
         {
             var currentSemester = await _unitOfWork._semesterRepo.GetCurrentSemester();

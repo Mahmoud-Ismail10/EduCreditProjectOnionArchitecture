@@ -78,7 +78,7 @@ namespace EduCredit.APIs.Controllers
         }
 
         [HttpGet("statistics/{type}/{TeacherId}")]
-        //[Authorize(Roles = $"{AuthorizationConstants.TeacherRole}")]
+        [Authorize(Roles = $"{AuthorizationConstants.TeacherRole}")]
         public async Task<ActionResult<ApiResponse<StatisticsDto>>> GetStatistics(TeacherStatistics type, Guid TeacherId)
         {
             var result = await _teacherServices.GetStatistics(type,TeacherId);

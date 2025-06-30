@@ -70,7 +70,8 @@ namespace EduCredit.Service.Services
                 SenderId = readMessageDto.SenderId,
                 SenderName = person?.FullName ?? "Unknown",
                 Message = readMessageDto.Message,
-                SendAt = DateTime.UtcNow,
+                //SendAt = DateTime.UtcNow,
+                SendAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time")),
                 CourseId = readMessageDto.CourseId,
                 CourseName = course?.Name ?? "Unnamed Course"
             };
