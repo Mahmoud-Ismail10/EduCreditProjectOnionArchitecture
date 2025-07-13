@@ -1,64 +1,99 @@
-# EduCredit
+# 📚 EduCredit
 
-## Description
+**EduCredit** is a modern, modular academic management system designed to streamline communication, scheduling, enrollment, and notifications for educational institutions. Built with clean architecture, it provides robust APIs to support both teachers and students with real-time features.
 
-EduCredit is a modern, modular academic management system designed to streamline communication, scheduling, enrollment, and notifications for educational institutions. Built with a clean architecture, it provides robust APIs for managing users, courses, notifications, chat, and more, supporting both teachers and students with real-time features.
+---
 
-## How to Run the Project
+## 🚀 Features
 
-1. *Prerequisites:*
-   - [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
-   - [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
-   - [Visual Studio 2022](https://visualstudio.microsoft.com/vs/)
+- User & Role Management  
+- Course Enrollment  
+- Real-time Notifications (via SignalR)  
+- Real-time Chat System  
+- Scheduling System  
+- JWT Authentication & Authorization  
+- Swagger Documentation
 
-2. *Clone the Repository:*
-   bash
-   git clone https://github.com/GraduationDevs/EduCredit.Solution.git
-   cd EduCredit
-   
+---
 
-3. *Configure the Application:*
-   - Update appsettings.json with your environment-specific settings (e.g., connection strings, JWT secrets).
+## 🛠 Technologies Used
 
-4. *Restore Dependencies:*
-   bash
-   dotnet restore
-   
+- .NET 8  
+- C# 12  
+- ASP.NET Core Web API  
+- SignalR  
+- Entity Framework Core  
+- In-Memory Caching  
+- JWT Authentication  
+- Swagger / OpenAPI
 
-5. *Build the Solution:*
-   bash
-   dotnet build
-   
+---
 
-6. *Run the API:*
-   bash
-   dotnet run
-   
-   The API will be available at https://localhost:5001 or as configured.
+## ⚙️ How to Run the Project
 
-## Technologies Used
+### 🔐 Prerequisites
 
-- *.NET 8*
-- *C# 12*
-- *ASP.NET Core Web API*
-- *SignalR* (for real-time notifications and chat)
-- *Entity Framework Core* (for data access)
-- *In-Memory Caching*
-- *JWT Authentication & Authorization*
-- *Swagger/OpenAPI* (for API documentation)
+- [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)  
+- [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)  
+- Visual Studio 2022 or later
 
-## Author
+### 📥 Clone the Repository
 
-Toqa, Mahmoud
+```bash
+git clone https://github.com/GraduationDevs/EduCredit.Solution.git
+cd EduCredit
+```
 
-## License
+### 🧩 Configure the Application
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+Update the `appsettings.json` file with your environment-specific settings:
 
-## Screenshot
+- Database connection string  
+- JWT settings  
+- CORS policies (if needed)
 
-![App Screenshot](https://github.com/user-attachments/assets/4571e531-727c-4877-b265-59366ddb1fb7)
+### 📦 Restore Dependencies
 
-## Live Demo
+```bash
+dotnet restore
+```
 
-[Click here to try the app](https://educredit.runasp.net/swagger/index.html)
+### 🧱 Build the Solution
+
+```bash
+dotnet build
+```
+
+### ▶️ Run the API
+
+```bash
+dotnet run
+```
+
+The API will be available at:
+
+```
+https://localhost:5001
+```
+
+Or based on your configuration in `launchSettings.json`.
+
+---
+
+## 👥 Authors
+
+- **Toqa**
+- **Mahmoud**
+
+---
+
+## 📝 License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+
+---
+
+## 📸 Screenshot
+
+![462416704-4571e531-727c-4877-b265-59366ddb1fb7](https://github.com/user-attachments/assets/31ea63cb-b327-4ed0-8693-5997d845fee5)
+
